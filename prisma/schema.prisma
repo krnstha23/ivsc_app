@@ -1,0 +1,173 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums
+enum Role {
+  ADMIN
+  TEACHER
+  USER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+// User table - all system users (admin, teachers, students)
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  phone         String?
+  firstName     String
+  middleName    String?
+  lastName      String
+  passwordHash  String
+  role          Role     @default(USER)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  teacherProfile TeacherProfile?
+  studentProfile StudentProfile?
+  bookings       Booking[]
+  classHistory   ClassMetadata[]
+}
+
+// StudentProfile - extended info for students
+model StudentProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  subjects  String[]
+  packageId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id])
+  package Package? @relation(fields: [packageId], references: [id])
+}
+
+// TeacherProfile - extended info for teachers
+model TeacherProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  bio       String?
+  subjects  String[]
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user          User            @relation(fields: [userId], references: [id])
+  availability  Availability[]
+  bookings      Booking[]
+  classHistory  ClassMetadata[]
+}
+
+// Availability - teacher's open time slots for specific dates
+model Availability {
+  id        String   @id @default(uuid())
+  teacherId String
+  date      DateTime @db.Date
+  startTime String   // "HH:MM" format
+  endTime   String   // "HH:MM" format
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  teacher TeacherProfile @relation(fields: [teacherId], references: [id])
+  booking Booking?
+
+  // Index for fast lookups
+  @@index([teacherId, date])
+}
+
+// Package - class packages that students can purchase
+model Package {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal
+  subjects    String[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  students     StudentProfile[]
+  bookings     Booking[]
+  classHistory ClassMetadata[]
+}
+
+// Booking - scheduled sessions between students and teachers
+model Booking {
+  id             String        @id @default(uuid())
+  userId         String
+  teacherId      String
+  availabilityId String        @unique // 1:1 - one booking per slot
+  packageId      String?
+  scheduledAt    DateTime
+  duration       Int           // minutes
+  status         BookingStatus @default(PENDING)
+  notes          String?
+  paymentStatus  PaymentStatus @default(PENDING)
+  transactionId  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  user         User           @relation(fields: [userId], references: [id])
+  teacher      TeacherProfile @relation(fields: [teacherId], references: [id])
+  availability Availability   @relation(fields: [availabilityId], references: [id])
+  package      Package?       @relation(fields: [packageId], references: [id])
+
+  // Indexes for fast lookups
+  @@index([userId])
+  @@index([teacherId])
+  @@index([scheduledAt])
+}
+
+// ClassMetadata - record of completed classes
+model ClassMetadata {
+  id        String   @id @default(uuid())
+  packageId String
+  teacherId String
+  studentId String
+  date      DateTime @db.Date
+  startTime String   // "HH:MM" format
+  endTime   String   // "HH:MM" format
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  package Package        @relation(fields: [packageId], references: [id])
+  teacher TeacherProfile @relation(fields: [teacherId], references: [id])
+  student User           @relation(fields: [studentId], references: [id])
+
+  // Indexes
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([date])
+}
