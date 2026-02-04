@@ -1,7 +1,7 @@
 # IVCS - System Design Document
 
-> **Last Updated**: January 31, 2026  
-> **Status**: Planning / Early Development  
+> **Last Updated**: February 4, 2026  
+> **Status**: Phase 1 - Foundation (In Progress)  
 > **Branch**: `adding-db`
 
 ---
@@ -206,7 +206,7 @@ User (Student)
 | Backend  | Next.js API Routes / Server Actions | Unified codebase, type safety                     |
 | Database | PostgreSQL                          | Relational data, complex queries, ACID compliance |
 | ORM      | Prisma 7                            | Type-safe queries, migrations, excellent DX       |
-| Auth     | TBD (NextAuth.js / Clerk / Custom)  | Depends on requirements                           |
+| Auth     | NextAuth.js v5 (Auth.js)            | Free, flexible, native Next.js support            |
 
 ### 5.2 Folder Structure (Proposed)
 
@@ -253,95 +253,79 @@ ivcs-app/
 
 ### 5.3 Database Schema (Prisma)
 
-```prisma
-// Proposed schema - to be implemented in prisma/schema.prisma
+**Status**: ✅ Implemented (Feb 4, 2026) - Migration `20260204182111_init`
 
-enum Role {
-  ADMIN
-  TEACHER
-  USER
-}
+#### Models Overview
 
-enum DayOfWeek {
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
-  SATURDAY
-  SUNDAY
-}
+| Model | Table Name | Purpose |
+|-------|------------|---------|
+| `User` | `users` | Base user with role (ADMIN, TEACHER, USER), auth fields |
+| `StudentProfile` | `student_profiles` | Extended student info, linked to enrollments |
+| `TeacherProfile` | `teacher_profiles` | Extended teacher info: bio, availability |
+| `Availability` | `availabilities` | Date-specific time slots teachers mark as available |
+| `Package` | `packages` | Purchasable class packages with pricing and subjects |
+| `Booking` | `bookings` | Scheduled sessions, links User → Teacher → Availability |
+| `ClassMetadata` | `class_metadata` | Completed class records for history/reporting |
+| `PackageBundle` | `package_bundles` | Marketing bundles grouping multiple packages |
+| `PackageBundleItem` | `package_bundle_items` | Junction: Bundle ↔ Package with display order |
+| `StudentEnrollment` | `student_enrollments` | Junction: Student ↔ Package with enrollment tracking |
+| `TeacherPackage` | `teacher_packages` | Junction: Teacher ↔ Package assignment |
 
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  COMPLETED
-}
+#### Enums
 
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  name          String
-  passwordHash  String
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+| Enum | DB Type | Values |
+|------|---------|--------|
+| `Role` | `role` | ADMIN, TEACHER, USER |
+| `BookingStatus` | `booking_status` | PENDING, CONFIRMED, CANCELLED, COMPLETED |
+| `PaymentStatus` | `payment_status` | PENDING, PAID, REFUNDED, FAILED |
+| `EnrollmentStatus` | `enrollment_status` | ACTIVE, COMPLETED, CANCELLED |
 
-  // Relations
-  teacherProfile  TeacherProfile?
-  bookings        Booking[]       @relation("UserBookings")
-}
+#### Key Design Decisions
 
-model TeacherProfile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  bio         String?
-  subjects    String[]
-  hourlyRate  Decimal?
-  isActive    Boolean  @default(true)
+1. **snake_case table names**: All tables use `@@map()` for PostgreSQL convention
+2. **Explicit junction tables**: All many-to-many relationships use explicit junctions for metadata support
+3. **Package-centric model**: Teachers and Students link to Packages (not free-text subjects)
+4. **Enrollment tracking**: StudentEnrollment tracks classes total/used, expiry, status
+5. **Payment at booking level**: Enrollment created only after successful payment
 
-  // Relations
-  user          User          @relation(fields: [userId], references: [id])
-  availability  Availability[]
-  bookings      Booking[]     @relation("TeacherBookings")
-}
+#### New Tables (Feb 4, 2026)
 
-model Availability {
-  id            String     @id @default(uuid())
-  teacherId     String
-  dayOfWeek     DayOfWeek
-  startTime     String     // "HH:MM" format
-  endTime       String     // "HH:MM" format
-  isRecurring   Boolean    @default(true)
-  specificDate  DateTime?  // For non-recurring slots
-
-  // Relations
-  teacher   TeacherProfile @relation(fields: [teacherId], references: [id])
-
-  @@index([teacherId, dayOfWeek])
-}
-
-model Booking {
-  id           String        @id @default(uuid())
-  userId       String
-  teacherId    String
-  scheduledAt  DateTime
-  duration     Int           // minutes
-  status       BookingStatus @default(PENDING)
-  notes        String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-
-  // Relations
-  user     User           @relation("UserBookings", fields: [userId], references: [id])
-  teacher  TeacherProfile @relation("TeacherBookings", fields: [teacherId], references: [id])
-
-  @@index([userId])
-  @@index([teacherId])
-  @@index([scheduledAt])
-}
+**PackageBundle** - Marketing bundles
 ```
+id, name, description, price, discountPercent,
+isActive, isFeatured, validFrom, validUntil,
+createdAt, updatedAt
+```
+
+**PackageBundleItem** - Bundle ↔ Package junction
+```
+id, bundleId, packageId, displayOrder, customPrice, createdAt
+@@unique([bundleId, packageId])
+```
+
+**StudentEnrollment** - Student ↔ Package junction
+```
+id, studentId, packageId, enrolledAt,
+status (EnrollmentStatus), classesTotal, classesUsed,
+paymentId, createdAt, updatedAt
+@@unique([studentId, packageId])
+```
+
+**TeacherPackage** - Teacher ↔ Package junction
+```
+id, teacherId, packageId, createdAt
+@@unique([teacherId, packageId])
+```
+
+#### Removed Fields (Feb 4, 2026)
+
+| Model | Removed Field | Reason |
+|-------|---------------|--------|
+| `StudentProfile` | `subjects String[]` | Replaced by Package relations via StudentEnrollment |
+| `StudentProfile` | `packageId String?` | Replaced by StudentEnrollment (supports multiple) |
+| `TeacherProfile` | `subjects String[]` | Replaced by Package relations via TeacherPackage |
+
+See `prisma/schema.prisma` for full implementation.
 
 ---
 
@@ -349,21 +333,44 @@ model Booking {
 
 ### 6.1 Decisions Made
 
-| Decision                         | Rationale                                                            | Date       |
-| -------------------------------- | -------------------------------------------------------------------- | ---------- |
-| PostgreSQL over SQLite           | Complex relational queries, concurrent access, production-ready      | 2026-01-31 |
-| Prisma 7 with pg adapter         | Type safety, modern features, driver adapters for edge compatibility | 2026-01-31 |
-| Single User table with Role enum | Simpler auth, shared attributes, role-based access control           | 2026-01-31 |
-| Separate TeacherProfile          | Teachers have additional attributes not relevant to other roles      | 2026-01-31 |
+| Decision                             | Rationale                                                            | Date       |
+| ------------------------------------ | -------------------------------------------------------------------- | ---------- |
+| PostgreSQL over SQLite               | Complex relational queries, concurrent access, production-ready      | 2026-01-31 |
+| Prisma 7 with pg adapter             | Type safety, modern features, driver adapters for edge compatibility | 2026-01-31 |
+| Single User table with Role enum     | Simpler auth, shared attributes, role-based access control           | 2026-01-31 |
+| Separate TeacherProfile              | Teachers have additional attributes not relevant to other roles      | 2026-01-31 |
+| Added StudentProfile model           | Students need package association and subject preferences            | 2026-01-31 |
+| Date-specific Availability (not recurring) | Simpler conflict detection, explicit slot management, no "exception" complexity | 2026-01-31 |
+| Package model for paid sessions      | Platform is paid; students purchase class packages                   | 2026-01-31 |
+| 1:1 Availability-to-Booking relation | One booking per slot prevents double-booking at schema level         | 2026-01-31 |
+| ClassMetadata for completed classes  | Separate audit trail from bookings; supports reporting               | 2026-01-31 |
+| firstName/middleName/lastName split  | Better for formal display and search                                 | 2026-01-31 |
+| snake_case for all DB tables         | PostgreSQL naming convention; explicit @@map() on all models         | 2026-02-04 |
+| Explicit junction tables             | All M:M relations use explicit junctions for metadata & control      | 2026-02-04 |
+| PackageBundle for marketing          | Group packages into purchasable bundles with custom pricing          | 2026-02-04 |
+| Package-centric relationships        | Teachers/Students link to Packages, not free-text subjects           | 2026-02-04 |
+| paymentId on Enrollment (not amount) | Links enrollment to payment record; amount tracked in Transaction table | 2026-02-04 |
+| No expiration on packages            | Packages don't expire; removed expiresAt and EXPIRED status              | 2026-02-04 |
+| Keep Package.subjects as String[]    | Describes topics within a package; doesn't need relational integrity | 2026-02-04 |
 
 ### 6.2 Pending Decisions
 
-| Decision            | Options                          | Considerations                         |
-| ------------------- | -------------------------------- | -------------------------------------- |
-| Authentication      | NextAuth.js, Clerk, Custom JWT   | Cost, features, self-hosted vs managed |
-| Time zone handling  | Store UTC + user TZ, Store local | Multi-region support needs?            |
-| Notification system | Email, In-app, Push              | User preferences, infrastructure       |
-| Payment integration | Stripe, None                     | Is this a paid tutoring platform?      |
+| Decision            | Options                              | Recommendation                                       |
+| ------------------- | ------------------------------------ | ---------------------------------------------------- |
+| Time zone handling  | Store UTC + user TZ, Store local     | **UTC storage** + client-side conversion             |
+| Notification system | Email, In-app, Push                  | **Email + In-app** initially; push later             |
+| Payment provider    | Stripe, Razorpay, PayPal             | **Stripe** - best API, but depends on region         |
+| Recurring availability | Template-based generation vs manual | Manual for MVP; template generation in Phase 4       |
+
+### 6.3 Future Additions (Identified)
+
+| Model | Priority | Phase | Purpose |
+|-------|----------|-------|---------|
+| Notification | High | 2 | In-app notifications for booking events |
+| Review | Medium | 2-3 | Student ratings/reviews for teachers |
+| Transaction | High | 3 | Payment audit trail when payments go live |
+| SessionNote | Low | 4 | Teacher notes on student progress |
+| PromoCode | Low | 4 | Marketing discount codes |
 
 ---
 
@@ -397,48 +404,502 @@ model Booking {
 
 ## 8. Implementation Phases
 
-### Phase 1: Foundation (Current)
+### Phase 1: Foundation (Current - In Progress)
 
-- [x] Project setup (Next.js, Tailwind, Prisma)
-- [ ] Database schema implementation
-- [ ] Basic authentication
-- [ ] User registration/login
+**1.1 Infrastructure (COMPLETED)**
+- [x] Project setup (Next.js 16, Tailwind 4, Prisma 7)
+- [x] PostgreSQL database configuration
+- [x] Database schema design and implementation
+- [x] Initial migration applied
+
+**1.2 Authentication System (NEXT PRIORITY)**
+- [ ] Choose auth strategy: **Recommendation: NextAuth.js v5 (Auth.js)**
+  - Credentials provider for email/password
+  - JWT sessions for stateless auth
+  - Built-in CSRF protection
+- [ ] Implement auth infrastructure
+  - [ ] `lib/auth.ts` - Auth.js configuration
+  - [ ] `lib/prisma.ts` - Singleton Prisma client
+  - [ ] Password hashing utility (bcrypt or argon2)
+- [ ] Auth API routes
+  - [ ] `app/api/auth/[...nextauth]/route.ts`
+- [ ] Session management and middleware
+  - [ ] `middleware.ts` - Route protection
+  - [ ] Role-based access control (RBAC) helpers
+
+**1.3 User Registration & Onboarding**
+- [ ] Registration flow
+  - [ ] `app/(auth)/register/page.tsx` - Registration form
+  - [ ] Server action: `actions/auth/register.ts`
+  - [ ] Email validation (format + uniqueness)
+  - [ ] Password strength requirements
+  - [ ] Auto-create StudentProfile for USER role
+- [ ] Login flow
+  - [ ] `app/(auth)/login/page.tsx` - Login form
+  - [ ] Error handling (invalid credentials, inactive account)
+  - [ ] "Remember me" functionality
+- [ ] Post-login redirect based on role
+
+**1.4 Core UI Components**
+- [ ] Design system foundation
+  - [ ] `components/ui/button.tsx`
+  - [ ] `components/ui/input.tsx`
+  - [ ] `components/ui/card.tsx`
+  - [ ] `components/ui/badge.tsx`
+  - [ ] `components/ui/modal.tsx`
+  - [ ] `components/ui/toast.tsx` (notifications)
+- [ ] Layout components
+  - [ ] `components/layout/navbar.tsx`
+  - [ ] `components/layout/sidebar.tsx`
+  - [ ] `components/layout/footer.tsx`
+- [ ] Form components
+  - [ ] `components/forms/form-field.tsx`
+  - [ ] `components/forms/form-error.tsx`
+
+---
 
 ### Phase 2: Core Features
 
-- [ ] Teacher profile management
-- [ ] Availability CRUD
-- [ ] User browsing teachers
-- [ ] Basic booking flow
+**2.1 Teacher Management**
+- [ ] Teacher dashboard layout
+  - [ ] `app/(dashboard)/teacher/layout.tsx`
+  - [ ] `app/(dashboard)/teacher/page.tsx` - Overview/stats
+- [ ] Profile management
+  - [ ] `app/(dashboard)/teacher/profile/page.tsx`
+  - [ ] Edit bio, subjects, contact info
+  - [ ] Profile completion indicator
+- [ ] Availability management (CRITICAL)
+  - [ ] `app/(dashboard)/teacher/availability/page.tsx`
+  - [ ] Calendar interface for setting available slots
+  - [ ] Bulk slot creation (e.g., "every Monday 9-5")
+  - [ ] Individual date slot management
+  - [ ] Visual conflict detection
+  - [ ] Server actions: `actions/availability/*.ts`
 
-### Phase 3: Timetable & Admin
+**2.2 Student Features**
+- [ ] Student dashboard
+  - [ ] `app/(dashboard)/student/layout.tsx`
+  - [ ] `app/(dashboard)/student/page.tsx` - Upcoming classes, quick actions
+- [ ] Browse teachers
+  - [ ] `app/(dashboard)/student/browse/page.tsx`
+  - [ ] Filter by subject, availability, rating
+  - [ ] Teacher cards with key info
+  - [ ] Search functionality
+- [ ] View teacher profile & availability
+  - [ ] `app/(dashboard)/student/teachers/[id]/page.tsx`
+  - [ ] Calendar view of available slots
+  - [ ] Teacher bio, subjects, reviews
 
-- [ ] Admin dashboard
-- [ ] Calendar/timetable view
+**2.3 Booking System (CORE)**
+- [ ] Booking flow
+  - [ ] Select slot → Confirm details → Submit
+  - [ ] Real-time availability check (optimistic locking)
+  - [ ] Server action with transaction: `actions/booking/create.ts`
 - [ ] Booking management
-- [ ] Basic reporting
+  - [ ] `app/(dashboard)/student/bookings/page.tsx`
+  - [ ] List: Upcoming, Past, Cancelled
+  - [ ] Cancel booking (with policy enforcement)
+  - [ ] Reschedule booking
+- [ ] Teacher booking view
+  - [ ] `app/(dashboard)/teacher/bookings/page.tsx`
+  - [ ] Accept/decline pending bookings
+  - [ ] View student details
+
+---
+
+### Phase 3: Admin & Packages
+
+**3.1 Admin Dashboard**
+- [ ] Admin layout & overview
+  - [ ] `app/(dashboard)/admin/layout.tsx`
+  - [ ] `app/(dashboard)/admin/page.tsx` - System stats, recent activity
+- [ ] User management
+  - [ ] `app/(dashboard)/admin/users/page.tsx`
+  - [ ] List all users with role filter
+  - [ ] Activate/deactivate accounts
+  - [ ] Change user roles
+  - [ ] Create teacher accounts
+- [ ] Teacher management
+  - [ ] `app/(dashboard)/admin/teachers/page.tsx`
+  - [ ] Approve new teachers
+  - [ ] View/edit teacher profiles
+  - [ ] Manage teacher subjects
+
+**3.2 Package Management**
+- [ ] Package CRUD
+  - [ ] `app/(dashboard)/admin/packages/page.tsx`
+  - [ ] Create/edit packages (name, price, subjects, description)
+  - [ ] Activate/deactivate packages
+- [ ] Student package assignment
+  - [ ] Assign packages to students
+  - [ ] Track package usage/remaining classes
+- [ ] Package purchase flow (student-facing)
+  - [ ] `app/(dashboard)/student/packages/page.tsx`
+  - [ ] View available packages
+  - [ ] Purchase interface (Stripe integration placeholder)
+
+**3.3 Timetable View**
+- [ ] Master calendar
+  - [ ] `app/(dashboard)/admin/timetable/page.tsx`
+  - [ ] Weekly/monthly view of all bookings
+  - [ ] Filter by teacher, student, subject
+  - [ ] Drag-and-drop rescheduling (nice-to-have)
+- [ ] Reporting
+  - [ ] Booking statistics
+  - [ ] Teacher utilization
+  - [ ] Revenue reports (if payments active)
+
+---
 
 ### Phase 4: Polish & Production
 
-- [ ] Notifications (email)
-- [ ] Advanced filtering/search
-- [ ] Mobile responsiveness
-- [ ] Performance optimization
+**4.1 Notifications**
+- [ ] In-app notifications
+  - [ ] Notification model (database)
+  - [ ] Real-time updates (consider Pusher/Ably or polling)
+  - [ ] Notification bell in navbar
+- [ ] Email notifications
+  - [ ] Email service integration (Resend, SendGrid, etc.)
+  - [ ] Templates: Booking confirmation, reminder, cancellation
+  - [ ] Scheduled reminders (24h before class)
+
+**4.2 Payment Integration**
+- [ ] Stripe integration
+  - [ ] Checkout session for package purchase
+  - [ ] Webhook handlers for payment events
+  - [ ] Refund handling
+  - [ ] Payment history
+
+**4.3 UX Polish**
+- [ ] Loading states & skeletons
+- [ ] Error boundaries
+- [ ] Empty states with CTAs
+- [ ] Mobile-responsive design audit
+- [ ] Accessibility audit (WCAG 2.1 AA)
+- [ ] Dark mode (optional)
+
+**4.4 Performance & Security**
+- [ ] API rate limiting
+- [ ] Input validation (Zod schemas)
+- [ ] SQL injection protection (Prisma handles this)
+- [ ] XSS protection
+- [ ] Database query optimization
+- [ ] Image optimization (if teacher photos)
+- [ ] Caching strategy (React Query / SWR)
+
+**4.5 DevOps & Deployment**
+- [ ] Environment configuration (dev/staging/prod)
+- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] Database backup strategy
+- [ ] Error monitoring (Sentry)
+- [ ] Analytics (optional)
+- [ ] Production deployment (Vercel + managed Postgres)
 
 ---
 
 ## 9. Open Questions
 
-1. **Is this a paid platform?** Do users pay for sessions?
-2. **Class types?** 1-on-1 only, or group sessions?
-3. **Session duration?** Fixed slots (30/60 min) or flexible?
-4. **Approval workflow?** Do teachers approve bookings, or auto-confirm?
-5. **Multi-language support?** Is i18n needed?
+1. ~~**Is this a paid platform?**~~ ✅ **ANSWERED**: Yes, Package model exists with pricing
+2. **Class types?** 1-on-1 only, or group sessions? *(Assume 1-on-1 for MVP)*
+3. **Session duration?** Fixed slots (30/60 min) or flexible? *(Need to decide)*
+4. **Approval workflow?** Do teachers approve bookings, or auto-confirm? *(Recommend: auto-confirm for available slots)*
+5. **Multi-language support?** Is i18n needed? *(Defer to Phase 4+)*
+6. **Cancellation policy?** How much notice required? Refund policy?
+7. ~~**Package expiration?**~~ ✅ **ANSWERED**: Packages don't expire
+8. **Teacher onboarding?** Admin creates teachers, or self-registration with approval?
 
 ---
 
-## 10. Changelog
+## 10. Immediate Next Steps (Priority Order)
 
-| Date       | Changes                                | Author |
-| ---------- | -------------------------------------- | ------ |
-| 2026-01-31 | Initial system design document created | -      |
+### Step 0: Schema Revision ✅ COMPLETED (Feb 4, 2026)
+- [x] Update `prisma/schema.prisma` with all changes
+- [x] Delete existing migration
+- [x] Create fresh migration: `20260204182111_init`
+- [x] Generate Prisma client
+
+---
+
+### Step 1: Prisma Client Setup
+
+**Purpose:** Create singleton Prisma client to prevent connection exhaustion during development hot-reloads.
+
+**Files to create:**
+```
+lib/
+├── prisma.ts       # Singleton Prisma client
+```
+
+**Implementation:**
+```typescript
+// lib/prisma.ts
+import { PrismaClient } from '@/app/generated/prisma'
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: process.env.NODE_ENV === 'development' 
+    ? ['query', 'error', 'warn'] 
+    : ['error']
+})
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma
+}
+```
+
+**Complexity:** Low (5 minutes)
+
+---
+
+### Step 2: Authentication System
+
+**Purpose:** User registration, login, session management, route protection.
+
+**Technology choices:**
+| Component | Choice | Rationale |
+|-----------|--------|-----------|
+| Auth library | NextAuth.js v5 (Auth.js) | Free, flexible, native Next.js support |
+| Session strategy | JWT | Stateless, no session DB needed |
+| Password hashing | bcryptjs | Battle-tested, well-supported |
+
+**Dependencies to install:**
+```bash
+npm install next-auth@beta bcryptjs
+npm install -D @types/bcryptjs
+```
+
+**Files to create:**
+```
+lib/
+├── auth.ts              # Main NextAuth configuration
+├── auth.config.ts       # Edge-compatible config (for middleware)
+├── passwords.ts         # Password hash/verify utilities
+
+app/
+├── api/
+│   └── auth/
+│       └── [...nextauth]/
+│           └── route.ts  # Auth API endpoints (GET, POST)
+
+├── (auth)/
+│   ├── layout.tsx       # Auth pages layout (centered card)
+│   ├── login/
+│   │   └── page.tsx     # Login form
+│   └── register/
+│       └── page.tsx     # Registration form
+
+actions/
+└── auth/
+    ├── register.ts      # Server action for registration
+    └── login.ts         # Server action for login
+
+middleware.ts            # Route protection
+
+types/
+└── next-auth.d.ts       # TypeScript augmentation for session
+```
+
+**Authentication flow:**
+```
+Registration:
+  Form → Server Action → Validate → Hash Password → Create User + Profile → Redirect to Login
+
+Login:
+  Form → NextAuth Credentials → Find User → Verify Password → Create JWT → Set Cookie → Redirect to Dashboard
+
+Route Protection:
+  Request → Middleware → Check JWT → Allow or Redirect to Login
+
+Role-based Redirect:
+  ADMIN → /admin
+  TEACHER → /teacher
+  USER → /student
+```
+
+**Key implementation details:**
+
+1. **Password utilities** (`lib/passwords.ts`):
+   - `hashPassword(password)` - bcrypt with 12 salt rounds
+   - `verifyPassword(password, hash)` - compare passwords
+
+2. **Auth config** (`lib/auth.config.ts`):
+   - Custom pages: `/login`, `/register`
+   - JWT callback: Add `id` and `role` to token
+   - Session callback: Add `id` and `role` to session
+   - Authorized callback: Protect dashboard routes
+
+3. **Credentials provider** (`lib/auth.ts`):
+   - Find user by email
+   - Verify password hash
+   - Check `isActive` status
+   - Return user object for JWT
+
+4. **Middleware** (`middleware.ts`):
+   - Protect: `/admin/*`, `/teacher/*`, `/student/*`
+   - Redirect unauthenticated users to `/login`
+
+5. **Registration** (`actions/auth/register.ts`):
+   - Validate input
+   - Check email uniqueness
+   - Hash password
+   - Create User + StudentProfile (transaction)
+   - Redirect to login
+
+**Complexity:** Medium (core functionality)
+
+---
+
+### Step 3: UI Component Library
+
+**Purpose:** Reusable, consistent UI components.
+
+**Recommendation:** shadcn/ui
+
+**Setup:**
+```bash
+npx shadcn@latest init
+npx shadcn@latest add button input label card form toast dialog select table
+```
+
+**Minimum components needed:**
+| Component | Usage |
+|-----------|-------|
+| Button | Actions, submit |
+| Input | Form fields |
+| Label | Form labels |
+| Card | Content containers |
+| Form | Form validation (react-hook-form + zod) |
+| Toast/Sonner | Notifications |
+| Dialog | Modals |
+| Select | Dropdowns |
+| Table | Data display (admin) |
+
+**File structure:**
+```
+components/
+├── ui/                  # shadcn/ui components
+│   ├── button.tsx
+│   ├── input.tsx
+│   ├── card.tsx
+│   └── ...
+├── forms/               # Custom form components
+│   └── auth-form.tsx
+└── layout/              # Layout components
+    ├── navbar.tsx
+    ├── sidebar.tsx
+    └── footer.tsx
+```
+
+---
+
+### Step 4: Dashboard Layouts
+
+**Purpose:** Role-based dashboard shells with navigation.
+
+**File structure:**
+```
+app/
+├── (auth)/                     # Public - auth pages
+│   ├── layout.tsx              # Centered card layout
+│   ├── login/page.tsx
+│   └── register/page.tsx
+│
+├── (dashboard)/                # Protected - all dashboards
+│   ├── layout.tsx              # Shared shell (navbar)
+│   ├── page.tsx                # Redirect based on role
+│   │
+│   ├── admin/
+│   │   ├── layout.tsx          # Admin sidebar
+│   │   ├── page.tsx            # Admin home (stats)
+│   │   ├── users/page.tsx
+│   │   ├── packages/page.tsx
+│   │   └── bundles/page.tsx
+│   │
+│   ├── teacher/
+│   │   ├── layout.tsx          # Teacher sidebar
+│   │   ├── page.tsx            # Teacher home
+│   │   ├── profile/page.tsx
+│   │   ├── availability/page.tsx
+│   │   └── bookings/page.tsx
+│   │
+│   └── student/
+│       ├── layout.tsx          # Student sidebar
+│       ├── page.tsx            # Student home
+│       ├── browse/page.tsx     # Browse teachers
+│       ├── packages/page.tsx   # View/purchase packages
+│       └── bookings/page.tsx   # My bookings
+```
+
+**Navigation items per role:**
+
+| Admin | Teacher | Student |
+|-------|---------|---------|
+| Dashboard | Dashboard | Dashboard |
+| Users | My Profile | Browse Teachers |
+| Teachers | Availability | My Packages |
+| Packages | My Bookings | My Bookings |
+| Bundles | | |
+| Reports | | |
+
+---
+
+### Step 5: Core Features
+
+**Phase 2 features by role:**
+
+**Admin:**
+- [ ] User management (list, activate/deactivate, change role)
+- [ ] Package CRUD
+- [ ] Bundle CRUD
+- [ ] Teacher approval (if self-registration)
+
+**Teacher:**
+- [ ] Profile setup (bio, packages)
+- [ ] Availability management (calendar UI)
+- [ ] View assigned bookings
+- [ ] Accept/complete bookings
+
+**Student:**
+- [ ] Browse teachers (filter by package)
+- [ ] View teacher availability
+- [ ] Book sessions
+- [ ] View/manage bookings
+- [ ] View enrolled packages
+
+---
+
+### Implementation Order
+
+| Order | Task | Status | Depends On |
+|-------|------|--------|------------|
+| 0 | Database schema | ✅ Done | - |
+| 1 | Prisma client | ⏳ Pending | Database |
+| 2 | Authentication | ⏳ Pending | Prisma client |
+| 3 | UI components | ⏳ Pending | - (parallel) |
+| 4 | Dashboard layouts | ⏳ Pending | Auth + UI |
+| 5 | Core features | ⏳ Pending | Dashboards |
+
+---
+
+## 11. Changelog
+
+| Date       | Changes                                                    | Author |
+| ---------- | ---------------------------------------------------------- | ------ |
+| 2026-01-31 | Initial system design document created                     | -      |
+| 2026-01-31 | Database schema implemented with Package, StudentProfile   | -      |
+| 2026-02-04 | Updated roadmap with detailed implementation phases        | -      |
+| 2026-02-04 | Documented schema evolution and design decisions           | -      |
+| 2026-02-04 | Added snake_case table naming convention (@@map)           | -      |
+| 2026-02-04 | Added PackageBundle, PackageBundleItem models              | -      |
+| 2026-02-04 | Added StudentEnrollment model (replaces subjects/packageId)| -      |
+| 2026-02-04 | Added TeacherPackage model (replaces subjects)             | -      |
+| 2026-02-04 | Removed amountPaid/expiresAt from StudentEnrollment        | -      |
+| 2026-02-04 | Removed EXPIRED from EnrollmentStatus enum                 | -      |
+| 2026-02-04 | Added paymentId to StudentEnrollment                       | -      |
+| 2026-02-04 | Identified future tables: Notification, Review, Transaction| -      |
+| 2026-02-04 | Database migration completed: `20260204182111_init`        | -      |
+| 2026-02-04 | Detailed Step 1-5 implementation plan documented           | -      |
+| 2026-02-04 | Auth decision finalized: NextAuth.js v5                    | -      |
