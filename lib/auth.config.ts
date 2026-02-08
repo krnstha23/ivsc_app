@@ -29,7 +29,8 @@ export const authConfig = {
       const isDashboardRoute =
         pathname.startsWith('/admin') ||
         pathname.startsWith('/teacher') ||
-        pathname.startsWith('/student')
+        pathname.startsWith('/student') ||
+        pathname.startsWith('/dashboard')
 
       if (isDashboardRoute && !auth?.user) {
         return NextResponse.redirect(new URL('/login', request.url))
@@ -38,4 +39,4 @@ export const authConfig = {
       return true
     },
   },
-} satisfies NextAuthConfig
+} satisfies Omit<NextAuthConfig, 'providers'>

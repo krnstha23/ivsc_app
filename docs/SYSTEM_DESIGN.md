@@ -1,6 +1,6 @@
 # IVCS - System Design Document
 
-> **Last Updated**: February 4, 2026  
+> **Last Updated**: February 8, 2026  
 > **Status**: Phase 1 - Foundation (In Progress)  
 > **Branch**: `adding-db`
 
@@ -96,8 +96,9 @@ User (Student)
 | Field     | Type     | Description                |
 | --------- | -------- | -------------------------- |
 | id        | UUID     | Primary key                |
-| email     | String   | Unique, for authentication |
-| name      | String   | Display name               |
+| username  | String   | Unique; **used for login** (credentials) |
+| email     | String   | Unique; for account/notifications       |
+| name      | String   | Display name (firstName, middleName, lastName in DB) |
 | role      | Enum     | ADMIN, TEACHER, USER       |
 | createdAt | DateTime | Account creation timestamp |
 | updatedAt | DateTime | Last modification          |
@@ -208,58 +209,50 @@ User (Student)
 | ORM      | Prisma 7                            | Type-safe queries, migrations, excellent DX       |
 | Auth     | NextAuth.js v5 (Auth.js)            | Free, flexible, native Next.js support            |
 
-### 5.2 Folder Structure (Proposed)
+### 5.2 Folder Structure (Current)
 
 ```
 ivcs-app/
 ├── app/
-│   ├── (auth)/
-│   │   ├── login/
-│   │   └── register/
-│   ├── (dashboard)/
-│   │   ├── admin/
-│   │   │   ├── teachers/
-│   │   │   ├── users/
-│   │   │   └── timetable/
-│   │   ├── teacher/
-│   │   │   ├── availability/
-│   │   │   └── bookings/
-│   │   └── user/
-│   │       ├── browse/
-│   │       └── my-bookings/
-│   ├── api/
-│   │   ├── auth/
-│   │   ├── bookings/
-│   │   ├── teachers/
-│   │   └── availability/
+│   ├── api/auth/[...nextauth]/route.ts
+│   ├── admin/page.tsx           # Dashboard-01 block (sidebar, charts, table)
+│   ├── dashboard/page.tsx       # Redirect by role → /admin | /teacher | /student
+│   ├── login/page.tsx
+│   ├── register/page.tsx       # Placeholder
+│   ├── student/page.tsx        # Placeholder
+│   ├── teacher/page.tsx        # Placeholder
 │   ├── layout.tsx
-│   └── page.tsx
+│   ├── page.tsx
+│   └── globals.css
 ├── components/
-│   ├── ui/                 # Reusable UI components
-│   ├── forms/              # Form components
-│   └── calendar/           # Timetable/calendar components
+│   ├── ui/                     # shadcn components (from login-03, dashboard-01)
+│   ├── login-form.tsx
+│   ├── app-sidebar.tsx, site-header.tsx, nav-*, section-cards, data-table, chart-area-interactive
+│   └── providers.tsx           # SessionProvider
 ├── lib/
-│   ├── prisma.ts           # Prisma client instance
-│   ├── auth.ts             # Auth utilities
-│   └── utils.ts            # Helper functions
-├── prisma/
-│   ├── schema.prisma
-│   └── migrations/
-├── docs/
-│   └── SYSTEM_DESIGN.md    # This file
-└── types/
-    └── index.ts            # TypeScript type definitions
+│   ├── prisma.ts               # Singleton + pg adapter
+│   ├── auth.ts                 # NextAuth + Credentials (username)
+│   ├── auth.config.ts          # Edge-safe config
+│   ├── auth-edge.ts            # Edge auth for proxy
+│   ├── passwords.ts            # hashPassword, verifyPassword
+│   └── utils.ts                # cn()
+├── prisma/schema.prisma, migrations/
+├── proxy.ts                    # Route protection (Next.js 16; was middleware.ts)
+├── docs/SYSTEM_DESIGN.md
+└── components.json             # shadcn config
 ```
+
+Planned: `(auth)/`, `(dashboard)/` route groups; `actions/auth/register.ts`; role-specific layouts and pages per Phase 2.
 
 ### 5.3 Database Schema (Prisma)
 
-**Status**: ✅ Implemented (Feb 4, 2026) - Migration `20260204182111_init`
+**Status**: ✅ Implemented (Feb 4, 2026) - Migrations `20260204182111_init`, `20260208000000_add_username_to_users`
 
 #### Models Overview
 
 | Model | Table Name | Purpose |
 |-------|------------|---------|
-| `User` | `users` | Base user with role (ADMIN, TEACHER, USER), auth fields |
+| `User` | `users` | Base user with **username** (login), email, role (ADMIN, TEACHER, USER), auth fields |
 | `StudentProfile` | `student_profiles` | Extended student info, linked to enrollments |
 | `TeacherProfile` | `teacher_profiles` | Extended teacher info: bio, availability |
 | `Availability` | `availabilities` | Date-specific time slots teachers mark as available |
@@ -325,6 +318,12 @@ id, teacherId, packageId, createdAt
 | `StudentProfile` | `packageId String?` | Replaced by StudentEnrollment (supports multiple) |
 | `TeacherProfile` | `subjects String[]` | Replaced by Package relations via TeacherPackage |
 
+#### Username on User (Feb 8, 2026)
+
+- **Migration** `20260208000000_add_username_to_users`: added `username String @unique` to `users`.
+- Existing rows backfilled with `username = email` so current users can continue to log in.
+- **Login**: Credentials provider and login form use **username** (not email); lookup by `prisma.user.findUnique({ where: { username } })`.
+
 See `prisma/schema.prisma` for full implementation.
 
 ---
@@ -352,6 +351,8 @@ See `prisma/schema.prisma` for full implementation.
 | paymentId on Enrollment (not amount) | Links enrollment to payment record; amount tracked in Transaction table | 2026-02-04 |
 | No expiration on packages            | Packages don't expire; removed expiresAt and EXPIRED status              | 2026-02-04 |
 | Keep Package.subjects as String[]    | Describes topics within a package; doesn't need relational integrity | 2026-02-04 |
+| Username for login (User.username)    | Login credential is username (unique); email kept for account/notifications | 2026-02-08 |
+| Next.js 16 proxy convention           | Use `proxy.ts` instead of deprecated `middleware.ts` for route protection | 2026-02-08 |
 
 ### 6.2 Pending Decisions
 
@@ -412,49 +413,43 @@ See `prisma/schema.prisma` for full implementation.
 - [x] Database schema design and implementation
 - [x] Initial migration applied
 
-**1.2 Authentication System (NEXT PRIORITY)**
-- [ ] Choose auth strategy: **Recommendation: NextAuth.js v5 (Auth.js)**
-  - Credentials provider for email/password
+**1.2 Authentication System** ✅ (Feb 8, 2026)
+- [x] Auth strategy: NextAuth.js v5 (Auth.js)
+  - Credentials provider for **username**/password (login by username, not email)
   - JWT sessions for stateless auth
   - Built-in CSRF protection
-- [ ] Implement auth infrastructure
-  - [ ] `lib/auth.ts` - Auth.js configuration
-  - [ ] `lib/prisma.ts` - Singleton Prisma client
-  - [ ] Password hashing utility (bcrypt or argon2)
-- [ ] Auth API routes
-  - [ ] `app/api/auth/[...nextauth]/route.ts`
-- [ ] Session management and middleware
-  - [ ] `middleware.ts` - Route protection
-  - [ ] Role-based access control (RBAC) helpers
+- [x] Auth infrastructure
+  - [x] `lib/auth.ts` - NextAuth config + Credentials provider
+  - [x] `lib/auth.config.ts` - Edge-compatible config (callbacks, pages)
+  - [x] `lib/auth-edge.ts` - Edge-safe auth for proxy (no Prisma)
+  - [x] `lib/prisma.ts` - Singleton Prisma client (pg adapter)
+  - [x] `lib/passwords.ts` - bcrypt hash/verify
+- [x] Auth API: `app/api/auth/[...nextauth]/route.ts`
+- [x] Route protection: **`proxy.ts`** (Next.js 16 convention; middleware deprecated)
+  - Protects `/dashboard`, `/admin`, `/teacher`, `/student`; redirects unauthenticated to `/login`
+- [ ] RBAC helpers (optional; role in session for now)
 
 **1.3 User Registration & Onboarding**
-- [ ] Registration flow
-  - [ ] `app/(auth)/register/page.tsx` - Registration form
-  - [ ] Server action: `actions/auth/register.ts`
-  - [ ] Email validation (format + uniqueness)
+- [ ] Registration flow (full)
+  - [x] `app/register/page.tsx` - **Placeholder** (link from login)
+  - [ ] Registration form + server action: `actions/auth/register.ts`
+  - [ ] Username + email validation (format + uniqueness)
   - [ ] Password strength requirements
   - [ ] Auto-create StudentProfile for USER role
-- [ ] Login flow
-  - [ ] `app/(auth)/login/page.tsx` - Login form
-  - [ ] Error handling (invalid credentials, inactive account)
-  - [ ] "Remember me" functionality
-- [ ] Post-login redirect based on role
+- [x] Login flow
+  - [x] `app/login/page.tsx` - Login form (shadcn login-03 block, wired to username + signIn)
+  - [x] Error handling (invalid credentials)
+  - [x] SessionProvider (`components/providers.tsx`) for client-side signIn
+  - [ ] "Remember me" (deferred)
+- [x] Post-login redirect: `/dashboard` → redirect by role to `/admin`, `/teacher`, or `/student`
 
-**1.4 Core UI Components**
-- [ ] Design system foundation
-  - [ ] `components/ui/button.tsx`
-  - [ ] `components/ui/input.tsx`
-  - [ ] `components/ui/card.tsx`
-  - [ ] `components/ui/badge.tsx`
-  - [ ] `components/ui/modal.tsx`
-  - [ ] `components/ui/toast.tsx` (notifications)
-- [ ] Layout components
-  - [ ] `components/layout/navbar.tsx`
-  - [ ] `components/layout/sidebar.tsx`
-  - [ ] `components/layout/footer.tsx`
-- [ ] Form components
-  - [ ] `components/forms/form-field.tsx`
-  - [ ] `components/forms/form-error.tsx`
+**1.4 Core UI Components** (partial – shadcn blocks added Feb 8, 2026)
+- [x] Design system foundation (shadcn/ui initialized + login-03 + dashboard-01 blocks)
+  - [x] `components/ui/` – button, input, card, label, separator, field, sheet, tooltip, skeleton, breadcrumb, select, tabs, table, toggle, badge, checkbox, dropdown-menu, drawer, avatar, sonner, sidebar, chart, toggle-group
+  - [x] `lib/utils.ts` – `cn()` (clsx + tailwind-merge); `tw-animate-css` for animations
+- [x] Login/dashboard blocks: `components/login-form.tsx`, `components/app-sidebar.tsx`, `components/site-header.tsx`, section-cards, data-table, chart-area-interactive, nav-*
+- [ ] Layout components (layout/navbar, layout/footer – optional; sidebar from dashboard block)
+- [ ] Form components (form-field, form-error – optional; Field from shadcn used in login)
 
 ---
 
@@ -510,9 +505,8 @@ See `prisma/schema.prisma` for full implementation.
 ### Phase 3: Admin & Packages
 
 **3.1 Admin Dashboard**
-- [ ] Admin layout & overview
-  - [ ] `app/(dashboard)/admin/layout.tsx`
-  - [ ] `app/(dashboard)/admin/page.tsx` - System stats, recent activity
+- [x] Admin dashboard page (Feb 8, 2026): `app/admin/page.tsx` – dashboard-01 block (sidebar, section cards, chart, data table)
+- [ ] Admin layout (optional wrapper): `app/(dashboard)/admin/layout.tsx`
 - [ ] User management
   - [ ] `app/(dashboard)/admin/users/page.tsx`
   - [ ] List all users with role filter
@@ -671,52 +665,38 @@ npm install next-auth@beta bcryptjs
 npm install -D @types/bcryptjs
 ```
 
-**Files to create:**
+**Files created (Feb 8, 2026):**
 ```
 lib/
-├── auth.ts              # Main NextAuth configuration
-├── auth.config.ts       # Edge-compatible config (for middleware)
-├── passwords.ts         # Password hash/verify utilities
+├── auth.ts              # NextAuth + Credentials (username/password)
+├── auth.config.ts       # Edge-compatible config (for proxy)
+├── auth-edge.ts         # Edge-safe auth (used by proxy.ts; no Prisma)
+├── passwords.ts         # hashPassword, verifyPassword
 
-app/
-├── api/
-│   └── auth/
-│       └── [...nextauth]/
-│           └── route.ts  # Auth API endpoints (GET, POST)
+app/api/auth/[...nextauth]/route.ts   # GET, POST handlers
 
-├── (auth)/
-│   ├── layout.tsx       # Auth pages layout (centered card)
-│   ├── login/
-│   │   └── page.tsx     # Login form
-│   └── register/
-│       └── page.tsx     # Registration form
+app/login/page.tsx, app/register/page.tsx   # login wired; register placeholder
 
-actions/
-└── auth/
-    ├── register.ts      # Server action for registration
-    └── login.ts         # Server action for login
+proxy.ts                 # Route protection (Next.js 16 convention; middleware deprecated)
 
-middleware.ts            # Route protection
-
-types/
-└── next-auth.d.ts       # TypeScript augmentation for session
+components/providers.tsx # SessionProvider for client signIn
+components/login-form.tsx # Username + password, signIn('credentials')
 ```
 
-**Authentication flow:**
-```
-Registration:
-  Form → Server Action → Validate → Hash Password → Create User + Profile → Redirect to Login
+**Still to create:** `actions/auth/register.ts`, full registration form, `types/next-auth.d.ts` (optional).
 
+**Authentication flow (implemented):**
+```
 Login:
-  Form → NextAuth Credentials → Find User → Verify Password → Create JWT → Set Cookie → Redirect to Dashboard
+  Form (username + password) → signIn('credentials') → Find User by username → Verify Password
+  → JWT → Redirect to /dashboard → Server redirect by role to /admin | /teacher | /student
 
 Route Protection:
-  Request → Middleware → Check JWT → Allow or Redirect to Login
+  Request → proxy.ts (auth from lib/auth-edge) → Check session → Allow or Redirect to /login
+  Protected paths: /dashboard, /admin, /teacher, /student
 
 Role-based Redirect:
-  ADMIN → /admin
-  TEACHER → /teacher
-  USER → /student
+  /dashboard page reads session.role → redirects ADMIN → /admin, TEACHER → /teacher, USER → /student
 ```
 
 **Key implementation details:**
@@ -732,20 +712,20 @@ Role-based Redirect:
    - Authorized callback: Protect dashboard routes
 
 3. **Credentials provider** (`lib/auth.ts`):
-   - Find user by email
+   - Find user by **username** (not email)
    - Verify password hash
    - Check `isActive` status
-   - Return user object for JWT
+   - Return user object (id, email, name, role) for JWT
 
-4. **Middleware** (`middleware.ts`):
-   - Protect: `/admin/*`, `/teacher/*`, `/student/*`
+4. **Proxy** (`proxy.ts` – Next.js 16 convention; `middleware.ts` is deprecated):
+   - Protect: `/dashboard`, `/admin/*`, `/teacher/*`, `/student/*`
    - Redirect unauthenticated users to `/login`
+   - Uses `lib/auth-edge.ts` (edge-safe; no Prisma) to avoid loading Node-only code in Edge
 
-5. **Registration** (`actions/auth/register.ts`):
-   - Validate input
-   - Check email uniqueness
+5. **Registration** (`actions/auth/register.ts` – not yet implemented):
+   - Validate input (username + email uniqueness)
    - Hash password
-   - Create User + StudentProfile (transaction)
+   - Create User (username, email, …) + StudentProfile (transaction)
    - Redirect to login
 
 **Complexity:** Medium (core functionality)
@@ -877,10 +857,16 @@ app/
 |-------|------|--------|------------|
 | 0 | Database schema | ✅ Done | - |
 | 1 | Prisma client | ✅ Done | Database |
-| 2 | Authentication | ⏳ Pending | Prisma client |
-| 3 | UI components | ⏳ Pending | - (parallel) |
-| 4 | Dashboard layouts | ⏳ Pending | Auth + UI |
-| 5 | Core features | ⏳ Pending | Dashboards |
+| 2 | Authentication (lib, API, proxy, login UI, role redirect) | ✅ Done | Prisma client |
+| 3 | UI components (shadcn init + login-03 + dashboard-01 blocks) | ✅ Done | - |
+| 4 | Dashboard layouts (admin = dashboard-01; teacher/student placeholders) | ✅ Partial | Auth + UI |
+| 5 | Core features (registration action, teacher/student/admin features) | ⏳ Pending | Dashboards |
+
+### Next on the plan (Feb 8, 2026)
+
+1. **Registration flow**: Full `app/register` form + `actions/auth/register.ts` (username, email, password; create User + StudentProfile; redirect to login).
+2. **Dashboard layouts**: Optional `(dashboard)` route group and role-specific sidebars; admin already uses dashboard-01 sidebar.
+3. **Core features**: Teacher (profile, availability, bookings), Student (browse, bookings, packages), Admin (users, teachers, packages, timetable) per Phase 2–3.
 
 ---
 
@@ -904,3 +890,11 @@ app/
 | 2026-02-04 | Detailed Step 1-5 implementation plan documented           | -      |
 | 2026-02-04 | Auth decision finalized: NextAuth.js v5                    | -      |
 | 2026-02-08 | Step 1 completed: Prisma client singleton in `lib/prisma.ts` | -      |
+| 2026-02-08 | Username added to User model; migration `20260208000000_add_username_to_users` (backfill existing rows) | -      |
+| 2026-02-08 | Auth lib: `lib/auth.ts`, `lib/auth.config.ts`, `lib/auth-edge.ts`, `lib/passwords.ts`; Credentials by **username** | -      |
+| 2026-02-08 | Auth API `app/api/auth/[...nextauth]/route.ts`; route protection via **proxy.ts** (Next.js 16; middleware deprecated) | -      |
+| 2026-02-08 | Login: shadcn login-03 block, username + signIn, SessionProvider; post-login redirect from /dashboard by role | -      |
+| 2026-02-08 | Dashboard: /dashboard redirects by role; /admin = dashboard-01 block; /teacher, /student placeholders | -      |
+| 2026-02-08 | shadcn init + login-03 + dashboard-01 blocks; lib/utils.ts, tw-animate-css; register placeholder page | -      |
+| 2026-02-08 | Prisma client uses pg adapter (Pool + PrismaPg) for Prisma 7 compatibility | -      |
+| 2026-02-08 | Doc updated: planning, folder structure, Phase 1.2/1.3/1.4 status, proxy convention | -      |
