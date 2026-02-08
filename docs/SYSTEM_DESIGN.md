@@ -876,7 +876,7 @@ app/
 | Order | Task | Status | Depends On |
 |-------|------|--------|------------|
 | 0 | Database schema | ✅ Done | - |
-| 1 | Prisma client | ⏳ Pending | Database |
+| 1 | Prisma client | ✅ Done | Database |
 | 2 | Authentication | ⏳ Pending | Prisma client |
 | 3 | UI components | ⏳ Pending | - (parallel) |
 | 4 | Dashboard layouts | ⏳ Pending | Auth + UI |
@@ -903,3 +903,4 @@ app/
 | 2026-02-04 | Database migration completed: `20260204182111_init`        | -      |
 | 2026-02-04 | Detailed Step 1-5 implementation plan documented           | -      |
 | 2026-02-04 | Auth decision finalized: NextAuth.js v5                    | -      |
+| 2026-02-08 | Step 1 completed: Prisma client singleton in `lib/prisma.ts` | -      |
