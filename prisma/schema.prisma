@@ -58,6 +58,7 @@ enum EnrollmentStatus {
 // User - all system users (admin, teachers, students)
 model User {
   id           String   @id @default(uuid())
+  username     String   @unique
   email        String   @unique
   phone        String?
   firstName    String
