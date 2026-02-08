@@ -1,0 +1,297 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum Role {
+  ADMIN
+  TEACHER
+  USER
+
+  @@map("role")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+
+  @@map("booking_status")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+
+  @@map("payment_status")
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+
+  @@map("enrollment_status")
+}
+
+// =============================================================================
+// USER & PROFILES
+// =============================================================================
+
+// User - all system users (admin, teachers, students)
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  phone        String?
+  firstName    String
+  middleName   String?
+  lastName     String
+  passwordHash String
+  role         Role     @default(USER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  teacherProfile TeacherProfile?
+  studentProfile StudentProfile?
+  bookings       Booking[]
+  classHistory   ClassMetadata[]
+
+  @@map("users")
+}
+
+// StudentProfile - extended info for students
+model StudentProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user        User                @relation(fields: [userId], references: [id])
+  enrollments StudentEnrollment[]
+
+  @@map("student_profiles")
+}
+
+// TeacherProfile - extended info for teachers
+model TeacherProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  bio       String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user         User            @relation(fields: [userId], references: [id])
+  availability Availability[]
+  bookings     Booking[]
+  classHistory ClassMetadata[]
+  packages     TeacherPackage[]
+
+  @@map("teacher_profiles")
+}
+
+// =============================================================================
+// PACKAGES & BUNDLES
+// =============================================================================
+
+// Package - class packages that students can purchase
+model Package {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal
+  subjects    String[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  bookings     Booking[]
+  classHistory ClassMetadata[]
+  bundleItems  PackageBundleItem[]
+  enrollments  StudentEnrollment[]
+  teachers     TeacherPackage[]
+
+  @@map("packages")
+}
+
+// PackageBundle - marketing bundles grouping multiple packages
+model PackageBundle {
+  id              String    @id @default(uuid())
+  name            String
+  description     String?
+  price           Decimal
+  discountPercent Decimal?
+  isActive        Boolean   @default(true)
+  isFeatured      Boolean   @default(false)
+  validFrom       DateTime?
+  validUntil      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  items PackageBundleItem[]
+
+  @@map("package_bundles")
+}
+
+// PackageBundleItem - junction table for Bundle <-> Package
+model PackageBundleItem {
+  id           String   @id @default(uuid())
+  bundleId     String
+  packageId    String
+  displayOrder Int      @default(0)
+  customPrice  Decimal?
+  createdAt    DateTime @default(now())
+
+  // Relations
+  bundle  PackageBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  package Package       @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleId, packageId])
+  @@index([bundleId])
+  @@index([packageId])
+  @@map("package_bundle_items")
+}
+
+// =============================================================================
+// ENROLLMENTS & TEACHER ASSIGNMENTS
+// =============================================================================
+
+// StudentEnrollment - junction table for Student <-> Package with enrollment tracking
+model StudentEnrollment {
+  id           String           @id @default(uuid())
+  studentId    String
+  packageId    String
+  enrolledAt   DateTime         @default(now())
+  status       EnrollmentStatus @default(ACTIVE)
+  classesTotal Int
+  classesUsed  Int              @default(0)
+  paymentId    String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relations
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  package Package        @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, packageId])
+  @@index([studentId])
+  @@index([packageId])
+  @@map("student_enrollments")
+}
+
+// TeacherPackage - junction table for Teacher <-> Package assignment
+model TeacherPackage {
+  id        String   @id @default(uuid())
+  teacherId String
+  packageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  teacher TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  package Package        @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, packageId])
+  @@index([teacherId])
+  @@index([packageId])
+  @@map("teacher_packages")
+}
+
+// =============================================================================
+// AVAILABILITY & BOOKING
+// =============================================================================
+
+// Availability - teacher's open time slots for specific dates
+model Availability {
+  id        String   @id @default(uuid())
+  teacherId String
+  date      DateTime @db.Date
+  startTime String   // "HH:MM" format
+  endTime   String   // "HH:MM" format
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  teacher TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  booking Booking?
+
+  @@index([teacherId, date])
+  @@map("availabilities")
+}
+
+// Booking - scheduled sessions between students and teachers
+model Booking {
+  id             String        @id @default(uuid())
+  userId         String
+  teacherId      String
+  availabilityId String        @unique // 1:1 - one booking per slot
+  packageId      String?
+  scheduledAt    DateTime
+  duration       Int           // minutes
+  status         BookingStatus @default(PENDING)
+  notes          String?
+  paymentStatus  PaymentStatus @default(PENDING)
+  transactionId  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  user         User           @relation(fields: [userId], references: [id])
+  teacher      TeacherProfile @relation(fields: [teacherId], references: [id])
+  availability Availability   @relation(fields: [availabilityId], references: [id])
+  package      Package?       @relation(fields: [packageId], references: [id])
+
+  @@index([userId])
+  @@index([teacherId])
+  @@index([scheduledAt])
+  @@map("bookings")
+}
+
+// =============================================================================
+// CLASS HISTORY
+// =============================================================================
+
+// ClassMetadata - record of completed classes
+model ClassMetadata {
+  id        String   @id @default(uuid())
+  packageId String
+  teacherId String
+  studentId String
+  date      DateTime @db.Date
+  startTime String   // "HH:MM" format
+  endTime   String   // "HH:MM" format
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  package Package        @relation(fields: [packageId], references: [id])
+  teacher TeacherProfile @relation(fields: [teacherId], references: [id])
+  student User           @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([date])
+  @@map("class_metadata")
+}
