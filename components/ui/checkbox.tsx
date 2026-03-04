@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import CheckedIcon from "@/components/ui/checked-icon"
+import { CheckCircle } from "@solar-icons/react"
 import { Checkbox as CheckboxPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
@@ -23,7 +23,7 @@ function Checkbox({
         data-slot="checkbox-indicator"
         className="grid place-content-center text-current transition-none"
       >
-        <CheckedIcon size={14} className="size-3.5" />
+        <CheckCircle size={14} className="size-3.5" />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )

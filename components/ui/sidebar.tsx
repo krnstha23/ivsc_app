@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import LayoutSidebarRightCollapseIcon from "@/components/ui/layout-sidebar-right-collapse-icon";
+import { SidebarMinimalistic } from "@solar-icons/react";
 import { Slot } from "radix-ui";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -287,7 +287,7 @@ function SidebarTrigger({
             }}
             {...props}
         >
-            <LayoutSidebarRightCollapseIcon size={16} className="size-4" />
+            <SidebarMinimalistic size={16} className="size-4" />
             <span className="sr-only">Toggle Sidebar</span>
         </Button>
     );

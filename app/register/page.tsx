@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import LayersIcon from "@/components/ui/layers-icon";
+import { LayersMinimalistic } from "@solar-icons/react";
 
 import { RegisterForm } from "@/components/register-form";
 
@@ -13,7 +13,7 @@ export default function RegisterPage() {
                     className="flex items-center gap-2 self-center font-medium"
                 >
                     <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-                        <LayersIcon size={16} className="size-4" />
+                        <LayersMinimalistic size={16} className="size-4" />
                     </div>
                     IVCS
                 </Link>

@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import CheckedIcon from "@/components/ui/checked-icon"
-import RightChevron from "@/components/ui/right-chevron"
+import { CheckCircle, AltArrowRight } from "@solar-icons/react"
 import { CircleIcon } from "lucide-react"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 
@@ -102,7 +101,7 @@ function DropdownMenuCheckboxItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <CheckedIcon size={16} className="size-4" />
+          <CheckCircle size={16} className="size-4" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -219,7 +218,7 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      <RightChevron size={16} className="ml-auto size-4" />
+      <AltArrowRight size={16} className="ml-auto size-4" />
     </DropdownMenuPrimitive.SubTrigger>
   )
 }

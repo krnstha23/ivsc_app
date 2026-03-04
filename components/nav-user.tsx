@@ -1,10 +1,6 @@
 "use client"
 
-import CreditCard from "@/components/ui/credit-card"
-import DotsVerticalIcon from "@/components/ui/dots-vertical-icon"
-import LogoutIcon from "@/components/ui/logout-icon"
-import FilledBellIcon from "@/components/ui/filled-bell-icon"
-import UserIcon from "@/components/ui/user-icon"
+import { MenuDots, UserRounded, Card, Bell, Logout2 } from "@solar-icons/react"
 
 import {
   Avatar,
@@ -57,7 +53,7 @@ export function NavUser({
                   {user.email}
                 </span>
               </div>
-              <DotsVerticalIcon size={16} className="ml-auto size-4" />
+              <MenuDots weight="Bold" size={16} className="ml-auto size-4" style={{ transform: "rotate(90deg)" }} />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -83,21 +79,21 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <UserIcon size={16} className="size-4" />
+                <UserRounded size={16} className="size-4" />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <CreditCard size={16} className="size-4" />
+                <Card size={16} className="size-4" />
                 Billing
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <FilledBellIcon size={16} className="size-4" />
+                <Bell weight="Bold" size={16} className="size-4" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <LogoutIcon size={16} className="size-4" />
+              <Logout2 size={16} className="size-4" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

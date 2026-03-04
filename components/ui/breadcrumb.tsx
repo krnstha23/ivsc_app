@@ -1,6 +1,5 @@
 import * as React from "react"
-import RightChevron from "@/components/ui/right-chevron"
-import DotsHorizontalIcon from "@/components/ui/dots-horizontal-icon"
+import { AltArrowRight, MenuDots } from "@solar-icons/react"
 import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
@@ -76,7 +75,7 @@ function BreadcrumbSeparator({
       className={cn("[&>svg]:size-3.5", className)}
       {...props}
     >
-      {children ?? <RightChevron size={14} className="size-3.5" />}
+      {children ?? <AltArrowRight size={14} className="size-3.5" />}
     </li>
   )
 }
@@ -93,7 +92,7 @@ function BreadcrumbEllipsis({
       className={cn("flex size-9 items-center justify-center", className)}
       {...props}
     >
-      <DotsHorizontalIcon size={16} className="size-4" />
+      <MenuDots weight="Bold" size={16} className="size-4" />
       <span className="sr-only">More</span>
     </span>
   )

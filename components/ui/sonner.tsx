@@ -1,10 +1,6 @@
 "use client"
 
-import CheckedIcon from "@/components/ui/checked-icon"
-import InfoCircleIcon from "@/components/ui/info-circle-icon"
-import RefreshIcon from "@/components/ui/refresh-icon"
-import XIcon from "@/components/ui/x-icon"
-import TriangleAlertIcon from "@/components/ui/triangle-alert-icon"
+import { CheckCircle, InfoCircle, DangerTriangle, CloseCircle, Refresh } from "@solar-icons/react"
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
@@ -16,11 +12,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
-        success: <CheckedIcon size={16} className="size-4" />,
-        info: <InfoCircleIcon size={16} className="size-4" />,
-        warning: <TriangleAlertIcon size={16} className="size-4" />,
-        error: <XIcon size={16} className="size-4" />,
-        loading: <RefreshIcon size={16} className="size-4 animate-spin" />,
+        success: <CheckCircle size={16} className="size-4" />,
+        info: <InfoCircle size={16} className="size-4" />,
+        warning: <DangerTriangle size={16} className="size-4" />,
+        error: <CloseCircle size={16} className="size-4" />,
+        loading: <Refresh size={16} className="size-4 animate-spin" />,
       }}
       style={
         {
