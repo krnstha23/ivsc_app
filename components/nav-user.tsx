@@ -1,12 +1,10 @@
 "use client"
 
-import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconLogout,
-  IconNotification,
-  IconUserCircle,
-} from "@tabler/icons-react"
+import CreditCard from "@/components/ui/credit-card"
+import DotsVerticalIcon from "@/components/ui/dots-vertical-icon"
+import LogoutIcon from "@/components/ui/logout-icon"
+import FilledBellIcon from "@/components/ui/filled-bell-icon"
+import UserIcon from "@/components/ui/user-icon"
 
 import {
   Avatar,
@@ -59,7 +57,7 @@ export function NavUser({
                   {user.email}
                 </span>
               </div>
-              <IconDotsVertical className="ml-auto size-4" />
+              <DotsVerticalIcon size={16} className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -85,21 +83,21 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <IconUserCircle />
+                <UserIcon size={16} className="size-4" />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconCreditCard />
+                <CreditCard size={16} className="size-4" />
                 Billing
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconNotification />
+                <FilledBellIcon size={16} className="size-4" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <IconLogout />
+              <LogoutIcon size={16} className="size-4" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

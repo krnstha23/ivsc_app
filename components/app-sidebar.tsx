@@ -1,181 +1,99 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
+import { useSession } from "next-auth/react";
+import LayoutDashboardIcon from "@/components/ui/layout-dashboard-icon";
+import LayersIcon from "@/components/ui/layers-icon";
+import ShoppingCartIcon from "@/components/ui/shopping-cart-icon";
+import UsersIcon from "@/components/ui/users-icon";
+import AlarmClockPlusIcon from "@/components/ui/alarm-clock-plus-icon";
+
+import { NavMain } from "@/components/nav-main";
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react"
+    Sidebar,
+    SidebarContent,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { filterByRole, type Role } from "@/lib/permissions";
 
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
-
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
+// Single dashboard: admins see all, teachers see teacher pages, users see user pages only.
+const NAV_MAIN = [
+    // Shared (all roles)
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: LayoutDashboardIcon,
+        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
+        title: "Calendar",
+        url: "/calendar",
+        icon: AlarmClockPlusIcon,
+        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
+        title: "Users",
+        url: "/users",
+        icon: UsersIcon,
+        allowedRoles: ["ADMIN"] as Role[],
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
+        title: "Teachers",
+        url: "/teachers",
+        icon: UsersIcon,
+        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
     {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+        title: "Students",
+        url: "/students",
+        icon: ShoppingCartIcon,
+        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+        title: "Packages",
+        url: "/packages",
+        icon: ShoppingCartIcon,
+        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
-}
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
-    </Sidebar>
-  )
+    const { data: session, status } = useSession();
+    const role = (session?.user as { role?: string } | undefined)?.role as
+        | Role
+        | undefined;
+
+    const navMain = React.useMemo(() => filterByRole(NAV_MAIN, role), [role]);
+
+    return (
+        <Sidebar collapsible="offcanvas" {...props}>
+            <SidebarHeader>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            asChild
+                            className="data-[slot=sidebar-menu-button]:p-1.5!"
+                        >
+                            <a href="/dashboard">
+                                <LayersIcon size={20} className="size-5!" />
+                                <span className="text-base font-semibold">
+                                    IVCS
+                                </span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarHeader>
+            <SidebarContent>
+                {status !== "loading" && (
+                    <>
+                        <NavMain items={navMain} />
+                    </>
+                )}
+            </SidebarContent>
+        </Sidebar>
+    );
 }

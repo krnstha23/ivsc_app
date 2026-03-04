@@ -47,7 +47,7 @@ async function main() {
         // 1. Users
         const admin = await tx.user.create({
             data: {
-                username: "admin",
+                userName: "admin",
                 email: "admin@ivcs.local",
                 firstName: "Admin",
                 lastName: "User",
@@ -57,7 +57,7 @@ async function main() {
         });
         const teacher1 = await tx.user.create({
             data: {
-                username: "teacher1",
+                userName: "teacher1",
                 email: "teacher1@ivcs.local",
                 firstName: "Jane",
                 lastName: "Smith",
@@ -67,7 +67,7 @@ async function main() {
         });
         const teacher2 = await tx.user.create({
             data: {
-                username: "teacher2",
+                userName: "teacher2",
                 email: "teacher2@ivcs.local",
                 firstName: "John",
                 lastName: "Doe",
@@ -77,7 +77,7 @@ async function main() {
         });
         const student1 = await tx.user.create({
             data: {
-                username: "student1",
+                userName: "student1",
                 email: "student1@ivcs.local",
                 firstName: "Alex",
                 lastName: "Student",
@@ -87,7 +87,7 @@ async function main() {
         });
         const student2 = await tx.user.create({
             data: {
-                username: "student2",
+                userName: "student2",
                 email: "student2@ivcs.local",
                 firstName: "Sam",
                 lastName: "Learner",
@@ -97,7 +97,7 @@ async function main() {
         });
         const student3 = await tx.user.create({
             data: {
-                username: "student3",
+                userName: "student3",
                 email: "student3@ivcs.local",
                 firstName: "Jordan",
                 lastName: "Pupil",

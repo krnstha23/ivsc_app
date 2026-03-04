@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
  * Used by middleware and merged into the full auth config in auth.ts.
  */
 export const authConfig = {
+  secret: process.env.AUTH_SECRET,
   pages: {
     signIn: '/login',
   },
@@ -14,6 +15,7 @@ export const authConfig = {
       if (user) {
         token.id = user.id
         token.role = (user as { role?: string }).role
+        token.username = (user as { username?: string }).username
       }
       return token
     },
@@ -21,18 +23,21 @@ export const authConfig = {
       if (session.user) {
         (session.user as { id?: string }).id = token.id as string
         ;(session.user as { role?: string }).role = token.role as string
+        ;(session.user as { username?: string }).username = token.username as string
       }
       return session
     },
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl
-      const isDashboardRoute =
-        pathname.startsWith('/admin') ||
-        pathname.startsWith('/teacher') ||
-        pathname.startsWith('/student') ||
-        pathname.startsWith('/dashboard')
+      const isProtectedRoute =
+        pathname.startsWith('/dashboard') ||
+        pathname.startsWith('/users') ||
+        pathname.startsWith('/packages') ||
+        pathname.startsWith('/calendar') ||
+        pathname.startsWith('/students') ||
+        pathname.startsWith('/teachers')
 
-      if (isDashboardRoute && !auth?.user) {
+      if (isProtectedRoute && !auth?.user) {
         return NextResponse.redirect(new URL('/login', request.url))
       }
 

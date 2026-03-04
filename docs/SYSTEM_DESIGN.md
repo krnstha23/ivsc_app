@@ -1,6 +1,6 @@
 # IVCS - System Design Document
 
-> **Last Updated**: February 8, 2026  
+> **Last Updated**: February 21, 2026  
 > **Status**: Phase 1 - Foundation (In Progress)  
 > **Branch**: `adding-db`
 
@@ -208,6 +208,9 @@ User (Student)
 | Database | PostgreSQL                          | Relational data, complex queries, ACID compliance |
 | ORM      | Prisma 7                            | Type-safe queries, migrations, excellent DX       |
 | Auth     | NextAuth.js v5 (Auth.js)            | Free, flexible, native Next.js support            |
+| Icons    | **itshover** (animated icon library) | Motion-first, hover animations; no Tabler/Lucide for UI icons |
+
+**Icons (standard):** The project uses **itshover** ([github.com/itshover/itshover](https://github.com/itshover/itshover)) as the single source for UI icons. All icon components live in `components/ui/` (e.g. `arrow-back-icon.tsx`, `layout-dashboard-icon.tsx`) and are installed via `npx shadcn@latest add https://itshover.com/r/[icon-name].json`. They depend on the `motion` package and use the shared `components/ui/types.ts` (AnimatedIconProps). **Do not introduce Tabler Icons or Lucide for new UI icons**; add or replace with itshover icons only. Existing exceptions (e.g. a single Lucide icon used for a tiny indicator where itshover has no equivalent) should be documented and minimized.
 
 ### 5.2 Folder Structure (Current)
 
@@ -215,38 +218,68 @@ User (Student)
 ivcs-app/
 ├── app/
 │   ├── api/auth/[...nextauth]/route.ts
-│   ├── admin/page.tsx           # Dashboard-01 block (sidebar, charts, table)
-│   ├── dashboard/page.tsx       # Redirect by role → /admin | /teacher | /student
+│   ├── dashboard/
+│   │   ├── layout.tsx           # Shared shell (sidebar, header) for all roles
+│   │   ├── page.tsx             # Single dashboard: cards, chart; Data Table (ADMIN only)
+│   │   └── data.json
 │   ├── login/page.tsx
-│   ├── register/page.tsx       # Placeholder
-│   ├── student/page.tsx        # Placeholder
-│   ├── teacher/page.tsx        # Placeholder
+│   ├── register/page.tsx        # Placeholder
 │   ├── layout.tsx
 │   ├── page.tsx
 │   └── globals.css
 ├── components/
-│   ├── ui/                     # shadcn components (from login-03, dashboard-01)
+│   ├── ui/                      # shadcn components (from login-03, dashboard-01)
 │   ├── login-form.tsx
-│   ├── app-sidebar.tsx, site-header.tsx, nav-*, section-cards, data-table, chart-area-interactive
-│   └── providers.tsx           # SessionProvider
+│   ├── app-sidebar.tsx          # Permission-based nav (filterByRole from lib/permissions)
+│   ├── site-header.tsx, nav-*, section-cards, data-table, chart-area-interactive
+│   └── providers.tsx            # SessionProvider
 ├── lib/
-│   ├── prisma.ts               # Singleton + pg adapter
-│   ├── auth.ts                 # NextAuth + Credentials (username)
-│   ├── auth.config.ts          # Edge-safe config
-│   ├── auth-edge.ts            # Edge auth for proxy
-│   ├── passwords.ts            # hashPassword, verifyPassword
-│   └── utils.ts                # cn()
+│   ├── prisma.ts                # Singleton + pg adapter
+│   ├── auth.ts                  # NextAuth + Credentials (username)
+│   ├── auth.config.ts           # Edge-safe config
+│   ├── auth-edge.ts             # Edge auth for proxy
+│   ├── passwords.ts             # hashPassword, verifyPassword
+│   ├── permissions.ts           # Role, canAccess, filterByRole (nav/section visibility)
+│   └── utils.ts                 # cn()
 ├── prisma/schema.prisma, migrations/
-├── proxy.ts                    # Route protection (Next.js 16; was middleware.ts)
+├── proxy.ts                     # Route protection (Next.js 16; was middleware.ts)
 ├── docs/SYSTEM_DESIGN.md
-└── components.json             # shadcn config
+└── components.json              # shadcn config
 ```
 
-Planned: `(auth)/`, `(dashboard)/` route groups; `actions/auth/register.ts`; role-specific layouts and pages per Phase 2.
+**Dashboard model (Feb 20, 2026):** **Single dashboard** at `/dashboard` for all roles. One app, one layout; only the **sidebar pages** (nav items) differ by role:
+
+- **Admins** see **all pages** (shared + admin + teacher + user).
+- **Teachers** see **only teacher-related pages** (shared + teacher: Dashboard, Analytics, Lifecycle, Availability, My Bookings, Settings, Help, Search).
+- **Users (students)** see **only user-related pages** (shared + user: Dashboard, Analytics, My Bookings, Browse Teachers, My Packages, Settings, Help, Search).
+
+Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar filters items with `filterByRole()`. Sub-routes (e.g. `/dashboard/bookings`) are protected so direct URL access respects the same permissions. No separate `/admin`, `/teacher`, or `/student` pages; all dashboard access is via `/dashboard`.
+
+**Sidebar pages by role (current):**
+
+| Page            | ADMIN | TEACHER | USER (Student) |
+|-----------------|-------|---------|----------------|
+| Dashboard       | ✓     | ✓       | ✓               |
+| Analytics       | ✓     | ✓       | ✓               |
+| Lifecycle       | ✓     | ✓       | —               |
+| Availability    | ✓     | ✓       | —               |
+| My Bookings     | ✓     | ✓       | ✓               |
+| Browse Teachers | ✓     | —       | ✓               |
+| My Packages     | ✓     | —       | ✓               |
+| Team            | ✓     | —       | —               |
+| Projects        | ✓     | —       | —               |
+| Data Library    | ✓     | —       | —               |
+| Reports         | ✓     | —       | —               |
+| Word Assistant  | ✓     | —       | —               |
+| Settings, Help, Search | ✓ | ✓       | ✓               |
+
+**Dashboard home:** Section cards and Chart visible to all; Data Table visible to ADMIN only.
+
+Planned: `(auth)/`, `(dashboard)/` route groups; `actions/auth/register.ts`; additional dashboard pages per Phase 2.
 
 ### 5.3 Database Schema (Prisma)
 
-**Status**: ✅ Implemented (Feb 4, 2026) - Migrations `20260204182111_init`, `20260208000000_add_username_to_users`
+**Status**: ✅ Implemented (Feb 4, 2026) - Migrations `20260204182111_init`, `20260208000000_add_username_to_users`, `20260221000000_rename_username_to_camelcase` (users.userName).
 
 #### Models Overview
 
@@ -275,11 +308,12 @@ Planned: `(auth)/`, `(dashboard)/` route groups; `actions/auth/register.ts`; rol
 
 #### Key Design Decisions
 
-1. **snake_case table names**: All tables use `@@map()` for PostgreSQL convention
-2. **Explicit junction tables**: All many-to-many relationships use explicit junctions for metadata support
-3. **Package-centric model**: Teachers and Students link to Packages (not free-text subjects)
-4. **Enrollment tracking**: StudentEnrollment tracks classes total/used, expiry, status
-5. **Payment at booking level**: Enrollment created only after successful payment
+1. **snake_case table names**: All tables use `@@map()` for PostgreSQL convention (e.g. `users`, `teacher_profiles`).
+2. **camelCase column names**: All table columns use **camelCase** in the database (e.g. `userName`, `passwordHash`, `firstName`, `createdAt`). In Prisma, use the same camelCase field name so the generated client uses the correct column name in queries. New migrations must create columns in camelCase for consistency.
+3. **Explicit junction tables**: All many-to-many relationships use explicit junctions for metadata support
+4. **Package-centric model**: Teachers and Students link to Packages (not free-text subjects)
+5. **Enrollment tracking**: StudentEnrollment tracks classes total/used, expiry, status
+6. **Payment at booking level**: Enrollment created only after successful payment
 
 #### New Tables (Feb 4, 2026)
 
@@ -345,6 +379,7 @@ See `prisma/schema.prisma` for full implementation.
 | ClassMetadata for completed classes  | Separate audit trail from bookings; supports reporting               | 2026-01-31 |
 | firstName/middleName/lastName split  | Better for formal display and search                                 | 2026-01-31 |
 | snake_case for all DB tables         | PostgreSQL naming convention; explicit @@map() on all models         | 2026-02-04 |
+| camelCase for DB column names        | All table columns in camelCase (e.g. userName, passwordHash); use same field name in Prisma so generated client queries match | 2026-02-21 |
 | Explicit junction tables             | All M:M relations use explicit junctions for metadata & control      | 2026-02-04 |
 | PackageBundle for marketing          | Group packages into purchasable bundles with custom pricing          | 2026-02-04 |
 | Package-centric relationships        | Teachers/Students link to Packages, not free-text subjects           | 2026-02-04 |
@@ -353,6 +388,8 @@ See `prisma/schema.prisma` for full implementation.
 | Keep Package.subjects as String[]    | Describes topics within a package; doesn't need relational integrity | 2026-02-04 |
 | Username for login (User.username)    | Login credential is username (unique); email kept for account/notifications | 2026-02-08 |
 | Next.js 16 proxy convention           | Use `proxy.ts` instead of deprecated `middleware.ts` for route protection | 2026-02-08 |
+| Single dashboard, role-based nav only | One dashboard at `/dashboard` for all roles; admins see all sidebar pages, teachers only teacher-related, users only user-related (lib/permissions.ts); no separate /admin, /teacher, /student pages | 2026-02-20 |
+| Use itshover for all UI icons          | Single icon library: itshover (animated, motion/react). Icons in `components/ui/*-icon.tsx`; add via shadcn CLI. No Tabler/Lucide for new icons. Keeps UX consistent and avoids mixing icon sets. | 2026-02-21 |
 
 ### 6.2 Pending Decisions
 
@@ -426,7 +463,7 @@ See `prisma/schema.prisma` for full implementation.
   - [x] `lib/passwords.ts` - bcrypt hash/verify
 - [x] Auth API: `app/api/auth/[...nextauth]/route.ts`
 - [x] Route protection: **`proxy.ts`** (Next.js 16 convention; middleware deprecated)
-  - Protects `/dashboard`, `/admin`, `/teacher`, `/student`; redirects unauthenticated to `/login`
+  - Protects `/dashboard`; redirects unauthenticated to `/login`
 - [ ] RBAC helpers (optional; role in session for now)
 
 **1.3 User Registration & Onboarding**
@@ -441,11 +478,12 @@ See `prisma/schema.prisma` for full implementation.
   - [x] Error handling (invalid credentials)
   - [x] SessionProvider (`components/providers.tsx`) for client-side signIn
   - [ ] "Remember me" (deferred)
-- [x] Post-login redirect: `/dashboard` → redirect by role to `/admin`, `/teacher`, or `/student`
+- [x] Post-login: all roles land on `/dashboard`. Single dashboard; sidebar nav filtered by role (`lib/permissions.ts`); no separate admin/teacher/student pages
 
 **1.4 Core UI Components** (partial – shadcn blocks added Feb 8, 2026)
 - [x] Design system foundation (shadcn/ui initialized + login-03 + dashboard-01 blocks)
   - [x] `components/ui/` – button, input, card, label, separator, field, sheet, tooltip, skeleton, breadcrumb, select, tabs, table, toggle, badge, checkbox, dropdown-menu, drawer, avatar, sonner, sidebar, chart, toggle-group
+  - [x] **Icons:** itshover only – all UI icons in `components/ui/*-icon.tsx` and `*chevron*.tsx`, `credit-card.tsx`; add via `npx shadcn@latest add https://itshover.com/r/<icon-name>.json`. Use these instead of Tabler/Lucide for any new or replacement icons.
   - [x] `lib/utils.ts` – `cn()` (clsx + tailwind-merge); `tw-animate-css` for animations
 - [x] Login/dashboard blocks: `components/login-form.tsx`, `components/app-sidebar.tsx`, `components/site-header.tsx`, section-cards, data-table, chart-area-interactive, nav-*
 - [ ] Layout components (layout/navbar, layout/footer – optional; sidebar from dashboard block)
@@ -505,8 +543,8 @@ See `prisma/schema.prisma` for full implementation.
 ### Phase 3: Admin & Packages
 
 **3.1 Admin Dashboard**
-- [x] Admin dashboard page (Feb 8, 2026): `app/admin/page.tsx` – dashboard-01 block (sidebar, section cards, chart, data table)
-- [ ] Admin layout (optional wrapper): `app/(dashboard)/admin/layout.tsx`
+- [x] Single dashboard (Feb 20, 2026): `app/dashboard/` – shared layout and page for all roles; sidebar filtered by `lib/permissions.ts`; Data Table visible to ADMIN only; no `app/admin`, `app/teacher`, or `app/student` pages
+- [ ] Admin-only pages (future): e.g. `app/(dashboard)/admin/users/page.tsx` when needed
 - [ ] User management
   - [ ] `app/(dashboard)/admin/users/page.tsx`
   - [ ] List all users with role filter
@@ -689,14 +727,17 @@ components/login-form.tsx # Username + password, signIn('credentials')
 ```
 Login:
   Form (username + password) → signIn('credentials') → Find User by username → Verify Password
-  → JWT → Redirect to /dashboard → Server redirect by role to /admin | /teacher | /student
+  → JWT → Redirect to /dashboard
 
 Route Protection:
   Request → proxy.ts (auth from lib/auth-edge) → Check session → Allow or Redirect to /login
-  Protected paths: /dashboard, /admin, /teacher, /student
+  Protected paths: /dashboard (and /dashboard/*)
 
-Role-based Redirect:
-  /dashboard page reads session.role → redirects ADMIN → /admin, TEACHER → /teacher, USER → /student
+Dashboard (single, permission-based):
+  All roles land on /dashboard. app/dashboard/layout.tsx provides shared shell (sidebar, header).
+  app/dashboard/page.tsx renders cards + chart for all; Data Table section only for ADMIN (canAccess).
+  AppSidebar uses useSession().role and filterByRole() from lib/permissions to show only allowed nav items.
+  No separate /admin, /teacher, or /student routes.
 ```
 
 **Key implementation details:**
@@ -718,7 +759,7 @@ Role-based Redirect:
    - Return user object (id, email, name, role) for JWT
 
 4. **Proxy** (`proxy.ts` – Next.js 16 convention; `middleware.ts` is deprecated):
-   - Protect: `/dashboard`, `/admin/*`, `/teacher/*`, `/student/*`
+   - Protect: `/dashboard` and `/dashboard/*`
    - Redirect unauthenticated users to `/login`
    - Uses `lib/auth-edge.ts` (edge-safe; no Prisma) to avoid loading Node-only code in Edge
 
@@ -743,6 +784,12 @@ Role-based Redirect:
 npx shadcn@latest init
 npx shadcn@latest add button input label card form toast dialog select table
 ```
+
+**Icons:** Use **itshover** only. Add icons with:
+```bash
+npx shadcn@latest add https://itshover.com/r/<icon-name>.json
+```
+Example: `arrow-back-icon`, `layout-dashboard-icon`, `filter-icon`. Icons live in `components/ui/` and require the `motion` package. Do not add Tabler Icons or Lucide for UI; use itshover for all new and replacement icons.
 
 **Minimum components needed:**
 | Component | Usage |
@@ -898,3 +945,7 @@ app/
 | 2026-02-08 | shadcn init + login-03 + dashboard-01 blocks; lib/utils.ts, tw-animate-css; register placeholder page | -      |
 | 2026-02-08 | Prisma client uses pg adapter (Pool + PrismaPg) for Prisma 7 compatibility | -      |
 | 2026-02-08 | Doc updated: planning, folder structure, Phase 1.2/1.3/1.4 status, proxy convention | -      |
+| 2026-02-20 | Single dashboard: one app at /dashboard; admins see all sidebar pages, teachers only teacher-related, users only user-related; lib/permissions.ts; sub-route placeholders + role check; doc updated | -      |
+| 2026-02-20 | Removed app/admin, app/teacher, app/student pages; auth protects only /dashboard | -      |
+| 2026-02-21 | Icons: standardised on itshover only; all UI icons from components/ui (itshover); design doc and Phase 1.4 / Step 3 updated to always use new icons | -      |
+| 2026-02-21 | DB: users.userName (camelCase); Prisma model field renamed to userName so generated client uses correct column; SYSTEM_DESIGN.md: all columns camelCase | -      |

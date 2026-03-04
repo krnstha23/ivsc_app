@@ -1,10 +1,10 @@
 import bcrypt from "bcryptjs";
 
-const SALT_ROUNDS = 20;
+const SALT_ROUNDS = 10;
 
 /**
  * Hash a plain text password for storage.
- * Uses bcrypt with 20 salt rounds.
+ * Uses bcrypt with 10 salt rounds (balance of security and login speed).
  */
 export async function hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, SALT_ROUNDS);
