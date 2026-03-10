@@ -1,8 +1,8 @@
 # IVCS - System Design Document
 
-> **Last Updated**: February 21, 2026  
-> **Status**: Phase 1 - Foundation (In Progress)  
-> **Branch**: `adding-db`
+> **Last Updated**: March 4, 2026  
+> **Status**: Phase 1 Complete, Phase 2–3 In Progress  
+> **Branch**: `main`
 
 ---
 
@@ -165,19 +165,21 @@ User (Student)
 6. Availability visible to users
 ```
 
-### 4.2 User Booking Flow
+### 4.2 User Booking Flow (Package-First)
 
 ```
-1. User logs in
-2. Browse teachers (filter by subject, availability)
-3. View teacher's available slots
-4. Select desired slot
-5. Confirm booking details
-6. Submit booking request
-7. System checks for conflicts
-8. If available: Create booking (PENDING or CONFIRMED)
-9. Notify teacher of new booking
-10. Notify user of confirmation
+1. User (student) logs in
+2. Browse packages (filter by price, teacher)
+3. Select a package
+4. View available time slots (predetermined by teacher's manual availability input)
+5. Select desired slot
+6. Confirm booking details
+7. Submit booking request
+8. System checks for conflicts
+9. If available: Create booking (PENDING or CONFIRMED)
+10. Deduct from student's enrolled package (classesUsed++)
+11. Notify teacher of new booking
+12. Notify student of confirmation
 ```
 
 ### 4.3 Admin Timetable Management
@@ -208,9 +210,10 @@ User (Student)
 | Database | PostgreSQL                          | Relational data, complex queries, ACID compliance |
 | ORM      | Prisma 7                            | Type-safe queries, migrations, excellent DX       |
 | Auth     | NextAuth.js v5 (Auth.js)            | Free, flexible, native Next.js support            |
-| Icons    | **itshover** (animated icon library) | Motion-first, hover animations; no Tabler/Lucide for UI icons |
+| Icons    | **@solar-icons/react** (Solar icon set) | Static, clean, consistent; imported as named React components |
+| Validation | **Zod v4**                            | Schema-based validation on all server actions; type-safe parsed output |
 
-**Icons (standard):** The project uses **itshover** ([github.com/itshover/itshover](https://github.com/itshover/itshover)) as the single source for UI icons. All icon components live in `components/ui/` (e.g. `arrow-back-icon.tsx`, `layout-dashboard-icon.tsx`) and are installed via `npx shadcn@latest add https://itshover.com/r/[icon-name].json`. They depend on the `motion` package and use the shared `components/ui/types.ts` (AnimatedIconProps). **Do not introduce Tabler Icons or Lucide for new UI icons**; add or replace with itshover icons only. Existing exceptions (e.g. a single Lucide icon used for a tiny indicator where itshover has no equivalent) should be documented and minimized.
+**Icons (standard):** The project uses **@solar-icons/react** as the single source for UI icons. Icons are imported directly as named components: `import { Widget4 } from '@solar-icons/react'` and rendered with `<Widget4 size={16} />`. The `weight` prop controls style variant (e.g. `weight="Bold"`). No wrapper files — import from `@solar-icons/react` directly in each consumer. **Do not introduce Tabler Icons or Lucide for new UI icons.**
 
 ### 5.2 Folder Structure (Current)
 
@@ -218,33 +221,55 @@ User (Student)
 ivcs-app/
 ├── app/
 │   ├── api/auth/[...nextauth]/route.ts
-│   ├── dashboard/
-│   │   ├── layout.tsx           # Shared shell (sidebar, header) for all roles
-│   │   ├── page.tsx             # Single dashboard: cards, chart; Data Table (ADMIN only)
-│   │   └── data.json
+│   ├── (app)/                       # Protected app shell (sidebar + header)
+│   │   ├── layout.tsx               # Auth check, SidebarProvider, SiteHeader
+│   │   ├── loading.tsx              # Skeleton loading state
+│   │   ├── error.tsx                # Error boundary with retry
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx             # Section cards for all roles
+│   │   │   └── [...slug]/page.tsx   # Placeholder sub-routes with role check
+│   │   ├── users/
+│   │   │   ├── page.tsx             # ADMIN: user list with filters
+│   │   │   ├── new/page.tsx         # ADMIN: create user form
+│   │   │   └── actions.ts           # createUser (Zod-validated, ADMIN-only)
+│   │   ├── teachers/
+│   │   │   ├── page.tsx             # Calendar + availability management
+│   │   │   └── actions.ts           # createAvailability, getTeacherAvailability*
+│   │   ├── students/page.tsx        # Calendar view
+│   │   ├── packages/page.tsx        # Package list with filters
+│   │   └── calendar/page.tsx        # Calendar view
 │   ├── login/page.tsx
-│   ├── register/page.tsx        # Placeholder
+│   ├── register/
+│   │   ├── page.tsx                 # Multi-step registration form
+│   │   └── actions.ts               # createAccount (Zod-validated)
 │   ├── layout.tsx
 │   ├── page.tsx
 │   └── globals.css
 ├── components/
-│   ├── ui/                      # shadcn components (from login-03, dashboard-01)
-│   ├── login-form.tsx
-│   ├── app-sidebar.tsx          # Permission-based nav (filterByRole from lib/permissions)
-│   ├── site-header.tsx, nav-*, section-cards, data-table, chart-area-interactive
-│   └── providers.tsx            # SessionProvider
+│   ├── ui/                          # shadcn primitives (no icon wrappers)
+│   ├── app-sidebar.tsx              # Permission-based nav (filterByRole)
+│   ├── site-header.tsx, nav-main, nav-user
+│   ├── register-form.tsx            # Multi-step: details → user type → password
+│   ├── create-user-form.tsx         # Admin create user form
+│   ├── calendar.tsx, calendar-week-view.tsx
+│   ├── teachers-calendar-with-popup.tsx, teachers-slot-form-dialog.tsx
+│   ├── header-user-menu.tsx, theme-toggle.tsx
+│   ├── logout-confirm-context.tsx, back-button-logout-handler.tsx
+│   ├── packages-header-with-filter.tsx, users-header-with-filter.tsx
+│   └── providers.tsx                # SessionProvider
 ├── lib/
-│   ├── prisma.ts                # Singleton + pg adapter
-│   ├── auth.ts                  # NextAuth + Credentials (username)
-│   ├── auth.config.ts           # Edge-safe config
-│   ├── auth-edge.ts             # Edge auth for proxy
-│   ├── passwords.ts             # hashPassword, verifyPassword
-│   ├── permissions.ts           # Role, canAccess, filterByRole (nav/section visibility)
-│   └── utils.ts                 # cn()
+│   ├── prisma.ts                    # Singleton + pg adapter
+│   ├── auth.ts                      # NextAuth + Credentials (username)
+│   ├── auth.config.ts               # Edge-safe config
+│   ├── auth-edge.ts                 # Edge auth for proxy
+│   ├── passwords.ts                 # hashPassword, verifyPassword
+│   ├── permissions.ts               # Role, canAccess, filterByRole
+│   ├── validations.ts               # Zod schemas for all server actions
+│   └── utils.ts                     # cn()
 ├── prisma/schema.prisma, migrations/
-├── proxy.ts                     # Route protection (Next.js 16; was middleware.ts)
+├── proxy.ts                         # Route protection (Next.js 16)
 ├── docs/SYSTEM_DESIGN.md
-└── components.json              # shadcn config
+└── components.json
 ```
 
 **Dashboard model (Feb 20, 2026):** **Single dashboard** at `/dashboard` for all roles. One app, one layout; only the **sidebar pages** (nav items) differ by role:
@@ -255,27 +280,20 @@ ivcs-app/
 
 Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar filters items with `filterByRole()`. Sub-routes (e.g. `/dashboard/bookings`) are protected so direct URL access respects the same permissions. No separate `/admin`, `/teacher`, or `/student` pages; all dashboard access is via `/dashboard`.
 
-**Sidebar pages by role (current):**
+**Sidebar pages by role (current — implemented):**
 
-| Page            | ADMIN | TEACHER | USER (Student) |
-|-----------------|-------|---------|----------------|
-| Dashboard       | ✓     | ✓       | ✓               |
-| Analytics       | ✓     | ✓       | ✓               |
-| Lifecycle       | ✓     | ✓       | —               |
-| Availability    | ✓     | ✓       | —               |
-| My Bookings     | ✓     | ✓       | ✓               |
-| Browse Teachers | ✓     | —       | ✓               |
-| My Packages     | ✓     | —       | ✓               |
-| Team            | ✓     | —       | —               |
-| Projects        | ✓     | —       | —               |
-| Data Library    | ✓     | —       | —               |
-| Reports         | ✓     | —       | —               |
-| Word Assistant  | ✓     | —       | —               |
-| Settings, Help, Search | ✓ | ✓       | ✓               |
+| Page       | Route        | ADMIN | TEACHER | USER (Student) |
+|------------|--------------|-------|---------|----------------|
+| Dashboard  | /dashboard   | ✓     | ✓       | ✓               |
+| Calendar   | /calendar    | ✓     | ✓       | ✓               |
+| Users      | /users       | ✓     | —       | —               |
+| Teachers   | /teachers    | ✓     | ✓       | ✓               |
+| Students   | /students    | ✓     | ✓       | ✓               |
+| Packages   | /packages    | ✓     | ✓       | ✓               |
 
-**Dashboard home:** Section cards and Chart visible to all; Data Table visible to ADMIN only.
+**Dashboard home:** Section cards visible to all roles.
 
-Planned: `(auth)/`, `(dashboard)/` route groups; `actions/auth/register.ts`; additional dashboard pages per Phase 2.
+**Route protection:** The `app/(app)/layout.tsx` enforces authentication. Pages with restricted access (e.g. `/users`) add role checks via `canAccess()`. Server actions also enforce their own role checks independently of pages.
 
 ### 5.3 Database Schema (Prisma)
 
@@ -289,11 +307,10 @@ Planned: `(auth)/`, `(dashboard)/` route groups; `actions/auth/register.ts`; add
 | `StudentProfile` | `student_profiles` | Extended student info, linked to enrollments |
 | `TeacherProfile` | `teacher_profiles` | Extended teacher info: bio, availability |
 | `Availability` | `availabilities` | Date-specific time slots teachers mark as available |
-| `Package` | `packages` | Purchasable class packages with pricing and subjects |
+| `Package` | `packages` | Purchasable class packages with pricing |
 | `Booking` | `bookings` | Scheduled sessions, links User → Teacher → Availability |
 | `ClassMetadata` | `class_metadata` | Completed class records for history/reporting |
-| `PackageBundle` | `package_bundles` | Marketing bundles grouping multiple packages |
-| `PackageBundleItem` | `package_bundle_items` | Junction: Bundle ↔ Package with display order |
+| `PackageBundle` | `package_bundles` | Marketing bundles grouping multiple packages (stores membership via `packageIds[]`) |
 | `StudentEnrollment` | `student_enrollments` | Junction: Student ↔ Package with enrollment tracking |
 | `TeacherPackage` | `teacher_packages` | Junction: Teacher ↔ Package assignment |
 
@@ -310,7 +327,7 @@ Planned: `(auth)/`, `(dashboard)/` route groups; `actions/auth/register.ts`; add
 
 1. **snake_case table names**: All tables use `@@map()` for PostgreSQL convention (e.g. `users`, `teacher_profiles`).
 2. **camelCase column names**: All table columns use **camelCase** in the database (e.g. `userName`, `passwordHash`, `firstName`, `createdAt`). In Prisma, use the same camelCase field name so the generated client uses the correct column name in queries. New migrations must create columns in camelCase for consistency.
-3. **Explicit junction tables**: All many-to-many relationships use explicit junctions for metadata support
+3. **Explicit junction tables**: Most many-to-many relationships use explicit junctions for metadata support (e.g. TeacherPackage, StudentEnrollment). Bundles store package membership via `packageIds[]`.
 4. **Package-centric model**: Teachers and Students link to Packages (not free-text subjects)
 5. **Enrollment tracking**: StudentEnrollment tracks classes total/used, expiry, status
 6. **Payment at booking level**: Enrollment created only after successful payment
@@ -321,13 +338,7 @@ Planned: `(auth)/`, `(dashboard)/` route groups; `actions/auth/register.ts`; add
 ```
 id, name, description, price, discountPercent,
 isActive, isFeatured, validFrom, validUntil,
-createdAt, updatedAt
-```
-
-**PackageBundleItem** - Bundle ↔ Package junction
-```
-id, bundleId, packageId, displayOrder, customPrice, createdAt
-@@unique([bundleId, packageId])
+packageIds[], createdAt, updatedAt
 ```
 
 **StudentEnrollment** - Student ↔ Package junction
@@ -385,11 +396,14 @@ See `prisma/schema.prisma` for full implementation.
 | Package-centric relationships        | Teachers/Students link to Packages, not free-text subjects           | 2026-02-04 |
 | paymentId on Enrollment (not amount) | Links enrollment to payment record; amount tracked in Transaction table | 2026-02-04 |
 | No expiration on packages            | Packages don't expire; removed expiresAt and EXPIRED status              | 2026-02-04 |
-| Keep Package.subjects as String[]    | Describes topics within a package; doesn't need relational integrity | 2026-02-04 |
+| Remove Package.subjects              | Simplify packages; remove array field and related UI/filtering       | 2026-03-04 |
 | Username for login (User.username)    | Login credential is username (unique); email kept for account/notifications | 2026-02-08 |
 | Next.js 16 proxy convention           | Use `proxy.ts` instead of deprecated `middleware.ts` for route protection | 2026-02-08 |
 | Single dashboard, role-based nav only | One dashboard at `/dashboard` for all roles; admins see all sidebar pages, teachers only teacher-related, users only user-related (lib/permissions.ts); no separate /admin, /teacher, /student pages | 2026-02-20 |
-| Use itshover for all UI icons          | Single icon library: itshover (animated, motion/react). Icons in `components/ui/*-icon.tsx`; add via shadcn CLI. No Tabler/Lucide for new icons. Keeps UX consistent and avoids mixing icon sets. | 2026-02-21 |
+| Use @solar-icons/react for all UI icons | Replaced animated itshover wrappers with static Solar icons. Named imports directly in consumers (`import { Widget4 } from '@solar-icons/react'`). No wrapper files, no animation overhead. | 2026-03-04 |
+| Package-first booking flow              | Students select packages (not teachers) → view teacher-predetermined availability → book. Packages are the entry point, tied to teachers via TeacherPackage. | 2026-03-04 |
+| Zod validation on all server actions    | Server actions are public endpoints; manual string checks are fragile. Zod schemas provide format validation, type safety, and composable error reporting. | 2026-03-04 |
+| Role guards on server actions           | Page-level guards protect UI, but actions are callable directly. `createUser` now checks ADMIN role; `createAvailability` checks TEACHER role. | 2026-03-04 |
 
 ### 6.2 Pending Decisions
 
@@ -466,13 +480,13 @@ See `prisma/schema.prisma` for full implementation.
   - Protects `/dashboard`; redirects unauthenticated to `/login`
 - [ ] RBAC helpers (optional; role in session for now)
 
-**1.3 User Registration & Onboarding**
-- [ ] Registration flow (full)
-  - [x] `app/register/page.tsx` - **Placeholder** (link from login)
-  - [ ] Registration form + server action: `actions/auth/register.ts`
-  - [ ] Username + email validation (format + uniqueness)
-  - [ ] Password strength requirements
-  - [ ] Auto-create StudentProfile for USER role
+**1.3 User Registration & Onboarding** ✅ (Mar 2026)
+- [x] Registration flow (full)
+  - [x] `app/register/page.tsx` - Multi-step form (details → user type → password)
+  - [x] `app/register/actions.ts` - `createAccount` server action (Zod-validated)
+  - [x] Username + email validation (format + uniqueness via Zod + DB check)
+  - [x] Password strength requirements (min 8 chars via Zod)
+  - [x] Auto-create StudentProfile for USER role, TeacherProfile for TEACHER
 - [x] Login flow
   - [x] `app/login/page.tsx` - Login form (shadcn login-03 block, wired to username + signIn)
   - [x] Error handling (invalid credentials)
@@ -480,95 +494,70 @@ See `prisma/schema.prisma` for full implementation.
   - [ ] "Remember me" (deferred)
 - [x] Post-login: all roles land on `/dashboard`. Single dashboard; sidebar nav filtered by role (`lib/permissions.ts`); no separate admin/teacher/student pages
 
-**1.4 Core UI Components** (partial – shadcn blocks added Feb 8, 2026)
+**1.4 Core UI Components** ✅ (Mar 2026)
 - [x] Design system foundation (shadcn/ui initialized + login-03 + dashboard-01 blocks)
-  - [x] `components/ui/` – button, input, card, label, separator, field, sheet, tooltip, skeleton, breadcrumb, select, tabs, table, toggle, badge, checkbox, dropdown-menu, drawer, avatar, sonner, sidebar, chart, toggle-group
-  - [x] **Icons:** itshover only – all UI icons in `components/ui/*-icon.tsx` and `*chevron*.tsx`, `credit-card.tsx`; add via `npx shadcn@latest add https://itshover.com/r/<icon-name>.json`. Use these instead of Tabler/Lucide for any new or replacement icons.
+  - [x] `components/ui/` – button, input, card, label, separator, field, sheet, tooltip, skeleton, breadcrumb, select, tabs, table, toggle, badge, checkbox, dropdown-menu, drawer, avatar, sonner, sidebar, chart, toggle-group, dialog
+  - [x] **Icons:** `@solar-icons/react` — imported directly as named components; no wrapper files
   - [x] `lib/utils.ts` – `cn()` (clsx + tailwind-merge); `tw-animate-css` for animations
-- [x] Login/dashboard blocks: `components/login-form.tsx`, `components/app-sidebar.tsx`, `components/site-header.tsx`, section-cards, data-table, chart-area-interactive, nav-*
-- [ ] Layout components (layout/navbar, layout/footer – optional; sidebar from dashboard block)
-- [ ] Form components (form-field, form-error – optional; Field from shadcn used in login)
+  - [x] `lib/validations.ts` – Zod schemas for all server actions
+- [x] Login/dashboard blocks, sidebar, header, section-cards, nav-*, calendar components
+- [x] Loading skeleton (`app/(app)/loading.tsx`) and error boundary (`app/(app)/error.tsx`)
+- [x] Logout confirmation dialog, back-button handler, theme toggle, header user menu
 
 ---
 
 ### Phase 2: Core Features
 
-**2.1 Teacher Management**
-- [ ] Teacher dashboard layout
-  - [ ] `app/(dashboard)/teacher/layout.tsx`
-  - [ ] `app/(dashboard)/teacher/page.tsx` - Overview/stats
-- [ ] Profile management
-  - [ ] `app/(dashboard)/teacher/profile/page.tsx`
-  - [ ] Edit bio, subjects, contact info
-  - [ ] Profile completion indicator
-- [ ] Availability management (CRITICAL)
-  - [ ] `app/(dashboard)/teacher/availability/page.tsx`
-  - [ ] Calendar interface for setting available slots
-  - [ ] Bulk slot creation (e.g., "every Monday 9-5")
-  - [ ] Individual date slot management
-  - [ ] Visual conflict detection
-  - [ ] Server actions: `actions/availability/*.ts`
+**2.1 Teacher Availability Management** (partially built)
+- [x] Calendar-based availability input (`app/(app)/teachers/page.tsx`)
+  - [x] `TeachersCalendarWithPopup` – calendar with slot count badges, click to add
+  - [x] `TeachersSlotFormDialog` – pick date, duration, time to create availability
+  - [x] `TeacherDayAvailabilityDialog` – 24hr timeline view of a day's slots
+  - [x] Server actions (Zod-validated): `createAvailability`, `getTeacherAvailabilityForMonth`, `getTeacherAvailabilityForDay`
+- [ ] Profile management (edit bio, subjects, hourly rate)
+- [ ] Bulk slot creation (e.g., "every Monday 9–5")
+- [ ] Visual conflict detection (overlapping slots)
+- [ ] Delete/edit existing availability slots
 
 **2.2 Student Features**
-- [ ] Student dashboard
-  - [ ] `app/(dashboard)/student/layout.tsx`
-  - [ ] `app/(dashboard)/student/page.tsx` - Upcoming classes, quick actions
-- [ ] Browse teachers
-  - [ ] `app/(dashboard)/student/browse/page.tsx`
-  - [ ] Filter by subject, availability, rating
-  - [ ] Teacher cards with key info
-  - [ ] Search functionality
-- [ ] View teacher profile & availability
-  - [ ] `app/(dashboard)/student/teachers/[id]/page.tsx`
-  - [ ] Calendar view of available slots
-  - [ ] Teacher bio, subjects, reviews
+- [x] Students page with calendar (`app/(app)/students/page.tsx`) – placeholder
+- [x] Browse packages (package list with filters on `/packages`)
+- [x] View package details + available slots (from teacher availability) – `/packages/[id]` with booking section
+- [ ] Student profile / enrolled packages view
 
-**2.3 Booking System (CORE)**
-- [ ] Booking flow
-  - [ ] Select slot → Confirm details → Submit
-  - [ ] Real-time availability check (optimistic locking)
-  - [ ] Server action with transaction: `actions/booking/create.ts`
+**2.3 Booking System (CORE — package-first)**
+- [x] Booking flow (package-first):
+  - [x] Student browses packages → sees available slots (predetermined by teacher) → books
+  - [x] Server action with transaction: create booking + deduct classesUsed on enrollment
+  - [ ] Real-time availability check (optimistic locking; currently re-fetch after book)
 - [ ] Booking management
-  - [ ] `app/(dashboard)/student/bookings/page.tsx`
-  - [ ] List: Upcoming, Past, Cancelled
+  - [ ] Student bookings page: Upcoming, Past, Cancelled
   - [ ] Cancel booking (with policy enforcement)
   - [ ] Reschedule booking
 - [ ] Teacher booking view
-  - [ ] `app/(dashboard)/teacher/bookings/page.tsx`
+  - [ ] View assigned bookings
   - [ ] Accept/decline pending bookings
-  - [ ] View student details
 
 ---
 
 ### Phase 3: Admin & Packages
 
-**3.1 Admin Dashboard**
-- [x] Single dashboard (Feb 20, 2026): `app/dashboard/` – shared layout and page for all roles; sidebar filtered by `lib/permissions.ts`; Data Table visible to ADMIN only; no `app/admin`, `app/teacher`, or `app/student` pages
-- [ ] Admin-only pages (future): e.g. `app/(dashboard)/admin/users/page.tsx` when needed
-- [ ] User management
-  - [ ] `app/(dashboard)/admin/users/page.tsx`
-  - [ ] List all users with role filter
-  - [ ] Activate/deactivate accounts
+**3.1 Admin Dashboard** (partially built)
+- [x] Single dashboard: `app/(app)/dashboard/` – shared layout for all roles
+- [x] User management (`app/(app)/users/`)
+  - [x] List all users with filter by name, username, role, active status
+  - [x] Create user form (`/users/new`) with Zod-validated server action + ADMIN role guard
+  - [ ] Edit/activate/deactivate accounts
   - [ ] Change user roles
-  - [ ] Create teacher accounts
-- [ ] Teacher management
-  - [ ] `app/(dashboard)/admin/teachers/page.tsx`
-  - [ ] Approve new teachers
-  - [ ] View/edit teacher profiles
-  - [ ] Manage teacher subjects
+- [ ] Teacher management (approve, edit profiles, assign packages)
 
-**3.2 Package Management**
-- [ ] Package CRUD
-  - [ ] `app/(dashboard)/admin/packages/page.tsx`
-  - [ ] Create/edit packages (name, price, subjects, description)
-  - [ ] Activate/deactivate packages
+**3.2 Package Management** (partially built)
+- [x] Package listing (`app/(app)/packages/page.tsx`) with filter by name, active status
+- [x] Package CRUD (create/edit/deactivate) – `/packages/new`, `/packages/[id]/edit`, delete in table
 - [ ] Student package assignment
   - [ ] Assign packages to students
   - [ ] Track package usage/remaining classes
-- [ ] Package purchase flow (student-facing)
-  - [ ] `app/(dashboard)/student/packages/page.tsx`
-  - [ ] View available packages
-  - [ ] Purchase interface (Stripe integration placeholder)
+- [ ] Package purchase flow (student-facing with Stripe placeholder)
 
 **3.3 Timetable View**
 - [ ] Master calendar
@@ -603,12 +592,12 @@ See `prisma/schema.prisma` for full implementation.
   - [ ] Payment history
 
 **4.3 UX Polish**
-- [ ] Loading states & skeletons
-- [ ] Error boundaries
+- [x] Loading states & skeletons (`app/(app)/loading.tsx`)
+- [x] Error boundaries (`app/(app)/error.tsx`)
+- [x] Dark mode (theme toggle in header + sidebar)
 - [ ] Empty states with CTAs
 - [ ] Mobile-responsive design audit
 - [ ] Accessibility audit (WCAG 2.1 AA)
-- [ ] Dark mode (optional)
 
 **4.4 Performance & Security**
 - [ ] API rate limiting
@@ -905,15 +894,24 @@ app/
 | 0 | Database schema | ✅ Done | - |
 | 1 | Prisma client | ✅ Done | Database |
 | 2 | Authentication (lib, API, proxy, login UI, role redirect) | ✅ Done | Prisma client |
-| 3 | UI components (shadcn init + login-03 + dashboard-01 blocks) | ✅ Done | - |
-| 4 | Dashboard layouts (admin = dashboard-01; teacher/student placeholders) | ✅ Partial | Auth + UI |
-| 5 | Core features (registration action, teacher/student/admin features) | ⏳ Pending | Dashboards |
+| 3 | UI components (shadcn init + blocks + Solar icons) | ✅ Done | - |
+| 4 | Registration flow (multi-step form + server action) | ✅ Done | Auth + UI |
+| 5 | Dashboard layouts (`app/(app)/` route group, sidebar, header) | ✅ Done | Auth + UI |
+| 6 | Admin user management (list, create, filters) | ✅ Done | Dashboards |
+| 7 | Teacher availability (calendar, slot creation, day view) | ✅ Partial | Dashboards |
+| 8 | Package listing (list, filters) | ✅ Partial | Dashboards |
+| 9 | Zod validation + loading/error states + role guards on actions | ✅ Done | All above |
+| 10 | **Booking system (package-first flow)** | ✅ Done | Availability + Packages |
+| 11 | Profile management (teacher/student) | ⏳ Pending | Auth |
+| 12 | Package CRUD + enrollment + purchase | ✅ Partial (CRUD done) | Packages |
 
-### Next on the plan (Feb 8, 2026)
+### Next on the plan (Mar 10, 2026)
 
-1. **Registration flow**: Full `app/register` form + `actions/auth/register.ts` (username, email, password; create User + StudentProfile; redirect to login).
-2. **Dashboard layouts**: Optional `(dashboard)` route group and role-specific sidebars; admin already uses dashboard-01 sidebar.
-3. **Core features**: Teacher (profile, availability, bookings), Student (browse, bookings, packages), Admin (users, teachers, packages, timetable) per Phase 2–3.
+1. ~~**Booking system (package-first)**~~ ✅ Done: Package detail page `/packages/[id]` with slot list and `createBooking` (transaction: booking + deduct enrollment). Students click package name to view & book.
+2. **Package CRUD**: Admin create/edit/deactivate done. Assign teachers to packages (TeacherPackage) – UI pending.
+3. **Profile management**: Teachers edit bio; students view enrolled packages and class usage.
+4. **Edit/delete availability**: Teachers can modify or remove existing availability slots.
+5. **User management completion**: Edit/deactivate users, change roles.
 
 ---
 
@@ -926,7 +924,7 @@ app/
 | 2026-02-04 | Updated roadmap with detailed implementation phases        | -      |
 | 2026-02-04 | Documented schema evolution and design decisions           | -      |
 | 2026-02-04 | Added snake_case table naming convention (@@map)           | -      |
-| 2026-02-04 | Added PackageBundle, PackageBundleItem models              | -      |
+| 2026-02-04 | Added PackageBundle models                                 | -      |
 | 2026-02-04 | Added StudentEnrollment model (replaces subjects/packageId)| -      |
 | 2026-02-04 | Added TeacherPackage model (replaces subjects)             | -      |
 | 2026-02-04 | Removed amountPaid/expiresAt from StudentEnrollment        | -      |
@@ -948,4 +946,5 @@ app/
 | 2026-02-20 | Single dashboard: one app at /dashboard; admins see all sidebar pages, teachers only teacher-related, users only user-related; lib/permissions.ts; sub-route placeholders + role check; doc updated | -      |
 | 2026-02-20 | Removed app/admin, app/teacher, app/student pages; auth protects only /dashboard | -      |
 | 2026-02-21 | Icons: standardised on itshover only; all UI icons from components/ui (itshover); design doc and Phase 1.4 / Step 3 updated to always use new icons | -      |
+| 2026-03-10 | Package-first booking: `getAvailableSlotsForPackage`, `getEnrollmentForPackage`, `createBooking` (Zod + USER role guard, transaction booking + classesUsed). Package detail `/packages/[id]` links to booking page `/packages/[id]/book`; `PackageBookingSection` (slot list, confirm modal, success/error). Packages table links name to detail. Edge case: avoid `@solar-icons/react` on this route tree (SSR createContext error); use emoji. DESIGN_DOC: Phase 2.2/2.3 and 3.2 updated; step 10 done. | -      |
 | 2026-02-21 | DB: users.userName (camelCase); Prisma model field renamed to userName so generated client uses correct column; SYSTEM_DESIGN.md: all columns camelCase | -      |

@@ -26,7 +26,10 @@ export function NavMain({
             <SidebarGroupContent className="flex flex-col gap-2">
                 <SidebarMenu>
                     {items.map((item) => {
-                        const isActive = pathname === item.url || (item.url !== "/dashboard" && pathname.startsWith(item.url));
+                        const isActive =
+                            pathname === item.url ||
+                            (item.url !== "/dashboard" &&
+                                pathname.startsWith(item.url));
                         return (
                             <SidebarMenuItem key={item.title}>
                                 <SidebarMenuButton
@@ -35,7 +38,12 @@ export function NavMain({
                                     isActive={isActive}
                                 >
                                     <Link href={item.url}>
-                                        {item.icon && <item.icon className="size-4" size={16} />}
+                                        {item.icon && (
+                                            <item.icon
+                                                className="size-4"
+                                                size={16}
+                                            />
+                                        )}
                                         <span>{item.title}</span>
                                     </Link>
                                 </SidebarMenuButton>

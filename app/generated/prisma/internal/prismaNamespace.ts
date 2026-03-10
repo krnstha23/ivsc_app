@@ -389,7 +389,6 @@ export const ModelName = {
   TeacherProfile: 'TeacherProfile',
   Package: 'Package',
   PackageBundle: 'PackageBundle',
-  PackageBundleItem: 'PackageBundleItem',
   StudentEnrollment: 'StudentEnrollment',
   TeacherPackage: 'TeacherPackage',
   Availability: 'Availability',
@@ -410,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "studentProfile" | "teacherProfile" | "package" | "packageBundle" | "packageBundleItem" | "studentEnrollment" | "teacherPackage" | "availability" | "booking" | "classMetadata"
+    modelProps: "user" | "studentProfile" | "teacherProfile" | "package" | "packageBundle" | "studentEnrollment" | "teacherPackage" | "availability" | "booking" | "classMetadata"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -781,80 +780,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PackageBundleCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PackageBundleCountAggregateOutputType> | number
-        }
-      }
-    }
-    PackageBundleItem: {
-      payload: Prisma.$PackageBundleItemPayload<ExtArgs>
-      fields: Prisma.PackageBundleItemFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.PackageBundleItemFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.PackageBundleItemFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>
-        }
-        findFirst: {
-          args: Prisma.PackageBundleItemFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.PackageBundleItemFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>
-        }
-        findMany: {
-          args: Prisma.PackageBundleItemFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>[]
-        }
-        create: {
-          args: Prisma.PackageBundleItemCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>
-        }
-        createMany: {
-          args: Prisma.PackageBundleItemCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.PackageBundleItemCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>[]
-        }
-        delete: {
-          args: Prisma.PackageBundleItemDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>
-        }
-        update: {
-          args: Prisma.PackageBundleItemUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>
-        }
-        deleteMany: {
-          args: Prisma.PackageBundleItemDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.PackageBundleItemUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.PackageBundleItemUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>[]
-        }
-        upsert: {
-          args: Prisma.PackageBundleItemUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PackageBundleItemPayload>
-        }
-        aggregate: {
-          args: Prisma.PackageBundleItemAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregatePackageBundleItem>
-        }
-        groupBy: {
-          args: Prisma.PackageBundleItemGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PackageBundleItemGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.PackageBundleItemCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PackageBundleItemCountAggregateOutputType> | number
         }
       }
     }
@@ -1312,7 +1237,6 @@ export const PackageScalarFieldEnum = {
   name: 'name',
   description: 'description',
   price: 'price',
-  subjects: 'subjects',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1331,23 +1255,12 @@ export const PackageBundleScalarFieldEnum = {
   isFeatured: 'isFeatured',
   validFrom: 'validFrom',
   validUntil: 'validUntil',
+  packageIds: 'packageIds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type PackageBundleScalarFieldEnum = (typeof PackageBundleScalarFieldEnum)[keyof typeof PackageBundleScalarFieldEnum]
-
-
-export const PackageBundleItemScalarFieldEnum = {
-  id: 'id',
-  bundleId: 'bundleId',
-  packageId: 'packageId',
-  displayOrder: 'displayOrder',
-  customPrice: 'customPrice',
-  createdAt: 'createdAt'
-} as const
-
-export type PackageBundleItemScalarFieldEnum = (typeof PackageBundleItemScalarFieldEnum)[keyof typeof PackageBundleItemScalarFieldEnum]
 
 
 export const StudentEnrollmentScalarFieldEnum = {
@@ -1517,20 +1430,6 @@ export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMo
 
 
 /**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-/**
  * Reference to a field of type 'EnrollmentStatus'
  */
 export type EnumEnrollmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnrollmentStatus'>
@@ -1541,6 +1440,20 @@ export type EnumEnrollmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'EnrollmentStatus[]'
  */
 export type ListEnumEnrollmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnrollmentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -1685,7 +1598,6 @@ export type GlobalOmitConfig = {
   teacherProfile?: Prisma.TeacherProfileOmit
   package?: Prisma.PackageOmit
   packageBundle?: Prisma.PackageBundleOmit
-  packageBundleItem?: Prisma.PackageBundleItemOmit
   studentEnrollment?: Prisma.StudentEnrollmentOmit
   teacherPackage?: Prisma.TeacherPackageOmit
   availability?: Prisma.AvailabilityOmit

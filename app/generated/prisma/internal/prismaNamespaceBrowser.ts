@@ -56,7 +56,6 @@ export const ModelName = {
   TeacherProfile: 'TeacherProfile',
   Package: 'Package',
   PackageBundle: 'PackageBundle',
-  PackageBundleItem: 'PackageBundleItem',
   StudentEnrollment: 'StudentEnrollment',
   TeacherPackage: 'TeacherPackage',
   Availability: 'Availability',
@@ -125,7 +124,6 @@ export const PackageScalarFieldEnum = {
   name: 'name',
   description: 'description',
   price: 'price',
-  subjects: 'subjects',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -144,23 +142,12 @@ export const PackageBundleScalarFieldEnum = {
   isFeatured: 'isFeatured',
   validFrom: 'validFrom',
   validUntil: 'validUntil',
+  packageIds: 'packageIds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type PackageBundleScalarFieldEnum = (typeof PackageBundleScalarFieldEnum)[keyof typeof PackageBundleScalarFieldEnum]
-
-
-export const PackageBundleItemScalarFieldEnum = {
-  id: 'id',
-  bundleId: 'bundleId',
-  packageId: 'packageId',
-  displayOrder: 'displayOrder',
-  customPrice: 'customPrice',
-  createdAt: 'createdAt'
-} as const
-
-export type PackageBundleItemScalarFieldEnum = (typeof PackageBundleItemScalarFieldEnum)[keyof typeof PackageBundleItemScalarFieldEnum]
 
 
 export const StudentEnrollmentScalarFieldEnum = {

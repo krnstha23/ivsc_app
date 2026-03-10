@@ -1,3 +1,5 @@
+"use client"
+
 import { AltArrowUp, AltArrowDown } from "@solar-icons/react"
 
 import { Badge } from "@/components/ui/badge"

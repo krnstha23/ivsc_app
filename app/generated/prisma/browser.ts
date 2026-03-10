@@ -43,11 +43,6 @@ export type Package = Prisma.PackageModel
  */
 export type PackageBundle = Prisma.PackageBundleModel
 /**
- * Model PackageBundleItem
- * 
- */
-export type PackageBundleItem = Prisma.PackageBundleItemModel
-/**
  * Model StudentEnrollment
  * 
  */

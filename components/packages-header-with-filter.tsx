@@ -1,18 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Filter } from "@solar-icons/react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { AddCircle } from "@solar-icons/react";
 import { Button } from "@/components/ui/button";
-import { PackagesFilter } from "@/components/packages-filter";
 
-export function PackagesHeaderWithFilter({
-    defaultName,
-    defaultIsActive,
-}: {
-    defaultName: string;
-    defaultIsActive: string;
-}) {
-    const [showFilter, setShowFilter] = useState(false);
+export function PackagesHeaderWithFilter() {
+    const { data: session } = useSession();
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    const canCreate = role === "ADMIN";
 
     return (
         <div className="flex flex-col gap-4">
@@ -20,35 +16,20 @@ export function PackagesHeaderWithFilter({
                 <div>
                     <h1 className="text-xl font-semibold">Packages</h1>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        View and filter all packages in the system.
+                        View all packages in the system.
                     </p>
                 </div>
-                <Button
-                    type="button"
-                    variant={showFilter ? "secondary" : "outline"}
-                    size="sm"
-                    onClick={() => setShowFilter((v) => !v)}
-                >
-                    {showFilter ? (
-                        <>
-                            <Filter size={16} className="mr-1.5 size-4" />
-                            Hide filter
-                        </>
-                    ) : (
-                        <>
-                            <Filter size={16} className="mr-1.5 size-4" />
-                            Filter
-                        </>
+                <div className="flex items-center gap-2">
+                    {canCreate && (
+                        <Button size="sm" asChild>
+                            <Link href="/packages/new">
+                                <AddCircle size={16} className="mr-1.5 size-4" />
+                                Create package
+                            </Link>
+                        </Button>
                     )}
-                </Button>
+                </div>
             </div>
-
-            {showFilter && (
-                <PackagesFilter
-                    defaultName={defaultName}
-                    defaultIsActive={defaultIsActive}
-                />
-            )}
         </div>
     );
 }

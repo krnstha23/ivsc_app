@@ -129,7 +129,6 @@ async function main() {
                 name: "Math 10",
                 description: "Grade 10 Mathematics",
                 price: 29.99,
-                subjects: ["Math"],
             },
         });
         const pkgEnglish = await tx.package.create({
@@ -137,7 +136,6 @@ async function main() {
                 name: "English 10",
                 description: "Grade 10 English",
                 price: 29.99,
-                subjects: ["English"],
             },
         });
         const pkgScience = await tx.package.create({
@@ -145,7 +143,6 @@ async function main() {
                 name: "Science 10",
                 description: "Grade 10 Science",
                 price: 34.99,
-                subjects: ["Science"],
             },
         });
         const bundle = await tx.packageBundle.create({
@@ -155,23 +152,10 @@ async function main() {
                 price: 79.99,
                 discountPercent: 10,
                 isFeatured: true,
+                packageIds: [pkgMath.id, pkgEnglish.id, pkgScience.id],
             },
         });
-        await tx.packageBundleItem.createMany({
-            data: [
-                { bundleId: bundle.id, packageId: pkgMath.id, displayOrder: 0 },
-                {
-                    bundleId: bundle.id,
-                    packageId: pkgEnglish.id,
-                    displayOrder: 1,
-                },
-                {
-                    bundleId: bundle.id,
-                    packageId: pkgScience.id,
-                    displayOrder: 2,
-                },
-            ],
-        });
+        void bundle;
 
         // 4. TeacherPackage
         await tx.teacherPackage.createMany({

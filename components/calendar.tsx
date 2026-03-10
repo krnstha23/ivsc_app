@@ -1,7 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { AltArrowLeft, AltArrowRight, Maximize } from "@solar-icons/react";
+import {
+  AltArrowLeft,
+  AltArrowRight,
+  AddCircle,
+  ChecklistMinimalistic,
+} from "@solar-icons/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -30,17 +35,19 @@ function getCalendarGrid(year: number, month: number) {
 }
 
 function dateKey(year: number, month: number, day: number): string {
-  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  // Keep keys stable across DST/timezones (matches Prisma @db.Date semantics).
+  return new Date(Date.UTC(year, month, day)).toISOString().slice(0, 10);
 }
 
 export type CalendarProps = {
   onDayClick?: (date: Date) => void;
-  /** Availability count per day ("YYYY-MM-DD"). Card is shown only when count > 1. */
+  /** Availability count per day ("YYYY-MM-DD"). Card is shown only when count > 0. */
   availabilityByDay?: Record<string, number>;
-  /** Called when the visible month changes so parent can refetch data. */
   onMonthChange?: (year: number, month: number) => void;
-  /** Called when the availability info card is clicked (opens timeline popup). */
+  /** Called when the availability card (slot count) is clicked. */
   onAvailabilityCardClick?: (date: Date) => void;
+  /** Whether to show the add icon on hover for clickable cells. */
+  showAddIcon?: boolean;
 };
 
 export function Calendar({
@@ -48,6 +55,7 @@ export function Calendar({
   availabilityByDay,
   onMonthChange,
   onAvailabilityCardClick,
+  showAddIcon = false,
 }: CalendarProps = {}) {
   const [viewDate, setViewDate] = React.useState(() => new Date());
   const year = viewDate.getFullYear();
@@ -138,15 +146,13 @@ export function Calendar({
           {grid.map((day, i) => {
             const cellDate =
               day != null ? new Date(year, month, day) : null;
-            const canClick =
-              day != null &&
-              isTodayOrLater(day) &&
-              typeof onDayClick === "function";
+            const canClick = day != null && typeof onDayClick === "function";
+            const canAdd = day != null && isTodayOrLater(day);
             const count =
               day != null && availabilityByDay
                 ? availabilityByDay[dateKey(year, month, day)] ?? 0
                 : 0;
-            const showCard = count > 1;
+            const showCard = count > 0;
             const cellClick =
               canClick && cellDate ? () => onDayClick(cellDate) : undefined;
             const cellClassName = cn(
@@ -157,7 +163,9 @@ export function Calendar({
               day !== null &&
                 isToday(day) &&
                 "bg-primary text-primary-foreground font-semibold hover:bg-primary/90 hover:text-primary-foreground",
-              canClick && "cursor-pointer"
+              canClick && "cursor-pointer",
+              showCard &&
+                "border-2 border-foreground/25 dark:border-foreground/20"
             );
             return (
               <div
@@ -181,18 +189,27 @@ export function Calendar({
                   <>
                     <span className="absolute left-2 top-2 z-[1]">{day}</span>
                     {showCard && (
+                      <span
+                        aria-hidden
+                        className="absolute left-2 top-7 z-[1] block size-1.5 rounded-full bg-amber-500 md:hidden"
+                      />
+                    )}
+                    {showCard && (
                       <div
                         className={cn(
-                          "absolute bottom-2 left-2 right-2 z-[2] flex flex-col rounded border bg-card text-card-foreground shadow-sm",
+                          "absolute inset-3 top-9 z-[2] hidden rounded-xl border-2 border-foreground/25 bg-background/70 text-card-foreground shadow-sm dark:border-foreground/20 md:block",
                           onAvailabilityCardClick && "cursor-pointer"
                         )}
-                        style={{ maxHeight: "60%", minHeight: "2.5rem" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (cellDate) onAvailabilityCardClick?.(cellDate);
-                        }}
                         role={onAvailabilityCardClick ? "button" : "presentation"}
                         tabIndex={onAvailabilityCardClick ? 0 : undefined}
+                        onClick={
+                          onAvailabilityCardClick && cellDate
+                            ? (e) => {
+                                e.stopPropagation();
+                                onAvailabilityCardClick(cellDate);
+                              }
+                            : undefined
+                        }
                         onKeyDown={
                           onAvailabilityCardClick && cellDate
                             ? (e) => {
@@ -205,15 +222,20 @@ export function Calendar({
                             : undefined
                         }
                       >
-                        <div className="rounded-t border-b bg-muted/80 px-1.5 py-0.5 text-center text-[10px] font-medium text-muted-foreground">
-                          {count} slot{count !== 1 ? "s" : ""}
+                        <div className="relative flex h-full items-center justify-center">
+                          <ChecklistMinimalistic
+                            size={22}
+                            className="size-5 text-foreground/60"
+                          />
+                          <div className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full border-2 border-foreground/25 bg-background text-xs font-semibold tabular-nums text-foreground dark:border-foreground/20">
+                            {count}
+                          </div>
                         </div>
-                        <div className="flex-1 p-1" aria-hidden />
                       </div>
                     )}
-                    {isTodayOrLater(day) && !onDayClick && (
+                    {canClick && canAdd && showAddIcon && (
                       <span className="absolute inset-0 flex items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                        <Maximize size={24} className="size-6" />
+                        <AddCircle size={24} className="size-6" />
                       </span>
                     )}
                   </>

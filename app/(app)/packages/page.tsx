@@ -1,18 +1,13 @@
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
+import type { PackageBundleWhereInput } from "@/app/generated/prisma/models/PackageBundle"
 import { PackagesHeaderWithFilter } from "@/components/packages-header-with-filter"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import { BundlesTable } from "@/components/bundles-table"
+import { BundlesHeaderWithFilter } from "@/components/bundles-header-with-filter"
+import { PackagesTable } from "@/components/packages-table"
 
-type SearchParams = { name?: string; isActive?: string }
+type SearchParams = { bundleName?: string; bundleIsActive?: string }
 
 export default async function PackagesPage({
   searchParams,
@@ -21,105 +16,77 @@ export default async function PackagesPage({
 }) {
   const session = await auth()
   if (!session?.user) redirect("/login")
+  const role = (session.user as { role?: string }).role
+  const canManage = role === "ADMIN"
 
-  const { name, isActive } = await searchParams
-
-  const where: Parameters<typeof prisma.package.findMany>[0]["where"] = {}
-
-  if (name?.trim()) {
-    where.name = {
-      contains: name.trim(),
-      mode: "insensitive",
-    }
-  }
-
-  if (isActive === "true") where.isActive = true
-  else if (isActive === "false") where.isActive = false
+  const { bundleName, bundleIsActive } = await searchParams
 
   const packages = await prisma.package.findMany({
-    where,
     select: {
       id: true,
       name: true,
       description: true,
       price: true,
-      subjects: true,
       isActive: true,
     },
     orderBy: [{ name: "asc" }],
   })
+  const packagesForClient = packages.map((p) => ({
+    ...p,
+    price: Number(p.price),
+  }))
+
+  const bundleWhere: PackageBundleWhereInput = {}
+  if (bundleName?.trim()) {
+    bundleWhere.name = { contains: bundleName.trim(), mode: "insensitive" }
+  }
+  if (bundleIsActive === "true") bundleWhere.isActive = true
+  else if (bundleIsActive === "false") bundleWhere.isActive = false
+
+  const bundles = await prisma.packageBundle.findMany({
+    where: bundleWhere,
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      discountPercent: true,
+      isActive: true,
+      isFeatured: true,
+      packageIds: true,
+    },
+    orderBy: [{ name: "asc" }],
+  })
+
+  const bundlesForClient = bundles.map((b) => ({
+    ...b,
+    price: Number(b.price),
+    discountPercent:
+      b.discountPercent == null ? null : Number(b.discountPercent),
+  }))
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       <div className="px-4 lg:px-6">
-        <PackagesHeaderWithFilter
-          defaultName={name ?? ""}
-          defaultIsActive={isActive ?? ""}
+        <PackagesHeaderWithFilter />
+      </div>
+
+      <div className="px-4 lg:px-6">
+        <PackagesTable packages={packagesForClient} canManage={canManage} />
+      </div>
+
+      <div className="px-4 lg:px-6">
+        <BundlesHeaderWithFilter
+          defaultName={bundleName ?? ""}
+          defaultIsActive={bundleIsActive ?? ""}
         />
       </div>
 
       <div className="px-4 lg:px-6">
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Subjects</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {packages.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    No packages found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                packages.map((pkg) => (
-                  <TableRow key={pkg.id}>
-                    <TableCell className="font-medium">{pkg.name}</TableCell>
-                    <TableCell className="max-w-xs truncate text-muted-foreground">
-                      {pkg.description ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      ${Number(pkg.price).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                    </TableCell>
-                    <TableCell>
-                      {pkg.subjects.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {pkg.subjects.map((s) => (
-                            <Badge key={s} variant="outline" className="text-xs">
-                              {s}
-                            </Badge>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={
-                          pkg.isActive
-                            ? "text-green-600 dark:text-green-400 font-medium"
-                            : "text-muted-foreground"
-                        }
-                      >
-                        {pkg.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <BundlesTable
+          bundles={bundlesForClient}
+          canManage={canManage}
+        />
       </div>
     </div>
   )

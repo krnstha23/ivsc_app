@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { canAccess } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import type { UserWhereInput } from "@/app/generated/prisma/models/User";
 import { UsersHeaderWithFilter } from "@/components/users-header-with-filter";
 import {
     Table,
@@ -42,7 +43,7 @@ export default async function UsersPage({
         role: roleFilter,
     } = await searchParams;
 
-    const where: Parameters<typeof prisma.user.findMany>[0]["where"] = {};
+    const where: UserWhereInput = {};
 
     if (name?.trim()) {
         const term = name.trim();

@@ -2,7 +2,13 @@
 
 import * as React from "react";
 import { useSession } from "next-auth/react";
-import { Widget4, AlarmAdd, UsersGroupRounded, CartLarge2, LayersMinimalistic } from "@solar-icons/react";
+import {
+    Widget4,
+    AlarmAdd,
+    UsersGroupRounded,
+    CartLarge2,
+    LayersMinimalistic,
+} from "@solar-icons/react";
 
 import { NavMain } from "@/components/nav-main";
 import {
@@ -72,7 +78,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             className="data-[slot=sidebar-menu-button]:p-1.5!"
                         >
                             <a href="/dashboard">
-                                <LayersMinimalistic size={20} className="size-5!" />
+                                <LayersMinimalistic
+                                    size={20}
+                                    className="size-5!"
+                                />
                                 <span className="text-base font-semibold">
                                     IVCS
                                 </span>

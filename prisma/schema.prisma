@@ -122,7 +122,6 @@ model Package {
   name        String
   description String?
   price       Decimal
-  subjects    String[]
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -130,7 +129,6 @@ model Package {
   // Relations
   bookings     Booking[]
   classHistory ClassMetadata[]
-  bundleItems  PackageBundleItem[]
   enrollments  StudentEnrollment[]
   teachers     TeacherPackage[]
 
@@ -148,32 +146,11 @@ model PackageBundle {
   isFeatured      Boolean   @default(false)
   validFrom       DateTime?
   validUntil      DateTime?
+  packageIds      String[]  @default([])
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  // Relations
-  items PackageBundleItem[]
-
   @@map("package_bundles")
-}
-
-// PackageBundleItem - junction table for Bundle <-> Package
-model PackageBundleItem {
-  id           String   @id @default(uuid())
-  bundleId     String
-  packageId    String
-  displayOrder Int      @default(0)
-  customPrice  Decimal?
-  createdAt    DateTime @default(now())
-
-  // Relations
-  bundle  PackageBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
-  package Package       @relation(fields: [packageId], references: [id], onDelete: Cascade)
-
-  @@unique([bundleId, packageId])
-  @@index([bundleId])
-  @@index([packageId])
-  @@map("package_bundle_items")
 }
 
 // =============================================================================

@@ -20,9 +20,8 @@
 | **User** | 1 admin, 2–3 teachers, 3–5 students; all with known test passwords (e.g. `password123`). |
 | **StudentProfile** | One per student user. |
 | **TeacherProfile** | One per teacher user (with optional `bio`). |
-| **Package** | 3–5 packages (e.g. Math 10, English 10, Science 10) with names, descriptions, prices, `subjects[]`. |
-| **PackageBundle** | 1–2 bundles (e.g. “Grade 10 Core”) with discount and optional `validFrom`/`validUntil`. |
-| **PackageBundleItem** | Link bundles to packages with `displayOrder` and optional `customPrice`. |
+| **Package** | 3–5 packages (e.g. Math 10, English 10, Science 10) with names, descriptions, prices. |
+| **PackageBundle** | 1–2 bundles (e.g. “Grade 10 Core”) with discount and optional `validFrom`/`validUntil`; bundles store package membership via `packageIds[]`. |
 | **TeacherPackage** | Assign each teacher to 1–2 packages. |
 | **StudentEnrollment** | Enroll some students in packages (status ACTIVE, `classesTotal`/`classesUsed`). |
 | **Availability** | 5–10 slots per teacher for upcoming dates (e.g. next 2 weeks), `startTime`/`endTime` in `"HH:MM"`. |
@@ -38,12 +37,11 @@ Seeding must follow this order to satisfy FKs:
 1. **User** (no dependencies)
 2. **StudentProfile**, **TeacherProfile** (depend on User)
 3. **Package**, **PackageBundle** (no dependencies)
-4. **PackageBundleItem** (Package, PackageBundle)
-5. **TeacherPackage** (TeacherProfile, Package)
-6. **StudentEnrollment** (StudentProfile, Package)
-7. **Availability** (TeacherProfile)
-8. **Booking** (User, TeacherProfile, Availability, optional Package)
-9. **ClassMetadata** (Package, TeacherProfile, User)
+4. **TeacherPackage** (TeacherProfile, Package)
+5. **StudentEnrollment** (StudentProfile, Package)
+6. **Availability** (TeacherProfile)
+7. **Booking** (User, TeacherProfile, Availability, optional Package)
+8. **ClassMetadata** (Package, TeacherProfile, User)
 
 Use a single `prisma.$transaction([...])` where possible so the seed is all-or-nothing (optional but recommended for cleanliness).
 

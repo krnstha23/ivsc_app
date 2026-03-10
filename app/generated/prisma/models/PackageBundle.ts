@@ -74,6 +74,7 @@ export type PackageBundleCountAggregateOutputType = {
   isFeatured: number
   validFrom: number
   validUntil: number
+  packageIds: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -128,6 +129,7 @@ export type PackageBundleCountAggregateInputType = {
   isFeatured?: true
   validFrom?: true
   validUntil?: true
+  packageIds?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -229,6 +231,7 @@ export type PackageBundleGroupByOutputType = {
   isFeatured: boolean
   validFrom: Date | null
   validUntil: Date | null
+  packageIds: string[]
   createdAt: Date
   updatedAt: Date
   _count: PackageBundleCountAggregateOutputType | null
@@ -266,9 +269,9 @@ export type PackageBundleWhereInput = {
   isFeatured?: Prisma.BoolFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
+  packageIds?: Prisma.StringNullableListFilter<"PackageBundle">
   createdAt?: Prisma.DateTimeFilter<"PackageBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PackageBundle"> | Date | string
-  items?: Prisma.PackageBundleItemListRelationFilter
 }
 
 export type PackageBundleOrderByWithRelationInput = {
@@ -281,9 +284,9 @@ export type PackageBundleOrderByWithRelationInput = {
   isFeatured?: Prisma.SortOrder
   validFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   validUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  packageIds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  items?: Prisma.PackageBundleItemOrderByRelationAggregateInput
 }
 
 export type PackageBundleWhereUniqueInput = Prisma.AtLeast<{
@@ -299,9 +302,9 @@ export type PackageBundleWhereUniqueInput = Prisma.AtLeast<{
   isFeatured?: Prisma.BoolFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
+  packageIds?: Prisma.StringNullableListFilter<"PackageBundle">
   createdAt?: Prisma.DateTimeFilter<"PackageBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PackageBundle"> | Date | string
-  items?: Prisma.PackageBundleItemListRelationFilter
 }, "id">
 
 export type PackageBundleOrderByWithAggregationInput = {
@@ -314,6 +317,7 @@ export type PackageBundleOrderByWithAggregationInput = {
   isFeatured?: Prisma.SortOrder
   validFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   validUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  packageIds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PackageBundleCountOrderByAggregateInput
@@ -336,6 +340,7 @@ export type PackageBundleScalarWhereWithAggregatesInput = {
   isFeatured?: Prisma.BoolWithAggregatesFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"PackageBundle"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"PackageBundle"> | Date | string | null
+  packageIds?: Prisma.StringNullableListFilter<"PackageBundle">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PackageBundle"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PackageBundle"> | Date | string
 }
@@ -350,9 +355,9 @@ export type PackageBundleCreateInput = {
   isFeatured?: boolean
   validFrom?: Date | string | null
   validUntil?: Date | string | null
+  packageIds?: Prisma.PackageBundleCreatepackageIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
-  items?: Prisma.PackageBundleItemCreateNestedManyWithoutBundleInput
 }
 
 export type PackageBundleUncheckedCreateInput = {
@@ -365,9 +370,9 @@ export type PackageBundleUncheckedCreateInput = {
   isFeatured?: boolean
   validFrom?: Date | string | null
   validUntil?: Date | string | null
+  packageIds?: Prisma.PackageBundleCreatepackageIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
-  items?: Prisma.PackageBundleItemUncheckedCreateNestedManyWithoutBundleInput
 }
 
 export type PackageBundleUpdateInput = {
@@ -380,9 +385,9 @@ export type PackageBundleUpdateInput = {
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  packageIds?: Prisma.PackageBundleUpdatepackageIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  items?: Prisma.PackageBundleItemUpdateManyWithoutBundleNestedInput
 }
 
 export type PackageBundleUncheckedUpdateInput = {
@@ -395,9 +400,9 @@ export type PackageBundleUncheckedUpdateInput = {
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  packageIds?: Prisma.PackageBundleUpdatepackageIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  items?: Prisma.PackageBundleItemUncheckedUpdateManyWithoutBundleNestedInput
 }
 
 export type PackageBundleCreateManyInput = {
@@ -410,6 +415,7 @@ export type PackageBundleCreateManyInput = {
   isFeatured?: boolean
   validFrom?: Date | string | null
   validUntil?: Date | string | null
+  packageIds?: Prisma.PackageBundleCreatepackageIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -424,6 +430,7 @@ export type PackageBundleUpdateManyMutationInput = {
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  packageIds?: Prisma.PackageBundleUpdatepackageIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -438,8 +445,17 @@ export type PackageBundleUncheckedUpdateManyInput = {
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  packageIds?: Prisma.PackageBundleUpdatepackageIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type PackageBundleCountOrderByAggregateInput = {
@@ -452,6 +468,7 @@ export type PackageBundleCountOrderByAggregateInput = {
   isFeatured?: Prisma.SortOrder
   validFrom?: Prisma.SortOrder
   validUntil?: Prisma.SortOrder
+  packageIds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -494,9 +511,8 @@ export type PackageBundleSumOrderByAggregateInput = {
   discountPercent?: Prisma.SortOrder
 }
 
-export type PackageBundleScalarRelationFilter = {
-  is?: Prisma.PackageBundleWhereInput
-  isNot?: Prisma.PackageBundleWhereInput
+export type PackageBundleCreatepackageIdsInput = {
+  set: string[]
 }
 
 export type NullableDecimalFieldUpdateOperationsInput = {
@@ -511,121 +527,11 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
-export type PackageBundleCreateNestedOneWithoutItemsInput = {
-  create?: Prisma.XOR<Prisma.PackageBundleCreateWithoutItemsInput, Prisma.PackageBundleUncheckedCreateWithoutItemsInput>
-  connectOrCreate?: Prisma.PackageBundleCreateOrConnectWithoutItemsInput
-  connect?: Prisma.PackageBundleWhereUniqueInput
+export type PackageBundleUpdatepackageIdsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
-export type PackageBundleUpdateOneRequiredWithoutItemsNestedInput = {
-  create?: Prisma.XOR<Prisma.PackageBundleCreateWithoutItemsInput, Prisma.PackageBundleUncheckedCreateWithoutItemsInput>
-  connectOrCreate?: Prisma.PackageBundleCreateOrConnectWithoutItemsInput
-  upsert?: Prisma.PackageBundleUpsertWithoutItemsInput
-  connect?: Prisma.PackageBundleWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.PackageBundleUpdateToOneWithWhereWithoutItemsInput, Prisma.PackageBundleUpdateWithoutItemsInput>, Prisma.PackageBundleUncheckedUpdateWithoutItemsInput>
-}
-
-export type PackageBundleCreateWithoutItemsInput = {
-  id?: string
-  name: string
-  description?: string | null
-  price: runtime.Decimal | runtime.DecimalJsLike | number | string
-  discountPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  isActive?: boolean
-  isFeatured?: boolean
-  validFrom?: Date | string | null
-  validUntil?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type PackageBundleUncheckedCreateWithoutItemsInput = {
-  id?: string
-  name: string
-  description?: string | null
-  price: runtime.Decimal | runtime.DecimalJsLike | number | string
-  discountPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  isActive?: boolean
-  isFeatured?: boolean
-  validFrom?: Date | string | null
-  validUntil?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type PackageBundleCreateOrConnectWithoutItemsInput = {
-  where: Prisma.PackageBundleWhereUniqueInput
-  create: Prisma.XOR<Prisma.PackageBundleCreateWithoutItemsInput, Prisma.PackageBundleUncheckedCreateWithoutItemsInput>
-}
-
-export type PackageBundleUpsertWithoutItemsInput = {
-  update: Prisma.XOR<Prisma.PackageBundleUpdateWithoutItemsInput, Prisma.PackageBundleUncheckedUpdateWithoutItemsInput>
-  create: Prisma.XOR<Prisma.PackageBundleCreateWithoutItemsInput, Prisma.PackageBundleUncheckedCreateWithoutItemsInput>
-  where?: Prisma.PackageBundleWhereInput
-}
-
-export type PackageBundleUpdateToOneWithWhereWithoutItemsInput = {
-  where?: Prisma.PackageBundleWhereInput
-  data: Prisma.XOR<Prisma.PackageBundleUpdateWithoutItemsInput, Prisma.PackageBundleUncheckedUpdateWithoutItemsInput>
-}
-
-export type PackageBundleUpdateWithoutItemsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  discountPercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type PackageBundleUncheckedUpdateWithoutItemsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  discountPercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-
-/**
- * Count Type PackageBundleCountOutputType
- */
-
-export type PackageBundleCountOutputType = {
-  items: number
-}
-
-export type PackageBundleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  items?: boolean | PackageBundleCountOutputTypeCountItemsArgs
-}
-
-/**
- * PackageBundleCountOutputType without action
- */
-export type PackageBundleCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the PackageBundleCountOutputType
-   */
-  select?: Prisma.PackageBundleCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * PackageBundleCountOutputType without action
- */
-export type PackageBundleCountOutputTypeCountItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.PackageBundleItemWhereInput
-}
 
 
 export type PackageBundleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -638,10 +544,9 @@ export type PackageBundleSelect<ExtArgs extends runtime.Types.Extensions.Interna
   isFeatured?: boolean
   validFrom?: boolean
   validUntil?: boolean
+  packageIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  items?: boolean | Prisma.PackageBundle$itemsArgs<ExtArgs>
-  _count?: boolean | Prisma.PackageBundleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["packageBundle"]>
 
 export type PackageBundleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -654,6 +559,7 @@ export type PackageBundleSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   isFeatured?: boolean
   validFrom?: boolean
   validUntil?: boolean
+  packageIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["packageBundle"]>
@@ -668,6 +574,7 @@ export type PackageBundleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   isFeatured?: boolean
   validFrom?: boolean
   validUntil?: boolean
+  packageIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["packageBundle"]>
@@ -682,23 +589,16 @@ export type PackageBundleSelectScalar = {
   isFeatured?: boolean
   validFrom?: boolean
   validUntil?: boolean
+  packageIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PackageBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "price" | "discountPercent" | "isActive" | "isFeatured" | "validFrom" | "validUntil" | "createdAt" | "updatedAt", ExtArgs["result"]["packageBundle"]>
-export type PackageBundleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  items?: boolean | Prisma.PackageBundle$itemsArgs<ExtArgs>
-  _count?: boolean | Prisma.PackageBundleCountOutputTypeDefaultArgs<ExtArgs>
-}
-export type PackageBundleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type PackageBundleIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type PackageBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "price" | "discountPercent" | "isActive" | "isFeatured" | "validFrom" | "validUntil" | "packageIds" | "createdAt" | "updatedAt", ExtArgs["result"]["packageBundle"]>
 
 export type $PackageBundlePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PackageBundle"
-  objects: {
-    items: Prisma.$PackageBundleItemPayload<ExtArgs>[]
-  }
+  objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
@@ -709,6 +609,7 @@ export type $PackageBundlePayload<ExtArgs extends runtime.Types.Extensions.Inter
     isFeatured: boolean
     validFrom: Date | null
     validUntil: Date | null
+    packageIds: string[]
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["packageBundle"]>
@@ -1105,7 +1006,6 @@ readonly fields: PackageBundleFieldRefs;
  */
 export interface Prisma__PackageBundleClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  items<T extends Prisma.PackageBundle$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PackageBundle$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PackageBundleItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1144,6 +1044,7 @@ export interface PackageBundleFieldRefs {
   readonly isFeatured: Prisma.FieldRef<"PackageBundle", 'Boolean'>
   readonly validFrom: Prisma.FieldRef<"PackageBundle", 'DateTime'>
   readonly validUntil: Prisma.FieldRef<"PackageBundle", 'DateTime'>
+  readonly packageIds: Prisma.FieldRef<"PackageBundle", 'String[]'>
   readonly createdAt: Prisma.FieldRef<"PackageBundle", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"PackageBundle", 'DateTime'>
 }
@@ -1163,10 +1064,6 @@ export type PackageBundleFindUniqueArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
-  /**
    * Filter, which PackageBundle to fetch.
    */
   where: Prisma.PackageBundleWhereUniqueInput
@@ -1185,10 +1082,6 @@ export type PackageBundleFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
-  /**
    * Filter, which PackageBundle to fetch.
    */
   where: Prisma.PackageBundleWhereUniqueInput
@@ -1206,10 +1099,6 @@ export type PackageBundleFindFirstArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the PackageBundle
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
   /**
    * Filter, which PackageBundle to fetch.
    */
@@ -1259,10 +1148,6 @@ export type PackageBundleFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
-  /**
    * Filter, which PackageBundle to fetch.
    */
   where?: Prisma.PackageBundleWhereInput
@@ -1311,10 +1196,6 @@ export type PackageBundleFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
-  /**
    * Filter, which PackageBundles to fetch.
    */
   where?: Prisma.PackageBundleWhereInput
@@ -1357,10 +1238,6 @@ export type PackageBundleCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the PackageBundle
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
   /**
    * The data needed to create a PackageBundle.
    */
@@ -1409,10 +1286,6 @@ export type PackageBundleUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the PackageBundle
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
   /**
    * The data needed to update a PackageBundle.
    */
@@ -1480,10 +1353,6 @@ export type PackageBundleUpsertArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
-  /**
    * The filter to search for the PackageBundle to update in case it exists.
    */
   where: Prisma.PackageBundleWhereUniqueInput
@@ -1510,10 +1379,6 @@ export type PackageBundleDeleteArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
-  /**
    * Filter which PackageBundle to delete.
    */
   where: Prisma.PackageBundleWhereUniqueInput
@@ -1534,30 +1399,6 @@ export type PackageBundleDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
- * PackageBundle.items
- */
-export type PackageBundle$itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the PackageBundleItem
-   */
-  select?: Prisma.PackageBundleItemSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the PackageBundleItem
-   */
-  omit?: Prisma.PackageBundleItemOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleItemInclude<ExtArgs> | null
-  where?: Prisma.PackageBundleItemWhereInput
-  orderBy?: Prisma.PackageBundleItemOrderByWithRelationInput | Prisma.PackageBundleItemOrderByWithRelationInput[]
-  cursor?: Prisma.PackageBundleItemWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.PackageBundleItemScalarFieldEnum | Prisma.PackageBundleItemScalarFieldEnum[]
-}
-
-/**
  * PackageBundle without action
  */
 export type PackageBundleDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1569,8 +1410,4 @@ export type PackageBundleDefaultArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PackageBundle
    */
   omit?: Prisma.PackageBundleOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PackageBundleInclude<ExtArgs> | null
 }
