@@ -95,19 +95,19 @@ model StudentProfile {
 
 // TeacherProfile - extended info for teachers
 model TeacherProfile {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  bio       String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  bio        String?
+  isActive   Boolean  @default(true)
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   user         User            @relation(fields: [userId], references: [id])
   availability Availability[]
   bookings     Booking[]
   classHistory ClassMetadata[]
-  packages     TeacherPackage[]
 
   @@map("teacher_profiles")
 }
@@ -130,7 +130,6 @@ model Package {
   bookings     Booking[]
   classHistory ClassMetadata[]
   enrollments  StudentEnrollment[]
-  teachers     TeacherPackage[]
 
   @@map("packages")
 }
@@ -140,8 +139,12 @@ model PackageBundle {
   id              String    @id @default(uuid())
   name            String
   description     String?
-  price           Decimal
+  priceStandard   Decimal
+  pricePriority   Decimal
+  priceInstant    Decimal
   discountPercent Decimal?
+  duration        Int       // fixed session length in minutes
+  hasEvaluation   Boolean   @default(false)
   isActive        Boolean   @default(true)
   isFeatured      Boolean   @default(false)
   validFrom       DateTime?
@@ -154,7 +157,7 @@ model PackageBundle {
 }
 
 // =============================================================================
-// ENROLLMENTS & TEACHER ASSIGNMENTS
+// ENROLLMENTS
 // =============================================================================
 
 // StudentEnrollment - junction table for Student <-> Package with enrollment tracking
@@ -180,36 +183,20 @@ model StudentEnrollment {
   @@map("student_enrollments")
 }
 
-// TeacherPackage - junction table for Teacher <-> Package assignment
-model TeacherPackage {
-  id        String   @id @default(uuid())
-  teacherId String
-  packageId String
-  createdAt DateTime @default(now())
-
-  // Relations
-  teacher TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  package Package        @relation(fields: [packageId], references: [id], onDelete: Cascade)
-
-  @@unique([teacherId, packageId])
-  @@index([teacherId])
-  @@index([packageId])
-  @@map("teacher_packages")
-}
-
 // =============================================================================
 // AVAILABILITY & BOOKING
 // =============================================================================
 
 // Availability - teacher's open time slots for specific dates
 model Availability {
-  id        String   @id @default(uuid())
-  teacherId String
-  date      DateTime @db.Date
-  startTime String   // "HH:MM" format
-  endTime   String   // "HH:MM" format
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  teacherId  String
+  date       DateTime @db.Date
+  startTime  String   // "HH:MM" format
+  endTime    String   // "HH:MM" format
+  bundleIds  String[] @default([]) // empty = available for all teacher's bundles
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   teacher TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
@@ -226,25 +213,65 @@ model Booking {
   teacherId      String
   availabilityId String        @unique // 1:1 - one booking per slot
   packageId      String?
+  bundleId       String?
   scheduledAt    DateTime
   duration       Int           // minutes
   status         BookingStatus @default(PENDING)
   notes          String?
+  meetLink       String?
   paymentStatus  PaymentStatus @default(PENDING)
   transactionId  String?
+  // Writing-only bookings: student-chosen submission window
+  submissionStart DateTime?
+  submissionEnd   DateTime?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
   // Relations
-  user         User           @relation(fields: [userId], references: [id])
-  teacher      TeacherProfile @relation(fields: [teacherId], references: [id])
-  availability Availability   @relation(fields: [availabilityId], references: [id])
-  package      Package?       @relation(fields: [packageId], references: [id])
+  user               User                @relation(fields: [userId], references: [id])
+  teacher            TeacherProfile      @relation(fields: [teacherId], references: [id])
+  availability       Availability        @relation(fields: [availabilityId], references: [id])
+  package            Package?            @relation(fields: [packageId], references: [id])
+  evaluation         Evaluation?
+  writingSubmission  WritingSubmission?
 
   @@index([userId])
   @@index([teacherId])
   @@index([scheduledAt])
   @@map("bookings")
+}
+
+// =============================================================================
+// EVALUATION & WRITING
+// =============================================================================
+
+model Evaluation {
+  id          String   @id @default(uuid())
+  bookingId   String   @unique
+  score       Int
+  feedback    String
+  submittedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("evaluations")
+}
+
+model WritingSubmission {
+  id         String   @id @default(uuid())
+  bookingId  String   @unique
+  filePath   String
+  fileName   String
+  fileSize   Int
+  uploadedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("writing_submissions")
 }
 
 // =============================================================================
@@ -272,4 +299,16 @@ model ClassMetadata {
   @@index([teacherId])
   @@index([date])
   @@map("class_metadata")
+}
+
+model StaticPage {
+  id        String   @id @default(uuid())
+  title     String
+  slug      String   @unique
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("static_pages")
 }

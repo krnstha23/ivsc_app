@@ -70,11 +70,6 @@ export type PackageBundle = Prisma.PackageBundleModel
  */
 export type StudentEnrollment = Prisma.StudentEnrollmentModel
 /**
- * Model TeacherPackage
- * 
- */
-export type TeacherPackage = Prisma.TeacherPackageModel
-/**
  * Model Availability
  * 
  */
@@ -85,7 +80,22 @@ export type Availability = Prisma.AvailabilityModel
  */
 export type Booking = Prisma.BookingModel
 /**
+ * Model Evaluation
+ * 
+ */
+export type Evaluation = Prisma.EvaluationModel
+/**
+ * Model WritingSubmission
+ * 
+ */
+export type WritingSubmission = Prisma.WritingSubmissionModel
+/**
  * Model ClassMetadata
  * 
  */
 export type ClassMetadata = Prisma.ClassMetadataModel
+/**
+ * Model StaticPage
+ * 
+ */
+export type StaticPage = Prisma.StaticPageModel

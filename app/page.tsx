@@ -1,684 +1,709 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import Image from "next/image";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { ProgressBarsSection } from "@/components/progress-bars-section";
+import Link from "next/link";
+import { LandingHeader } from "@/components/landing-header";
+import { prisma } from "@/lib/prisma";
 
-/* Inline icons to avoid SSR createContext with @solar-icons on root route */
-function LogoIcon({ className }: { className?: string }) {
+export const metadata: Metadata = {
+    title: "ScoreMirror – Computer-Based IELTS Mock Tests",
+    description:
+        "Walk into your IELTS exam already familiar with it. Full computer-based mock tests, human review, and performance reports.",
+    keywords: [
+        "IELTS mock test",
+        "computer-based IELTS",
+        "IELTS practice",
+        "IELTS speaking",
+        "IELTS writing review",
+    ],
+    alternates: { canonical: "/" },
+    openGraph: {
+        title: "ScoreMirror – Computer-Based IELTS Mock Tests",
+        description:
+            "Full computer-based IELTS mock tests with human review and performance reports.",
+        url: "/",
+        images: [
+            { url: "/hero.png", width: 1200, height: 630, alt: "ScoreMirror" },
+        ],
+    },
+};
+
+const accent = "#7C5CFF";
+const dark = "#0B0B0F";
+const light = "#F7F7F7";
+
+function Display({
+    children,
+    className = "",
+}: {
+    children: React.ReactNode;
+    className?: string;
+}) {
     return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-            aria-hidden
+        <span
+            className={`[font-family:var(--font-playfair),Georgia,serif] ${className}`}
         >
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
-        </svg>
-    );
-}
-function DocIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
-        </svg>
-    );
-}
-function MonitorIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <rect x="2" y="3" width="20" height="14" rx="2" />
-            <path d="M8 21h8M12 17v4" />
-        </svg>
-    );
-}
-function ChartIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <path d="M3 3v18h18" />
-            <path d="M7 16v-5M12 16V8M17 16v-3" />
-        </svg>
-    );
-}
-function CalendarIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <path d="M16 2v4M8 2v4M3 10h18" />
-        </svg>
-    );
-}
-function PackageIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <path d="M12 3v18M3 9l9-6 9 6-9 6-9-6z" />
-            <path d="M21 9v6M3 15v-6" />
-        </svg>
-    );
-}
-function CheckIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-            <path d="m9 11 3 3L22 4" />
-        </svg>
-    );
-}
-function HeadphonesIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-        </svg>
-    );
-}
-function BookIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        </svg>
-    );
-}
-function MicIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3" />
-        </svg>
-    );
-}
-function PencilIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={className}
-            aria-hidden
-        >
-            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-        </svg>
-    );
-}
-function HomeIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-            aria-hidden
-        >
-            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <path d="M9 22V12h6v10" />
-        </svg>
+            {children}
+        </span>
     );
 }
 
-export default function HomePage() {
+function CheckLi({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex min-h-svh flex-col bg-background">
-            {/* Header – logo left, nav center, CTA right */}
-            <header className="border-border sticky top-0 z-10 border-b bg-background">
-                <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-                    <Link
-                        href="/"
-                        className="flex shrink-0 items-center gap-2 font-semibold text-foreground"
-                    >
-                        <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
-                            <LogoIcon className="size-4.5" />
-                        </span>
-                        IVCS
-                    </Link>
-                    <nav className="hidden items-center gap-6 md:flex">
-                        <Link
-                            href="/packages"
-                            className="text-muted-foreground hover:text-foreground text-sm font-medium"
+        <li className="flex gap-3 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
+            <span
+                className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-white"
+                style={{ backgroundColor: accent }}
+                aria-hidden
+            >
+                <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M20 6 9 17l-5-5" />
+                </svg>
+            </span>
+            <span>{children}</span>
+        </li>
+    );
+}
+
+function ListeningMock() {
+    return (
+        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_25px_60px_-15px_rgba(15,15,25,0.25)]">
+            <div className="flex items-center gap-2 border-b border-black/[0.06] bg-[#f3f3f5] px-3 py-2.5">
+                <span className="size-2.5 rounded-full bg-[#ff5f57]" />
+                <span className="size-2.5 rounded-full bg-[#febc2e]" />
+                <span className="size-2.5 rounded-full bg-[#28c840]" />
+                <span
+                    className="ml-3 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white"
+                    style={{ backgroundColor: accent }}
+                >
+                    Listening
+                </span>
+                <span className="text-[10px] text-[#888]">
+                    Section 1 of 4 · Academic
+                </span>
+                <span className="ml-auto flex items-center gap-1 text-[10px] font-medium text-emerald-600">
+                    <span className="size-1.5 rounded-full bg-emerald-500" />
+                    12:04
+                </span>
+            </div>
+            <div className="grid grid-cols-[7.5rem_1fr] gap-0 max-sm:grid-cols-1">
+                <div className="border-r border-black/[0.06] bg-[#eeeff2] p-3 max-sm:border-r-0 max-sm:border-b">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#666]">
+                        Questions
+                    </p>
+                    <div className="mt-2 grid grid-cols-4 gap-1">
+                        {Array.from({ length: 8 }, (_, i) => (
+                            <span
+                                key={i}
+                                className={`flex size-7 items-center justify-center rounded-md text-[10px] font-semibold ${
+                                    i === 3
+                                        ? "text-white"
+                                        : "border border-black/[0.06] bg-white text-[#555]"
+                                }`}
+                                style={
+                                    i === 3
+                                        ? { backgroundColor: accent }
+                                        : undefined
+                                }
+                            >
+                                {i + 1}
+                            </span>
+                        ))}
+                    </div>
+                    <p className="mt-3 text-[9px] font-bold uppercase tracking-wider text-[#666]">
+                        Sections
+                    </p>
+                    <ul className="mt-1.5 space-y-1 text-[10px] text-[#444]">
+                        <li
+                            className="rounded-md px-2 py-1 font-medium"
+                            style={{
+                                backgroundColor: `${accent}18`,
+                                color: accent,
+                            }}
                         >
-                            Packages
-                        </Link>
-                        <Link
-                            href="/calendar"
-                            className="text-muted-foreground hover:text-foreground text-sm font-medium"
-                        >
-                            Calendar
-                        </Link>
-                        <Link
-                            href="/login"
-                            className="text-muted-foreground hover:text-foreground text-sm font-medium"
-                        >
-                            Login
-                        </Link>
-                    </nav>
-                    <div className="flex shrink-0 items-center gap-2">
-                        <ThemeToggle />
-                        <Link
-                            href="/register"
-                            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2 text-sm font-medium"
-                        >
-                            Get started
-                        </Link>
+                            · Listening
+                        </li>
+                        <li className="px-2 py-1">Reading</li>
+                        <li className="px-2 py-1">Writing</li>
+                        <li className="px-2 py-1">Speaking</li>
+                    </ul>
+                </div>
+                <div className="bg-white p-4 sm:p-5">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-[#888]">
+                        Part 1 · Questions 1–10
+                    </p>
+                    <p className="mt-3 text-[11px] leading-relaxed text-[#333] sm:text-xs">
+                        You will hear a number of different recordings and you
+                        will have to answer questions on what you hear. There
+                        will be time for you to read the instructions and
+                        questions, and you will have a chance to check your
+                        work.
+                    </p>
+                    <p className="mt-4 text-[11px] font-semibold text-[#111] sm:text-sm">
+                        Question 4 · Complete the note
+                    </p>
+                    <div className="mt-2 space-y-2 rounded-xl border border-black/[0.06] bg-[#fafafa] p-3">
+                        <div className="h-2 w-3/4 rounded bg-[#e5e5ea]" />
+                        <div className="h-2 w-full max-w-[200px] rounded bg-[#e5e5ea]" />
                     </div>
                 </div>
-            </header>
-
-            <main className="flex-1">
-                {/* Hero – two columns: copy left, image right; stacks on small screens */}
-                <section className="bg-muted/30 px-4 py-12 sm:px-6 sm:py-16 md:py-20">
-                    <div className="container mx-auto grid max-w-6xl items-center gap-8 md:grid-cols-2 md:gap-12">
-                        <div className="min-w-0">
-                            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-                                Take your mock tests online. Book practice
-                                sessions in one place.
-                            </h1>
-                            <p className="text-muted-foreground mt-4 max-w-xl text-base sm:text-lg">
-                                Teachers set availability. Students pick
-                                packages and book real-time sessions—all from
-                                home. One platform for admins, teachers, and
-                                students—no spreadsheets, no chaos.
-                            </p>
-                            <div className="mt-8 flex flex-wrap gap-3">
-                                <Link
-                                    href="/register"
-                                    className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex rounded-md px-6 py-3 text-sm font-medium"
-                                >
-                                    Get started
-                                </Link>
-                                <Link
-                                    href="/login"
-                                    className="border-border bg-background hover:bg-muted inline-flex rounded-md border px-6 py-3 text-sm font-medium"
-                                >
-                                    See how it works
-                                </Link>
-                            </div>
-                            <p className="text-muted-foreground mt-4 text-sm">
-                                Used by teams running mock tests and live
-                                practice in one place.
-                            </p>
-                        </div>
-                        <div className="relative flex min-w-0 justify-center md:justify-end">
-                            <div className="relative w-full max-w-md overflow-hidden rounded-xl">
-                                <Image
-                                    src="/online.svg"
-                                    alt="Online mock tests and practice sessions"
-                                    width={480}
-                                    height={360}
-                                    className="h-auto w-full object-contain"
-                                    priority
-                                    unoptimized
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Most students / pain points – centered heading + 3 blocks + paragraph */}
-                <section className="px-4 py-12 sm:px-6 sm:py-16">
-                    <div className="container mx-auto max-w-6xl">
-                        <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">
-                            Running mock tests? Most people still juggle between{" "}
-                            <br />
-                            <span className="text-primary">
-                                test centers and exam halls.
-                            </span>
-                        </h2>
-                        <div className="mt-10 grid gap-8 sm:grid-cols-3">
-                            <div className="flex flex-col gap-2">
-                                <div className="flex gap-4">
-                                    <span className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
-                                        <DocIcon className="size-5" />
-                                    </span>
-                                    <p className="text-muted-foreground text-sm">
-                                        Paper or spreadsheets don’t reflect
-                                        who’s free and who’s booked.
-                                    </p>
-                                </div>
-                                <p className="text-muted-foreground pl-14 text-sm">
-                                    When availability lives in docs or inboxes,
-                                    students and teachers waste time figuring
-                                    out free slots—and double bookings slip
-                                    through.
-                                </p>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <div className="flex gap-4">
-                                    <span className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
-                                        <DocIcon className="size-5" />
-                                    </span>
-                                    <p className="text-muted-foreground text-sm">
-                                        Chasing availability across tools wastes
-                                        time for everyone.
-                                    </p>
-                                </div>
-                                <p className="text-muted-foreground pl-14 text-sm">
-                                    Switching between email, calendars, and
-                                    sheets means missed messages and mismatched
-                                    expectations. One place keeps everyone on
-                                    the same page.
-                                </p>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <div className="flex gap-4">
-                                    <span className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
-                                        <DocIcon className="size-5" />
-                                    </span>
-                                    <p className="text-muted-foreground text-sm">
-                                        Package and class counts get lost
-                                        between systems.
-                                    </p>
-                                </div>
-                                <p className="text-muted-foreground pl-14 text-sm">
-                                    Without a single record, remaining classes
-                                    and enrollments get out of sync. IVCS tracks
-                                    packages and usage so nothing is lost in
-                                    translation.
-                                </p>
-                            </div>
-                        </div>
-                        <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-center text-sm">
-                            IVCS gives you one place to set availability, enroll
-                            in packages, and book mock tests and practice
-                            sessions—so students and teachers stay aligned.
-                        </p>
-                    </div>
-                </section>
-
-                {/* Merged: A better way + Platform built for – one section with comfort-from-home */}
-                <section className="bg-muted/20 px-4 py-12 sm:px-6 sm:py-16">
-                    <div className="container mx-auto max-w-6xl">
-                        <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">
-                            A platform built for online mock tests—take them
-                            from the{" "}
-                            <span className="text-primary">
-                                comfort of your home
-                            </span>
-                        </h2>
-                        <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-center text-sm">
-                            No commute, no stress. Prepare at your own pace with
-                            real availability, instant booking, and one simple
-                            dashboard.
-                        </p>
-                        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                            <div className="rounded-lg border border-border bg-card p-6">
-                                <span className="bg-primary/10 text-primary inline-flex size-10 items-center justify-center rounded-lg">
-                                    <HomeIcon className="size-5" />
-                                </span>
-                                <h3 className="mt-4 font-semibold text-foreground">
-                                    From the comfort of home
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm">
-                                    Take mock tests and practice sessions
-                                    wherever you're most at ease. No need to
-                                    travel—just log in and go.
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-border bg-card p-6">
-                                <span className="bg-primary/10 text-primary inline-flex size-10 items-center justify-center rounded-lg">
-                                    <MonitorIcon className="size-5" />
-                                </span>
-                                <h3 className="mt-4 font-semibold text-foreground">
-                                    Real availability
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm">
-                                    Teachers set slots. Students see only open
-                                    times and book from their package.
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-border bg-card p-6">
-                                <span className="bg-primary/10 text-primary inline-flex size-10 items-center justify-center rounded-lg">
-                                    <CheckIcon className="size-5" />
-                                </span>
-                                <h3 className="mt-4 font-semibold text-foreground">
-                                    Instant booking
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm">
-                                    One click to book. Class count updates
-                                    automatically so nothing is overbooked.
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-border bg-card p-6">
-                                <span className="bg-primary/10 text-primary inline-flex size-10 items-center justify-center rounded-lg">
-                                    <ChartIcon className="size-5" />
-                                </span>
-                                <h3 className="mt-4 font-semibold text-foreground">
-                                    One dashboard
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm">
-                                    Admin, teacher, and student views in one
-                                    platform. No more switching tools.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Everything you need – 4 detailed modules (kept as 5th section) */}
-                <section className="bg-muted/20 px-4 py-12 sm:px-6 sm:py-16">
-                    <div className="container mx-auto max-w-6xl">
-                        <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">
-                            Everything you need in{" "}
-                            <span className="text-primary">one place</span>
-                        </h2>
-                        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                            <div className="rounded-lg border border-border bg-card p-6">
-                                <span className="bg-primary/10 text-primary inline-flex size-10 items-center justify-center rounded-lg">
-                                    <CalendarIcon className="size-5" />
-                                </span>
-                                <h3 className="mt-4 font-semibold text-foreground">
-                                    Availability
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm">
-                                    Set your open slots by date and time.
-                                    Students only see times you’ve marked
-                                    available.
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-border bg-card p-6">
-                                <span className="bg-primary/10 text-primary inline-flex size-10 items-center justify-center rounded-lg">
-                                    <PencilIcon className="size-5" />
-                                </span>
-                                <h3 className="mt-4 font-semibold text-foreground">
-                                    Bookings
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm">
-                                    Book a session from an enrolled package. One
-                                    class is deducted automatically.
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-border bg-card p-6">
-                                <span className="bg-primary/10 text-primary inline-flex size-10 items-center justify-center rounded-lg">
-                                    <PackageIcon className="size-5" />
-                                </span>
-                                <h3 className="mt-4 font-semibold text-foreground">
-                                    Packages
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm">
-                                    Enroll in packages and see remaining
-                                    classes. No spreadsheets required.
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-border bg-card p-6">
-                                <span className="bg-primary/10 text-primary inline-flex size-10 items-center justify-center rounded-lg">
-                                    <MicIcon className="size-5" />
-                                </span>
-                                <h3 className="mt-4 font-semibold text-foreground">
-                                    Roles
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm">
-                                    Admin, teacher, and student dashboards with
-                                    the right tools for each role.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <ProgressBarsSection />
-
-                {/* Simple pricing – one card */}
-                <section className="bg-muted/20 px-4 py-12 sm:px-6 sm:py-16">
-                    <div className="container mx-auto max-w-6xl">
-                        <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">
-                            Simple pricing
-                        </h2>
-                        <div className="border-border bg-card mx-auto mt-10 max-w-md rounded-lg border p-6 shadow-sm">
-                            <h3 className="font-semibold text-foreground">
-                                Mock test & session packages
-                            </h3>
-                            <p className="text-muted-foreground mt-1 text-sm">
-                                Book mock tests and practice sessions from
-                                packages that fit your goals.
-                            </p>
-                            <ul className="text-muted-foreground mt-4 space-y-2 text-sm">
-                                <li>• Clear class count per package</li>
-                                <li>• Book from your enrolled packages</li>
-                                <li>• One place for students and teachers</li>
-                            </ul>
-                            <p className="mt-4 text-2xl font-bold text-foreground">
-                                From your admin
-                            </p>
-                            <p className="text-muted-foreground text-sm">
-                                Packages and pricing set by your organization.
-                            </p>
-                            <Link
-                                href="/register"
-                                className="bg-primary text-primary-foreground hover:bg-primary/90 mt-6 block w-full rounded-md py-3 text-center text-sm font-medium"
-                            >
-                                Get started
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Dark CTA – Know your level / Start */}
-                <section className="bg-foreground px-4 py-12 sm:px-6 sm:py-16">
-                    <div className="container mx-auto max-w-3xl text-center">
-                        <h2 className="text-2xl font-bold text-background sm:text-3xl">
-                            Ready to take your mock tests online?
-                        </h2>
-                        <p className="text-background/80 mt-4 text-base">
-                            Join IVCS and keep availability, packages, and
-                            bookings in sync so you as a student can focus on
-                            practice, not paperwork.
-                        </p>
-                        <Link
-                            href="/register"
-                            className="bg-background text-foreground hover:bg-background/90 mt-8 inline-block rounded-md px-6 py-3 text-sm font-medium"
-                        >
-                            Get started
-                        </Link>
-                    </div>
-                </section>
-
-                {/* Footer – 4 columns + bottom bar */}
-                <footer className="border-border border-t px-4 py-10 sm:px-6">
-                    <div className="container mx-auto max-w-6xl">
-                        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
-                            <div>
-                                <h4 className="font-semibold text-foreground">
-                                    Product
-                                </h4>
-                                <ul className="text-muted-foreground mt-3 space-y-2 text-sm">
-                                    <li>
-                                        <Link
-                                            href="/packages"
-                                            className="hover:text-foreground"
-                                        >
-                                            Packages
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            href="/calendar"
-                                            className="hover:text-foreground"
-                                        >
-                                            Calendar
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-foreground">
-                                    App
-                                </h4>
-                                <ul className="text-muted-foreground mt-3 space-y-2 text-sm">
-                                    <li>
-                                        <Link
-                                            href="/login"
-                                            className="hover:text-foreground"
-                                        >
-                                            Login
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            href="/register"
-                                            className="hover:text-foreground"
-                                        >
-                                            Sign up
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-foreground">
-                                    Company
-                                </h4>
-                                <ul className="text-muted-foreground mt-3 space-y-2 text-sm">
-                                    <li>
-                                        <span className="cursor-default">
-                                            IVCS
-                                        </span>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-foreground">
-                                    Legal
-                                </h4>
-                                <ul className="text-muted-foreground mt-3 space-y-2 text-sm">
-                                    <li>
-                                        <span className="cursor-default">
-                                            Privacy
-                                        </span>
-                                    </li>
-                                    <li>
-                                        <span className="cursor-default">
-                                            Terms
-                                        </span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="border-border mt-10 flex flex-col items-center justify-between gap-4 border-t pt-6 sm:flex-row">
-                            <Link
-                                href="/"
-                                className="flex items-center gap-2 font-semibold text-foreground"
-                            >
-                                <span className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded">
-                                    <LogoIcon className="size-3" />
-                                </span>
-                                IVCS
-                            </Link>
-                            <p className="text-muted-foreground text-sm">
-                                © {new Date().getFullYear()} IVCS. All rights
-                                reserved.
-                            </p>
-                        </div>
-                    </div>
-                </footer>
-            </main>
+            </div>
+            <div className="flex items-center justify-between border-t border-black/[0.06] bg-white px-4 py-2.5 text-[11px] font-semibold">
+                <span style={{ color: accent }}>← Previous</span>
+                <span className="text-[#888]">4 / 40</span>
+                <span style={{ color: accent }}>Next →</span>
+            </div>
         </div>
     );
 }
+
+function WritingFeedbackMock() {
+    return (
+        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_25px_60px_-15px_rgba(15,15,25,0.25)]">
+            <div
+                className="flex items-center justify-between border-b border-black/[0.06] px-4 py-3"
+                style={{ backgroundColor: `${accent}0f` }}
+            >
+                <span className="text-xs font-bold text-[#222]">
+                    Writing Task 2 · Feedback
+                </span>
+                <span
+                    className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white"
+                    style={{ backgroundColor: accent }}
+                >
+                    Reviewed
+                </span>
+            </div>
+            <div className="grid gap-3 p-4 sm:grid-cols-[1fr_11rem]">
+                <div className="min-h-[140px] rounded-xl border border-black/[0.06] bg-[#fafafa] p-3 text-[11px] leading-relaxed text-[#333]">
+                    <p>
+                        <mark
+                            className="rounded px-0.5"
+                            style={{ backgroundColor: `${accent}33` }}
+                        >
+                            Governments should invest
+                        </mark>{" "}
+                        more in public transport to reduce congestion in cities…
+                    </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                    {(
+                        [
+                            ["Grammar", "Article use; tense consistency"],
+                            ["Cohesion", "Linking words in paragraph 2"],
+                            ["Vocab", "Academic collocations"],
+                        ] as const
+                    ).map(([title, note]) => (
+                        <div
+                            key={title}
+                            className="rounded-lg border border-black/[0.06] bg-white p-2.5 shadow-sm"
+                        >
+                            <p
+                                className="text-[10px] font-bold"
+                                style={{ color: accent }}
+                            >
+                                {title}
+                            </p>
+                            <p className="mt-0.5 text-[10px] text-[#555]">
+                                {note}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ReportMock() {
+    return (
+        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_25px_60px_-15px_rgba(15,15,25,0.25)]">
+            <div className="border-b border-black/[0.06] bg-[#f8f8fa] px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#666]">
+                    Performance report
+                </p>
+                <div className="mt-2 flex flex-wrap items-end gap-2">
+                    <Display className="text-3xl font-semibold text-[#111]">
+                        6.5
+                    </Display>
+                    <span className="text-xs font-medium text-[#555]">
+                        Competent user
+                    </span>
+                </div>
+            </div>
+            <div className="space-y-4 p-4">
+                {(
+                    [
+                        ["Listening", 82],
+                        ["Reading", 70],
+                        ["Writing", 65],
+                        ["Speaking", 74],
+                    ] as const
+                ).map(([skill, pct]) => (
+                    <div key={skill}>
+                        <div className="flex justify-between text-[10px] font-semibold text-[#444]">
+                            <span>{skill}</span>
+                            <span>{pct}%</span>
+                        </div>
+                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-[#eee]">
+                            <div
+                                className="h-full rounded-full"
+                                style={{
+                                    width: `${pct}%`,
+                                    backgroundColor: accent,
+                                }}
+                            />
+                        </div>
+                    </div>
+                ))}
+                <div className="rounded-lg border border-black/[0.06] bg-[#fafafa] p-3">
+                    <p className="text-[9px] font-bold uppercase text-[#888]">
+                        Score trend
+                    </p>
+                    <div className="mt-2 flex h-12 items-end gap-1">
+                        {[40, 55, 48, 62, 58, 70, 65].map((h, i) => (
+                            <div
+                                key={i}
+                                className="flex-1 rounded-t-sm opacity-90"
+                                style={{
+                                    height: `${h}%`,
+                                    backgroundColor: accent,
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default async function HomePage() {
+    const footerPages = await prisma.staticPage.findMany({
+        where: { isActive: true },
+        select: { title: true, slug: true },
+        orderBy: { createdAt: "asc" },
+    });
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "ScoreMirror",
+        url: "https://scoremirror.test",
+        description:
+            "Full computer-based IELTS mock tests with human review and performance reports.",
+    };
+
+    return (
+        <div className="flex min-h-svh flex-col">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            {/* Hero */}
+            <section
+                className="relative pb-16 pt-28 sm:pb-24 sm:pt-32 lg:pb-28 lg:pt-36"
+                style={{ backgroundColor: dark }}
+            >
+                <LandingHeader />
+
+                <div className="relative z-[1] mx-auto grid max-w-6xl items-center gap-10 px-4 sm:gap-14 sm:px-6 lg:grid-cols-2 lg:gap-16">
+                    <div className="min-w-0 text-center lg:text-left">
+                        <p
+                            className="mb-5 inline-flex rounded-full px-3.5 py-1.5 text-xs font-medium text-white sm:text-[13px]"
+                            style={{ backgroundColor: `${accent}cc` }}
+                        >
+                            Computer-Based IELTS — Academic &amp; General
+                        </p>
+                        <h1 className="text-[1.75rem] font-normal leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.75rem] md:leading-[1.12]">
+                            <Display>
+                                Walk into your IELTS exam{" "}
+                                <em
+                                    className="font-semibold italic"
+                                    style={{ color: accent }}
+                                >
+                                    already familiar
+                                </em>{" "}
+                                with it.
+                            </Display>
+                        </h1>
+                        <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/65 sm:text-base lg:mx-0 mx-auto">
+                            Practice in a timed, computer-delivered environment
+                            that mirrors the real test — so pacing, navigation,
+                            and focus feel second nature.
+                        </p>
+                        <div className="mt-8 flex flex-col flex-wrap justify-center gap-3 sm:flex-row sm:gap-4 lg:justify-start">
+                            <Link
+                                href="/packages"
+                                className="inline-flex min-h-12 items-center justify-center rounded-2xl px-7 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
+                                style={{
+                                    backgroundColor: accent,
+                                    boxShadow: `0 12px 40px -8px ${accent}88`,
+                                }}
+                            >
+                                Start a Mock Test
+                            </Link>
+                            <Link
+                                href="#experience"
+                                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/40 bg-transparent px-7 text-sm font-semibold text-white transition hover:bg-white/10 sm:min-h-0 sm:px-8 sm:py-3.5"
+                            >
+                                Preview the experience
+                            </Link>
+                        </div>
+                        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+                            <div className="flex -space-x-2.5">
+                                {[
+                                    "#a78bfa",
+                                    "#818cf8",
+                                    "#c084fc",
+                                    "#22d3ee",
+                                ].map((c, i) => (
+                                    <span
+                                        key={i}
+                                        className="inline-flex size-9 items-center justify-center rounded-full border-2 border-[#0B0B0F] text-[10px] font-bold text-white"
+                                        style={{ backgroundColor: c }}
+                                        aria-hidden
+                                    >
+                                        {String.fromCharCode(65 + i)}
+                                    </span>
+                                ))}
+                            </div>
+                            <p className="max-w-[260px] text-left text-xs text-white/55 sm:max-w-none sm:text-sm">
+                                <span className="text-white/85 font-medium">
+                                    4,200+ candidates
+                                </span>{" "}
+                                preparing across Nepal.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="relative flex min-w-0 justify-center lg:justify-end">
+                        <div className="relative w-full max-w-[min(100%,520px)]">
+                            <div
+                                className="absolute -inset-4 -z-10 rounded-[2rem] opacity-40 blur-3xl sm:-inset-6"
+                                style={{
+                                    background: `radial-gradient(ellipse at center, ${accent}55, transparent 65%)`,
+                                }}
+                                aria-hidden
+                            />
+                            <Image
+                                src="/hero.png"
+                                alt="Computer-based IELTS reading test interface preview"
+                                width={1040}
+                                height={780}
+                                className="h-auto w-full rounded-2xl object-contain shadow-2xl"
+                                priority
+                                sizes="(max-width: 1024px) 100vw, 520px"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Transition quote */}
+            <section
+                className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
+                style={{ backgroundColor: light }}
+            >
+                <p className="mx-auto max-w-3xl text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
+                    <Display>
+                        You are not practising questions. You are{" "}
+                        <em
+                            className="font-semibold italic"
+                            style={{ color: accent }}
+                        >
+                            rehearsing the exam.
+                        </em>
+                    </Display>
+                </p>
+            </section>
+
+            {/* The Experience */}
+            <section
+                id="experience"
+                className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
+                style={{ backgroundColor: light }}
+            >
+                <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                    <div className="order-2 lg:order-1">
+                        <ListeningMock />
+                    </div>
+                    <div className="order-1 lg:order-2">
+                        <p
+                            className="text-xs font-bold uppercase tracking-[0.2em]"
+                            style={{ color: accent }}
+                        >
+                            The experience
+                        </p>
+                        <h2 className="mt-3 text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
+                            <Display>
+                                Designed around the{" "}
+                                <em
+                                    className="font-semibold italic"
+                                    style={{ color: accent }}
+                                >
+                                    real exam experience
+                                </em>
+                            </Display>
+                        </h2>
+                        <div className="mt-8 space-y-6 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
+                            <p>
+                                <strong className="text-[#0B0B0F]">
+                                    Timed sections that respect real
+                                    constraints.
+                                </strong>{" "}
+                                Each part runs on the clock, with navigation and
+                                prompts aligned to what you will see on test
+                                day.
+                            </p>
+                            <p>
+                                <strong className="text-[#0B0B0F]">
+                                    Continuous, distraction-minimised flow.
+                                </strong>{" "}
+                                Stay inside one coherent interface from
+                                listening through to writing, without breaking
+                                your focus.
+                            </p>
+                            <p>
+                                <strong className="text-[#0B0B0F]">
+                                    Navigation mirrors the official layout.
+                                </strong>{" "}
+                                Learn where controls live now — so you are never
+                                hunting for buttons when it counts.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Human Review */}
+            <section className="bg-white px-4 py-16 sm:px-6 sm:py-20 md:py-24">
+                <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                    <div className="order-1">
+                        <p
+                            className="text-xs font-bold uppercase tracking-[0.2em]"
+                            style={{ color: accent }}
+                        >
+                            Human review
+                        </p>
+                        <h2 className="mt-3 text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
+                            <Display>
+                                Reviewed by experienced{" "}
+                                <em
+                                    className="font-semibold italic"
+                                    style={{ color: accent }}
+                                >
+                                    IELTS instructors
+                                </em>
+                            </Display>
+                        </h2>
+                        <p className="mt-6 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
+                            Automated scoring can miss nuance. Our instructors
+                            comment on task achievement, coherence, grammar, and
+                            vocabulary — with actionable notes you can apply on
+                            your next attempt.
+                        </p>
+                        <ul className="mt-8 space-y-4">
+                            <CheckLi>
+                                Personalised comments tied to band descriptors
+                            </CheckLi>
+                            <CheckLi>
+                                Highlighted patterns in grammar and vocabulary
+                            </CheckLi>
+                            <CheckLi>
+                                Suggested upgrades for cohesion and tone
+                            </CheckLi>
+                        </ul>
+                    </div>
+                    <div className="order-2">
+                        <WritingFeedbackMock />
+                    </div>
+                </div>
+            </section>
+
+            {/* Performance report */}
+            <section className="bg-white px-4 py-16 sm:px-6 sm:py-20 md:py-24">
+                <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                    <div className="order-1">
+                        <p
+                            className="text-xs font-bold uppercase tracking-[0.2em]"
+                            style={{ color: accent }}
+                        >
+                            Performance report
+                        </p>
+                        <h2 className="mt-3 text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
+                            <Display>
+                                Understand your{" "}
+                                <em
+                                    className="font-semibold italic"
+                                    style={{ color: accent }}
+                                >
+                                    performance clearly
+                                </em>
+                            </Display>
+                        </h2>
+                        <p className="mt-6 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
+                            See strengths and weak spots at a glance — with
+                            overall band, skill breakdowns, and a trend view so
+                            you know whether you are improving week to week.
+                        </p>
+                        <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
+                            {(
+                                [
+                                    ["6.5", "Overall"],
+                                    ["7.0", "Listening"],
+                                    ["6.0", "Writing"],
+                                ] as const
+                            ).map(([score, label]) => (
+                                <div
+                                    key={label}
+                                    className="rounded-xl border border-black/[0.06] bg-[#fafafa] px-3 py-4 text-center shadow-sm sm:px-4"
+                                >
+                                    <p
+                                        className="text-lg font-semibold text-[#111] sm:text-xl"
+                                        style={{
+                                            fontFamily:
+                                                "var(--font-playfair), serif",
+                                        }}
+                                    >
+                                        {score}
+                                    </p>
+                                    <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-[#666] sm:text-[11px]">
+                                        {label}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="order-2">
+                        <ReportMock />
+                    </div>
+                </div>
+            </section>
+
+            {/* Pricing */}
+            <section
+                className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
+                style={{ backgroundColor: light }}
+            >
+                <div className="mx-auto max-w-6xl text-center">
+                    <h2 className="text-2xl text-[#0B0B0F] sm:text-3xl md:text-[2rem]">
+                        <Display>Simple and transparent</Display>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-sm text-[#5c5c6a] sm:text-base">
+                        One full mock. Every section. No surprise add-ons.
+                    </p>
+                    <div className="mx-auto mt-12 max-w-md rounded-2xl border border-black/[0.06] bg-white px-8 py-10 text-left shadow-[0_24px_60px_-24px_rgba(15,15,25,0.2)] sm:px-10 sm:py-12">
+                        <h3 className="text-lg font-bold text-[#0B0B0F]">
+                            Full IELTS Mock Test
+                        </h3>
+                        <p className="mt-4 flex items-baseline gap-2">
+                            <span className="text-sm font-medium text-[#5c5c6a]">
+                                Rs
+                            </span>
+                            <Display className="text-5xl font-semibold text-[#0B0B0F]">
+                                1200
+                            </Display>
+                            <span className="text-sm text-[#5c5c6a]">
+                                / per test
+                            </span>
+                        </p>
+                        <ul className="mt-8 space-y-4">
+                            <CheckLi>All four skills in one sitting</CheckLi>
+                            <CheckLi>Computer-delivered interface</CheckLi>
+                            <CheckLi>
+                                Timed sections and official-style flow
+                            </CheckLi>
+                            <CheckLi>Human feedback on writing tasks</CheckLi>
+                            <CheckLi>Downloadable performance report</CheckLi>
+                        </ul>
+                        <Link
+                            href="/packages"
+                            className="mt-10 flex min-h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-white transition hover:opacity-95 sm:min-h-[3.25rem]"
+                            style={{ backgroundColor: accent }}
+                        >
+                            Start Mock Test
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* Final CTA */}
+            <section
+                className="px-4 py-16 text-center sm:px-6 sm:py-24 md:py-28"
+                style={{ backgroundColor: dark }}
+            >
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/70">
+                    Ready when you are
+                </p>
+                <h2 className="mx-auto mt-4 max-w-3xl text-2xl text-white sm:text-3xl md:text-[2.5rem] md:leading-tight">
+                    <Display>
+                        Start before{" "}
+                        <em
+                            className="font-semibold italic"
+                            style={{ color: accent }}
+                        >
+                            you feel ready
+                        </em>
+                    </Display>
+                </h2>
+                <p className="mx-auto mt-5 max-w-lg text-sm text-white/65 sm:text-base">
+                    Experience the exam once — everything changes after that.
+                </p>
+                <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                    <Link
+                        href="/packages"
+                        className="inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-semibold text-white transition hover:opacity-95"
+                        style={{ backgroundColor: accent }}
+                    >
+                        Start Mock Test
+                    </Link>
+                    <Link
+                        href="#experience"
+                        className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/35 px-8 text-sm font-semibold text-white transition hover:bg-white/10"
+                    >
+                        Preview first
+                    </Link>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="border-t border-black/[0.06] bg-white px-4 py-10 sm:px-6 sm:py-12">
+                <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 md:flex-row md:justify-between">
+                    <Link
+                        href="/"
+                        className="text-lg font-semibold"
+                        style={{ color: accent }}
+                    >
+                        ScoreMirror
+                    </Link>
+                    <nav
+                        className="flex flex-wrap items-center justify-center gap-6 text-sm text-[#3d3d4a]"
+                        aria-label="Footer"
+                    >
+                        {footerPages.map((page) => (
+                            <Link
+                                key={page.slug}
+                                href={`/${page.slug}`}
+                                className="hover:opacity-80"
+                            >
+                                {page.title}
+                            </Link>
+                        ))}
+                    </nav>
+                    <p className="text-xs text-[#9a9aaa]">
+                        © {new Date().getFullYear()} ScoreMirror
+                    </p>
+                </div>
+            </footer>
+        </div>
+    );
+}
+

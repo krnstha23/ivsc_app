@@ -29,6 +29,7 @@ export type TeacherProfileMinAggregateOutputType = {
   userId: string | null
   bio: string | null
   isActive: boolean | null
+  isApproved: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -38,6 +39,7 @@ export type TeacherProfileMaxAggregateOutputType = {
   userId: string | null
   bio: string | null
   isActive: boolean | null
+  isApproved: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -47,6 +49,7 @@ export type TeacherProfileCountAggregateOutputType = {
   userId: number
   bio: number
   isActive: number
+  isApproved: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -58,6 +61,7 @@ export type TeacherProfileMinAggregateInputType = {
   userId?: true
   bio?: true
   isActive?: true
+  isApproved?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -67,6 +71,7 @@ export type TeacherProfileMaxAggregateInputType = {
   userId?: true
   bio?: true
   isActive?: true
+  isApproved?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -76,6 +81,7 @@ export type TeacherProfileCountAggregateInputType = {
   userId?: true
   bio?: true
   isActive?: true
+  isApproved?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -158,6 +164,7 @@ export type TeacherProfileGroupByOutputType = {
   userId: string
   bio: string | null
   isActive: boolean
+  isApproved: boolean
   createdAt: Date
   updatedAt: Date
   _count: TeacherProfileCountAggregateOutputType | null
@@ -188,13 +195,13 @@ export type TeacherProfileWhereInput = {
   userId?: Prisma.StringFilter<"TeacherProfile"> | string
   bio?: Prisma.StringNullableFilter<"TeacherProfile"> | string | null
   isActive?: Prisma.BoolFilter<"TeacherProfile"> | boolean
+  isApproved?: Prisma.BoolFilter<"TeacherProfile"> | boolean
   createdAt?: Prisma.DateTimeFilter<"TeacherProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TeacherProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   availability?: Prisma.AvailabilityListRelationFilter
   bookings?: Prisma.BookingListRelationFilter
   classHistory?: Prisma.ClassMetadataListRelationFilter
-  packages?: Prisma.TeacherPackageListRelationFilter
 }
 
 export type TeacherProfileOrderByWithRelationInput = {
@@ -202,13 +209,13 @@ export type TeacherProfileOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isApproved?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   availability?: Prisma.AvailabilityOrderByRelationAggregateInput
   bookings?: Prisma.BookingOrderByRelationAggregateInput
   classHistory?: Prisma.ClassMetadataOrderByRelationAggregateInput
-  packages?: Prisma.TeacherPackageOrderByRelationAggregateInput
 }
 
 export type TeacherProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -219,13 +226,13 @@ export type TeacherProfileWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TeacherProfileWhereInput | Prisma.TeacherProfileWhereInput[]
   bio?: Prisma.StringNullableFilter<"TeacherProfile"> | string | null
   isActive?: Prisma.BoolFilter<"TeacherProfile"> | boolean
+  isApproved?: Prisma.BoolFilter<"TeacherProfile"> | boolean
   createdAt?: Prisma.DateTimeFilter<"TeacherProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TeacherProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   availability?: Prisma.AvailabilityListRelationFilter
   bookings?: Prisma.BookingListRelationFilter
   classHistory?: Prisma.ClassMetadataListRelationFilter
-  packages?: Prisma.TeacherPackageListRelationFilter
 }, "id" | "userId">
 
 export type TeacherProfileOrderByWithAggregationInput = {
@@ -233,6 +240,7 @@ export type TeacherProfileOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isApproved?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TeacherProfileCountOrderByAggregateInput
@@ -248,6 +256,7 @@ export type TeacherProfileScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"TeacherProfile"> | string
   bio?: Prisma.StringNullableWithAggregatesFilter<"TeacherProfile"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"TeacherProfile"> | boolean
+  isApproved?: Prisma.BoolWithAggregatesFilter<"TeacherProfile"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TeacherProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TeacherProfile"> | Date | string
 }
@@ -256,13 +265,13 @@ export type TeacherProfileCreateInput = {
   id?: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutTeacherProfileInput
   availability?: Prisma.AvailabilityCreateNestedManyWithoutTeacherInput
   bookings?: Prisma.BookingCreateNestedManyWithoutTeacherInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileUncheckedCreateInput = {
@@ -270,25 +279,25 @@ export type TeacherProfileUncheckedCreateInput = {
   userId: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutTeacherInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutTeacherInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageUncheckedCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutTeacherProfileNestedInput
   availability?: Prisma.AvailabilityUpdateManyWithoutTeacherNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutTeacherNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUpdateManyWithoutTeacherNestedInput
 }
 
 export type TeacherProfileUncheckedUpdateInput = {
@@ -296,12 +305,12 @@ export type TeacherProfileUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutTeacherNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutTeacherNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUncheckedUpdateManyWithoutTeacherNestedInput
 }
 
 export type TeacherProfileCreateManyInput = {
@@ -309,6 +318,7 @@ export type TeacherProfileCreateManyInput = {
   userId: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -317,6 +327,7 @@ export type TeacherProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -326,6 +337,7 @@ export type TeacherProfileUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -340,6 +352,7 @@ export type TeacherProfileCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isApproved?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -349,6 +362,7 @@ export type TeacherProfileMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isApproved?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -358,6 +372,7 @@ export type TeacherProfileMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isApproved?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -397,20 +412,6 @@ export type TeacherProfileUncheckedUpdateOneWithoutUserNestedInput = {
   delete?: Prisma.TeacherProfileWhereInput | boolean
   connect?: Prisma.TeacherProfileWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.TeacherProfileUpdateToOneWithWhereWithoutUserInput, Prisma.TeacherProfileUpdateWithoutUserInput>, Prisma.TeacherProfileUncheckedUpdateWithoutUserInput>
-}
-
-export type TeacherProfileCreateNestedOneWithoutPackagesInput = {
-  create?: Prisma.XOR<Prisma.TeacherProfileCreateWithoutPackagesInput, Prisma.TeacherProfileUncheckedCreateWithoutPackagesInput>
-  connectOrCreate?: Prisma.TeacherProfileCreateOrConnectWithoutPackagesInput
-  connect?: Prisma.TeacherProfileWhereUniqueInput
-}
-
-export type TeacherProfileUpdateOneRequiredWithoutPackagesNestedInput = {
-  create?: Prisma.XOR<Prisma.TeacherProfileCreateWithoutPackagesInput, Prisma.TeacherProfileUncheckedCreateWithoutPackagesInput>
-  connectOrCreate?: Prisma.TeacherProfileCreateOrConnectWithoutPackagesInput
-  upsert?: Prisma.TeacherProfileUpsertWithoutPackagesInput
-  connect?: Prisma.TeacherProfileWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.TeacherProfileUpdateToOneWithWhereWithoutPackagesInput, Prisma.TeacherProfileUpdateWithoutPackagesInput>, Prisma.TeacherProfileUncheckedUpdateWithoutPackagesInput>
 }
 
 export type TeacherProfileCreateNestedOneWithoutAvailabilityInput = {
@@ -459,24 +460,24 @@ export type TeacherProfileCreateWithoutUserInput = {
   id?: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   availability?: Prisma.AvailabilityCreateNestedManyWithoutTeacherInput
   bookings?: Prisma.BookingCreateNestedManyWithoutTeacherInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileUncheckedCreateWithoutUserInput = {
   id?: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutTeacherInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutTeacherInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageUncheckedCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileCreateOrConnectWithoutUserInput = {
@@ -499,83 +500,19 @@ export type TeacherProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availability?: Prisma.AvailabilityUpdateManyWithoutTeacherNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutTeacherNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUpdateManyWithoutTeacherNestedInput
 }
 
 export type TeacherProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutTeacherNestedInput
-  bookings?: Prisma.BookingUncheckedUpdateManyWithoutTeacherNestedInput
-  classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUncheckedUpdateManyWithoutTeacherNestedInput
-}
-
-export type TeacherProfileCreateWithoutPackagesInput = {
-  id?: string
-  bio?: string | null
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutTeacherProfileInput
-  availability?: Prisma.AvailabilityCreateNestedManyWithoutTeacherInput
-  bookings?: Prisma.BookingCreateNestedManyWithoutTeacherInput
-  classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutTeacherInput
-}
-
-export type TeacherProfileUncheckedCreateWithoutPackagesInput = {
-  id?: string
-  userId: string
-  bio?: string | null
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutTeacherInput
-  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutTeacherInput
-  classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutTeacherInput
-}
-
-export type TeacherProfileCreateOrConnectWithoutPackagesInput = {
-  where: Prisma.TeacherProfileWhereUniqueInput
-  create: Prisma.XOR<Prisma.TeacherProfileCreateWithoutPackagesInput, Prisma.TeacherProfileUncheckedCreateWithoutPackagesInput>
-}
-
-export type TeacherProfileUpsertWithoutPackagesInput = {
-  update: Prisma.XOR<Prisma.TeacherProfileUpdateWithoutPackagesInput, Prisma.TeacherProfileUncheckedUpdateWithoutPackagesInput>
-  create: Prisma.XOR<Prisma.TeacherProfileCreateWithoutPackagesInput, Prisma.TeacherProfileUncheckedCreateWithoutPackagesInput>
-  where?: Prisma.TeacherProfileWhereInput
-}
-
-export type TeacherProfileUpdateToOneWithWhereWithoutPackagesInput = {
-  where?: Prisma.TeacherProfileWhereInput
-  data: Prisma.XOR<Prisma.TeacherProfileUpdateWithoutPackagesInput, Prisma.TeacherProfileUncheckedUpdateWithoutPackagesInput>
-}
-
-export type TeacherProfileUpdateWithoutPackagesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutTeacherProfileNestedInput
-  availability?: Prisma.AvailabilityUpdateManyWithoutTeacherNestedInput
-  bookings?: Prisma.BookingUpdateManyWithoutTeacherNestedInput
-  classHistory?: Prisma.ClassMetadataUpdateManyWithoutTeacherNestedInput
-}
-
-export type TeacherProfileUncheckedUpdateWithoutPackagesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutTeacherNestedInput
@@ -587,12 +524,12 @@ export type TeacherProfileCreateWithoutAvailabilityInput = {
   id?: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutTeacherProfileInput
   bookings?: Prisma.BookingCreateNestedManyWithoutTeacherInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileUncheckedCreateWithoutAvailabilityInput = {
@@ -600,11 +537,11 @@ export type TeacherProfileUncheckedCreateWithoutAvailabilityInput = {
   userId: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutTeacherInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageUncheckedCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileCreateOrConnectWithoutAvailabilityInput = {
@@ -627,12 +564,12 @@ export type TeacherProfileUpdateWithoutAvailabilityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutTeacherProfileNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutTeacherNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUpdateManyWithoutTeacherNestedInput
 }
 
 export type TeacherProfileUncheckedUpdateWithoutAvailabilityInput = {
@@ -640,23 +577,23 @@ export type TeacherProfileUncheckedUpdateWithoutAvailabilityInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutTeacherNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUncheckedUpdateManyWithoutTeacherNestedInput
 }
 
 export type TeacherProfileCreateWithoutBookingsInput = {
   id?: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutTeacherProfileInput
   availability?: Prisma.AvailabilityCreateNestedManyWithoutTeacherInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileUncheckedCreateWithoutBookingsInput = {
@@ -664,11 +601,11 @@ export type TeacherProfileUncheckedCreateWithoutBookingsInput = {
   userId: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutTeacherInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageUncheckedCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileCreateOrConnectWithoutBookingsInput = {
@@ -691,12 +628,12 @@ export type TeacherProfileUpdateWithoutBookingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutTeacherProfileNestedInput
   availability?: Prisma.AvailabilityUpdateManyWithoutTeacherNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUpdateManyWithoutTeacherNestedInput
 }
 
 export type TeacherProfileUncheckedUpdateWithoutBookingsInput = {
@@ -704,23 +641,23 @@ export type TeacherProfileUncheckedUpdateWithoutBookingsInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutTeacherNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUncheckedUpdateManyWithoutTeacherNestedInput
 }
 
 export type TeacherProfileCreateWithoutClassHistoryInput = {
   id?: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutTeacherProfileInput
   availability?: Prisma.AvailabilityCreateNestedManyWithoutTeacherInput
   bookings?: Prisma.BookingCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileUncheckedCreateWithoutClassHistoryInput = {
@@ -728,11 +665,11 @@ export type TeacherProfileUncheckedCreateWithoutClassHistoryInput = {
   userId: string
   bio?: string | null
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutTeacherInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutTeacherInput
-  packages?: Prisma.TeacherPackageUncheckedCreateNestedManyWithoutTeacherInput
 }
 
 export type TeacherProfileCreateOrConnectWithoutClassHistoryInput = {
@@ -755,12 +692,12 @@ export type TeacherProfileUpdateWithoutClassHistoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutTeacherProfileNestedInput
   availability?: Prisma.AvailabilityUpdateManyWithoutTeacherNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUpdateManyWithoutTeacherNestedInput
 }
 
 export type TeacherProfileUncheckedUpdateWithoutClassHistoryInput = {
@@ -768,11 +705,11 @@ export type TeacherProfileUncheckedUpdateWithoutClassHistoryInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutTeacherNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutTeacherNestedInput
-  packages?: Prisma.TeacherPackageUncheckedUpdateManyWithoutTeacherNestedInput
 }
 
 
@@ -784,14 +721,12 @@ export type TeacherProfileCountOutputType = {
   availability: number
   bookings: number
   classHistory: number
-  packages: number
 }
 
 export type TeacherProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   availability?: boolean | TeacherProfileCountOutputTypeCountAvailabilityArgs
   bookings?: boolean | TeacherProfileCountOutputTypeCountBookingsArgs
   classHistory?: boolean | TeacherProfileCountOutputTypeCountClassHistoryArgs
-  packages?: boolean | TeacherProfileCountOutputTypeCountPackagesArgs
 }
 
 /**
@@ -825,26 +760,19 @@ export type TeacherProfileCountOutputTypeCountClassHistoryArgs<ExtArgs extends r
   where?: Prisma.ClassMetadataWhereInput
 }
 
-/**
- * TeacherProfileCountOutputType without action
- */
-export type TeacherProfileCountOutputTypeCountPackagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TeacherPackageWhereInput
-}
-
 
 export type TeacherProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
   bio?: boolean
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   availability?: boolean | Prisma.TeacherProfile$availabilityArgs<ExtArgs>
   bookings?: boolean | Prisma.TeacherProfile$bookingsArgs<ExtArgs>
   classHistory?: boolean | Prisma.TeacherProfile$classHistoryArgs<ExtArgs>
-  packages?: boolean | Prisma.TeacherProfile$packagesArgs<ExtArgs>
   _count?: boolean | Prisma.TeacherProfileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teacherProfile"]>
 
@@ -853,6 +781,7 @@ export type TeacherProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   userId?: boolean
   bio?: boolean
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -863,6 +792,7 @@ export type TeacherProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   userId?: boolean
   bio?: boolean
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -873,17 +803,17 @@ export type TeacherProfileSelectScalar = {
   userId?: boolean
   bio?: boolean
   isActive?: boolean
+  isApproved?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TeacherProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "bio" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["teacherProfile"]>
+export type TeacherProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "bio" | "isActive" | "isApproved" | "createdAt" | "updatedAt", ExtArgs["result"]["teacherProfile"]>
 export type TeacherProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   availability?: boolean | Prisma.TeacherProfile$availabilityArgs<ExtArgs>
   bookings?: boolean | Prisma.TeacherProfile$bookingsArgs<ExtArgs>
   classHistory?: boolean | Prisma.TeacherProfile$classHistoryArgs<ExtArgs>
-  packages?: boolean | Prisma.TeacherProfile$packagesArgs<ExtArgs>
   _count?: boolean | Prisma.TeacherProfileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TeacherProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -900,13 +830,13 @@ export type $TeacherProfilePayload<ExtArgs extends runtime.Types.Extensions.Inte
     availability: Prisma.$AvailabilityPayload<ExtArgs>[]
     bookings: Prisma.$BookingPayload<ExtArgs>[]
     classHistory: Prisma.$ClassMetadataPayload<ExtArgs>[]
-    packages: Prisma.$TeacherPackagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
     bio: string | null
     isActive: boolean
+    isApproved: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["teacherProfile"]>
@@ -1307,7 +1237,6 @@ export interface Prisma__TeacherProfileClient<T, Null = never, ExtArgs extends r
   availability<T extends Prisma.TeacherProfile$availabilityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeacherProfile$availabilityArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AvailabilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bookings<T extends Prisma.TeacherProfile$bookingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeacherProfile$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   classHistory<T extends Prisma.TeacherProfile$classHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeacherProfile$classHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassMetadataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  packages<T extends Prisma.TeacherProfile$packagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeacherProfile$packagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeacherPackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1341,6 +1270,7 @@ export interface TeacherProfileFieldRefs {
   readonly userId: Prisma.FieldRef<"TeacherProfile", 'String'>
   readonly bio: Prisma.FieldRef<"TeacherProfile", 'String'>
   readonly isActive: Prisma.FieldRef<"TeacherProfile", 'Boolean'>
+  readonly isApproved: Prisma.FieldRef<"TeacherProfile", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"TeacherProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TeacherProfile", 'DateTime'>
 }
@@ -1808,30 +1738,6 @@ export type TeacherProfile$classHistoryArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.ClassMetadataScalarFieldEnum | Prisma.ClassMetadataScalarFieldEnum[]
-}
-
-/**
- * TeacherProfile.packages
- */
-export type TeacherProfile$packagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the TeacherPackage
-   */
-  select?: Prisma.TeacherPackageSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the TeacherPackage
-   */
-  omit?: Prisma.TeacherPackageOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TeacherPackageInclude<ExtArgs> | null
-  where?: Prisma.TeacherPackageWhereInput
-  orderBy?: Prisma.TeacherPackageOrderByWithRelationInput | Prisma.TeacherPackageOrderByWithRelationInput[]
-  cursor?: Prisma.TeacherPackageWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.TeacherPackageScalarFieldEnum | Prisma.TeacherPackageScalarFieldEnum[]
 }
 
 /**

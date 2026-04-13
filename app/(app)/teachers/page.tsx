@@ -17,7 +17,7 @@ export default async function TeachersPage() {
                 <h1 className="text-xl font-semibold">Teachers</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                     {canCreate
-                        ? "Click a date to add availability. Choose duration and time in the popup."
+                        ? "Click a date to add availability. Choose duration, time, and bundles in the popup."
                         : "View teacher availability. Click a slot count to see the day\u2019s schedule."}
                 </p>
             </div>

@@ -17,7 +17,11 @@ type BundleRow = {
     id: string;
     name: string;
     description: string | null;
-    price: number;
+    priceStandard: number;
+    pricePriority: number;
+    priceInstant: number;
+    duration: number;
+    hasEvaluation: boolean;
     discountPercent: number | null;
     isActive: boolean;
     isFeatured: boolean;
@@ -49,11 +53,27 @@ function BundleRow({
                 router.push(`/packages/bundles/${bundle.id}/edit`);
             }}
         >
-            <TableCell className="font-medium">{bundle.name}</TableCell>
+            <TableCell className="font-medium">
+                <div>{bundle.name}</div>
+                <div className="text-xs text-muted-foreground">
+                    {bundle.duration} min
+                    {bundle.hasEvaluation ? " · Eval" : ""}
+                </div>
+            </TableCell>
             <TableCell className="max-w-xs truncate text-muted-foreground">
                 {bundle.description ?? "—"}
             </TableCell>
-            <TableCell>{formatMoney(bundle.price)}</TableCell>
+            <TableCell className="align-top text-sm">
+                <div className="space-y-0.5 tabular-nums">
+                    <div>Std {formatMoney(bundle.priceStandard)}</div>
+                    <div className="text-muted-foreground">
+                        Pri {formatMoney(bundle.pricePriority)}
+                    </div>
+                    <div className="text-muted-foreground">
+                        Inst {formatMoney(bundle.priceInstant)}
+                    </div>
+                </div>
+            </TableCell>
             <TableCell className="tabular-nums">
                 {formatPercent(bundle.discountPercent)}
             </TableCell>
@@ -105,7 +125,7 @@ export function BundlesTable({
                     <TableRow>
                         <TableHead>Name</TableHead>
                         <TableHead>Description</TableHead>
-                        <TableHead>Price</TableHead>
+                        <TableHead>Prices (Std / Pri / Inst)</TableHead>
                         <TableHead>Discount</TableHead>
                         <TableHead>Packages</TableHead>
                         <TableHead>Status</TableHead>

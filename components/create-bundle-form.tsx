@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
     Select,
     SelectContent,
@@ -47,7 +48,11 @@ export function CreateBundleForm({
         id: string;
         name: string;
         description: string | null;
-        price: number;
+        priceStandard: number;
+        pricePriority: number;
+        priceInstant: number;
+        duration: number;
+        hasEvaluation: boolean;
         discountPercent: number | null;
         isActive: boolean;
         packageIds: string[];
@@ -56,8 +61,14 @@ export function CreateBundleForm({
     const [isActive, setIsActive] = React.useState<"true" | "false">(
         initial?.isActive === false ? "false" : "true",
     );
+    const [hasEvaluation, setHasEvaluation] = React.useState(
+        initial?.hasEvaluation ?? false,
+    );
     const [selectedIds, setSelectedIds] = React.useState<string[]>(
         initial?.packageIds ?? [],
+    );
+    const [durationValue, setDurationValue] = React.useState(
+        initial?.duration != null ? String(initial.duration) : "",
     );
 
     const [, formAction] = useActionState(
@@ -79,6 +90,8 @@ export function CreateBundleForm({
             {mode === "edit" && (
                 <input type="hidden" name="bundleId" value={initial?.id ?? ""} />
             )}
+            <input type="hidden" name="hasEvaluation" value={String(hasEvaluation)} />
+
             <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2 sm:col-span-2">
                     <Label htmlFor="name">Bundle name</Label>
@@ -87,7 +100,7 @@ export function CreateBundleForm({
                         name="name"
                         type="text"
                         required
-                        placeholder="e.g. Grade 10 Core"
+                        placeholder="e.g. IELTS Full Mock"
                         defaultValue={initial?.name ?? ""}
                     />
                 </div>
@@ -104,19 +117,24 @@ export function CreateBundleForm({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <Label htmlFor="price">Price</Label>
+                    <Label htmlFor="duration">Session duration (minutes)</Label>
                     <Input
-                        id="price"
-                        name="price"
+                        id="duration"
+                        name="duration"
                         type="number"
                         min="0"
-                        step="0.01"
+                        max="480"
+                        step="5"
                         required
-                        placeholder="0.00"
-                        defaultValue={
-                            initial?.price != null ? String(initial.price) : ""
-                        }
+                        placeholder="e.g. 30"
+                        value={durationValue}
+                        onChange={(e) => setDurationValue(e.target.value)}
                     />
+                    {durationValue === "0" && (
+                        <p className="text-sm text-muted-foreground">
+                            Writing-only bundle (no speaking session)
+                        </p>
+                    )}
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -135,6 +153,81 @@ export function CreateBundleForm({
                                 : ""
                         }
                     />
+                </div>
+
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                    <p className="text-sm font-medium text-foreground">
+                        Bundle price by lead-time tier
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                        Standard (&ge;48h), Priority (24&ndash;48h), Instant
+                        (same day).
+                    </p>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="priceStandard">Standard price</Label>
+                    <Input
+                        id="priceStandard"
+                        name="priceStandard"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        required
+                        placeholder="0.00"
+                        defaultValue={
+                            initial?.priceStandard != null
+                                ? String(initial.priceStandard)
+                                : ""
+                        }
+                    />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="pricePriority">Priority price</Label>
+                    <Input
+                        id="pricePriority"
+                        name="pricePriority"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        required
+                        placeholder="0.00"
+                        defaultValue={
+                            initial?.pricePriority != null
+                                ? String(initial.pricePriority)
+                                : ""
+                        }
+                    />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="priceInstant">Instant price</Label>
+                    <Input
+                        id="priceInstant"
+                        name="priceInstant"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        required
+                        placeholder="0.00"
+                        defaultValue={
+                            initial?.priceInstant != null
+                                ? String(initial.priceInstant)
+                                : ""
+                        }
+                    />
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <Switch
+                        id="hasEvaluation"
+                        checked={hasEvaluation}
+                        onCheckedChange={setHasEvaluation}
+                    />
+                    <Label htmlFor="hasEvaluation" className="cursor-pointer">
+                        Includes evaluation
+                    </Label>
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -217,4 +310,3 @@ export function CreateBundleForm({
         </form>
     );
 }
-

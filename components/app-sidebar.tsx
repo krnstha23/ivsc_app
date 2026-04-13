@@ -8,6 +8,15 @@ import {
     UsersGroupRounded,
     CartLarge2,
     LayersMinimalistic,
+    UserRounded,
+    CalendarMark,
+    Notebook,
+    UserCheck,
+    ClipboardCheck,
+    ClipboardList,
+    CalendarDate,
+    Chart,
+    Document,
 } from "@solar-icons/react";
 
 import { NavMain } from "@/components/nav-main";
@@ -29,6 +38,30 @@ const NAV_MAIN = [
         allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
     {
+        title: "Profile",
+        url: "/profile",
+        icon: UserRounded,
+        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
+    },
+    {
+        title: "My Bookings",
+        url: "/bookings",
+        icon: CalendarMark,
+        allowedRoles: ["USER"] as Role[],
+    },
+    {
+        title: "My Enrollments",
+        url: "/enrollments",
+        icon: ClipboardCheck,
+        allowedRoles: ["USER"] as Role[],
+    },
+    {
+        title: "My Sessions",
+        url: "/bookings/teaching",
+        icon: Notebook,
+        allowedRoles: ["TEACHER"] as Role[],
+    },
+    {
         title: "Calendar",
         url: "/calendar",
         icon: AlarmAdd,
@@ -47,6 +80,12 @@ const NAV_MAIN = [
         allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
     {
+        title: "Manage Teachers",
+        url: "/teachers/manage",
+        icon: UserCheck,
+        allowedRoles: ["ADMIN"] as Role[],
+    },
+    {
         title: "Students",
         url: "/students",
         icon: CartLarge2,
@@ -57,6 +96,30 @@ const NAV_MAIN = [
         url: "/packages",
         icon: CartLarge2,
         allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
+    },
+    {
+        title: "Enrollments",
+        url: "/enrollments",
+        icon: ClipboardList,
+        allowedRoles: ["ADMIN"] as Role[],
+    },
+    {
+        title: "Timetable",
+        url: "/timetable",
+        icon: CalendarDate,
+        allowedRoles: ["ADMIN"] as Role[],
+    },
+    {
+        title: "Static Pages",
+        url: "/pages",
+        icon: Document,
+        allowedRoles: ["ADMIN"] as Role[],
+    },
+    {
+        title: "Reports",
+        url: "/reports",
+        icon: Chart,
+        allowedRoles: ["ADMIN"] as Role[],
     },
 ];
 

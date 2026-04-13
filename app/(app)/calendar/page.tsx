@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Calendar } from "@/components/calendar";
+import { CalendarWithBookings } from "@/components/calendar-with-bookings";
 
 export default async function CalendarPage() {
   const session = await auth();
@@ -13,11 +13,12 @@ export default async function CalendarPage() {
       <div className="px-4 lg:px-6">
         <h1 className="text-xl font-semibold">Calendar</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          View and navigate dates. Events and scheduling can be added later.
+          View your confirmed bookings. Click a date to see the day&apos;s
+          schedule.
         </p>
       </div>
       <div className="px-4 lg:px-6">
-        <Calendar />
+        <CalendarWithBookings />
       </div>
     </div>
   );

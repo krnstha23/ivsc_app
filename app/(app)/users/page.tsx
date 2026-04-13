@@ -13,6 +13,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { approveTeacher } from "@/app/(app)/users/actions";
 
 type SearchParams = {
     name?: string;
@@ -85,6 +88,7 @@ export default async function UsersPage({
             lastName: true,
             role: true,
             isActive: true,
+            teacherProfile: { select: { isApproved: true } },
         },
         orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     });
@@ -120,13 +124,16 @@ export default async function UsersPage({
                                 <TableHead>Email</TableHead>
                                 <TableHead>User type</TableHead>
                                 <TableHead>Status</TableHead>
+                                <TableHead className="w-[90px] text-right">
+                                    Actions
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {users.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={5}
+                                        colSpan={6}
                                         className="h-24 text-center text-muted-foreground"
                                     >
                                         No users found.
@@ -146,17 +153,57 @@ export default async function UsersPage({
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <span
-                                                className={
-                                                    u.isActive
-                                                        ? "text-green-600 dark:text-green-400 font-medium"
-                                                        : "text-muted-foreground"
-                                                }
-                                            >
-                                                {u.isActive
-                                                    ? "Active"
-                                                    : "Inactive"}
-                                            </span>
+                                            <div className="flex flex-col gap-0.5">
+                                                <span
+                                                    className={
+                                                        u.isActive
+                                                            ? "text-green-600 dark:text-green-400 font-medium"
+                                                            : "text-muted-foreground"
+                                                    }
+                                                >
+                                                    {u.isActive
+                                                        ? "Active"
+                                                        : "Inactive"}
+                                                </span>
+                                                {u.role === "TEACHER" &&
+                                                    u.teacherProfile &&
+                                                    !u.teacherProfile.isApproved && (
+                                                        <span className="text-xs text-amber-600 dark:text-amber-400">
+                                                            Pending approval
+                                                        </span>
+                                                    )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                {u.role === "TEACHER" &&
+                                                    u.teacherProfile &&
+                                                    !u.teacherProfile.isApproved && (
+                                                        <form action={approveTeacher}>
+                                                            <input
+                                                                type="hidden"
+                                                                name="userId"
+                                                                value={u.id}
+                                                            />
+                                                            <Button
+                                                                type="submit"
+                                                                variant="default"
+                                                                size="xs"
+                                                            >
+                                                                Approve
+                                                            </Button>
+                                                        </form>
+                                                    )}
+                                                <Button
+                                                    variant="link"
+                                                    className="h-auto p-0"
+                                                    asChild
+                                                >
+                                                    <Link href={`/users/${u.id}/edit`}>
+                                                        Edit
+                                                    </Link>
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))

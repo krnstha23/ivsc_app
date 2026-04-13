@@ -4,6 +4,15 @@ import { prisma } from "@/lib/prisma";
 import { canAccess } from "@/lib/permissions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import {
     getEnrollmentForPackage,
 } from "@/app/(app)/packages/actions";
@@ -37,18 +46,45 @@ export default async function PackageDetailPage({
     const isAdmin = canAccess(role, ["ADMIN"]);
     const enrollment = await getEnrollmentForPackage(packageId);
 
+    const enrolledStudents = isAdmin
+        ? await prisma.studentEnrollment.findMany({
+              where: { packageId },
+              select: {
+                  id: true,
+                  classesTotal: true,
+                  classesUsed: true,
+                  status: true,
+                  enrolledAt: true,
+                  student: {
+                      select: {
+                          user: {
+                              select: {
+                                  firstName: true,
+                                  lastName: true,
+                                  email: true,
+                              },
+                          },
+                      },
+                  },
+              },
+              orderBy: { enrolledAt: "desc" },
+          })
+        : [];
+
     return (
         <div className="flex flex-col gap-6 py-4 md:py-6">
             <div className="px-4 lg:px-6 flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="text-xl font-semibold">{pkg.name}</h1>
-                    {isAdmin && (
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={`/packages/${pkg.id}/edit`}>
-                                Edit package
-                            </Link>
-                        </Button>
-                    )}
+                    <div className="flex gap-2">
+                        {isAdmin && (
+                            <Button variant="outline" size="sm" asChild>
+                                <Link href={`/packages/${pkg.id}/edit`}>
+                                    Edit package
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
                 </div>
                 {pkg.description && (
                     <p className="text-muted-foreground">{pkg.description}</p>
@@ -107,6 +143,121 @@ export default async function PackageDetailPage({
                             </span>
                         </div>
                     )}
+                </div>
+            )}
+
+            {isAdmin && (
+                <div className="px-4 lg:px-6 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">
+                            Enrolled Students
+                        </h2>
+                        <Button size="sm" asChild>
+                            <Link href="/enrollments/assign">
+                                Assign student
+                            </Link>
+                        </Button>
+                    </div>
+                    <div className="rounded-lg border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Student</TableHead>
+                                    <TableHead className="text-center">
+                                        Progress
+                                    </TableHead>
+                                    <TableHead className="text-center">
+                                        Status
+                                    </TableHead>
+                                    <TableHead>Enrolled</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {enrolledStudents.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={4}
+                                            className="text-center text-muted-foreground py-6"
+                                        >
+                                            No students enrolled in this
+                                            package.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    enrolledStudents.map((e) => {
+                                        const remaining =
+                                            e.classesTotal - e.classesUsed;
+                                        const pct =
+                                            e.classesTotal > 0
+                                                ? Math.round(
+                                                      (e.classesUsed /
+                                                          e.classesTotal) *
+                                                          100
+                                                  )
+                                                : 0;
+                                        return (
+                                            <TableRow key={e.id}>
+                                                <TableCell>
+                                                    <p className="font-medium">
+                                                        {
+                                                            e.student.user
+                                                                .firstName
+                                                        }{" "}
+                                                        {
+                                                            e.student.user
+                                                                .lastName
+                                                        }
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {
+                                                            e.student.user
+                                                                .email
+                                                        }
+                                                    </p>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {e.classesUsed} /{" "}
+                                                            {e.classesTotal}{" "}
+                                                            &middot;{" "}
+                                                            {remaining} left
+                                                        </span>
+                                                        <div className="h-2 w-full max-w-24 rounded-full bg-muted">
+                                                            <div
+                                                                className="h-full rounded-full bg-primary transition-all"
+                                                                style={{
+                                                                    width: `${pct}%`,
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <Badge
+                                                        variant={
+                                                            e.status ===
+                                                            "ACTIVE"
+                                                                ? "default"
+                                                                : e.status ===
+                                                                    "COMPLETED"
+                                                                  ? "secondary"
+                                                                  : "destructive"
+                                                        }
+                                                    >
+                                                        {e.status}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-sm text-muted-foreground">
+                                                    {e.enrolledAt.toLocaleDateString()}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             )}
 

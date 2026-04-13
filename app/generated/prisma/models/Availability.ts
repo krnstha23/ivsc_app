@@ -50,6 +50,7 @@ export type AvailabilityCountAggregateOutputType = {
   date: number
   startTime: number
   endTime: number
+  bundleIds: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -82,6 +83,7 @@ export type AvailabilityCountAggregateInputType = {
   date?: true
   startTime?: true
   endTime?: true
+  bundleIds?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -165,6 +167,7 @@ export type AvailabilityGroupByOutputType = {
   date: Date
   startTime: string
   endTime: string
+  bundleIds: string[]
   createdAt: Date
   updatedAt: Date
   _count: AvailabilityCountAggregateOutputType | null
@@ -196,6 +199,7 @@ export type AvailabilityWhereInput = {
   date?: Prisma.DateTimeFilter<"Availability"> | Date | string
   startTime?: Prisma.StringFilter<"Availability"> | string
   endTime?: Prisma.StringFilter<"Availability"> | string
+  bundleIds?: Prisma.StringNullableListFilter<"Availability">
   createdAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   teacher?: Prisma.XOR<Prisma.TeacherProfileScalarRelationFilter, Prisma.TeacherProfileWhereInput>
@@ -208,6 +212,7 @@ export type AvailabilityOrderByWithRelationInput = {
   date?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  bundleIds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   teacher?: Prisma.TeacherProfileOrderByWithRelationInput
@@ -223,6 +228,7 @@ export type AvailabilityWhereUniqueInput = Prisma.AtLeast<{
   date?: Prisma.DateTimeFilter<"Availability"> | Date | string
   startTime?: Prisma.StringFilter<"Availability"> | string
   endTime?: Prisma.StringFilter<"Availability"> | string
+  bundleIds?: Prisma.StringNullableListFilter<"Availability">
   createdAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   teacher?: Prisma.XOR<Prisma.TeacherProfileScalarRelationFilter, Prisma.TeacherProfileWhereInput>
@@ -235,6 +241,7 @@ export type AvailabilityOrderByWithAggregationInput = {
   date?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  bundleIds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AvailabilityCountOrderByAggregateInput
@@ -251,6 +258,7 @@ export type AvailabilityScalarWhereWithAggregatesInput = {
   date?: Prisma.DateTimeWithAggregatesFilter<"Availability"> | Date | string
   startTime?: Prisma.StringWithAggregatesFilter<"Availability"> | string
   endTime?: Prisma.StringWithAggregatesFilter<"Availability"> | string
+  bundleIds?: Prisma.StringNullableListFilter<"Availability">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Availability"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Availability"> | Date | string
 }
@@ -260,6 +268,7 @@ export type AvailabilityCreateInput = {
   date: Date | string
   startTime: string
   endTime: string
+  bundleIds?: Prisma.AvailabilityCreatebundleIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   teacher: Prisma.TeacherProfileCreateNestedOneWithoutAvailabilityInput
@@ -272,6 +281,7 @@ export type AvailabilityUncheckedCreateInput = {
   date: Date | string
   startTime: string
   endTime: string
+  bundleIds?: Prisma.AvailabilityCreatebundleIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   booking?: Prisma.BookingUncheckedCreateNestedOneWithoutAvailabilityInput
@@ -282,6 +292,7 @@ export type AvailabilityUpdateInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutAvailabilityNestedInput
@@ -294,6 +305,7 @@ export type AvailabilityUncheckedUpdateInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   booking?: Prisma.BookingUncheckedUpdateOneWithoutAvailabilityNestedInput
@@ -305,6 +317,7 @@ export type AvailabilityCreateManyInput = {
   date: Date | string
   startTime: string
   endTime: string
+  bundleIds?: Prisma.AvailabilityCreatebundleIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -314,6 +327,7 @@ export type AvailabilityUpdateManyMutationInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -324,6 +338,7 @@ export type AvailabilityUncheckedUpdateManyInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -344,6 +359,7 @@ export type AvailabilityCountOrderByAggregateInput = {
   date?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  bundleIds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -415,6 +431,15 @@ export type AvailabilityUncheckedUpdateManyWithoutTeacherNestedInput = {
   deleteMany?: Prisma.AvailabilityScalarWhereInput | Prisma.AvailabilityScalarWhereInput[]
 }
 
+export type AvailabilityCreatebundleIdsInput = {
+  set: string[]
+}
+
+export type AvailabilityUpdatebundleIdsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
 export type AvailabilityCreateNestedOneWithoutBookingInput = {
   create?: Prisma.XOR<Prisma.AvailabilityCreateWithoutBookingInput, Prisma.AvailabilityUncheckedCreateWithoutBookingInput>
   connectOrCreate?: Prisma.AvailabilityCreateOrConnectWithoutBookingInput
@@ -434,6 +459,7 @@ export type AvailabilityCreateWithoutTeacherInput = {
   date: Date | string
   startTime: string
   endTime: string
+  bundleIds?: Prisma.AvailabilityCreatebundleIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   booking?: Prisma.BookingCreateNestedOneWithoutAvailabilityInput
@@ -444,6 +470,7 @@ export type AvailabilityUncheckedCreateWithoutTeacherInput = {
   date: Date | string
   startTime: string
   endTime: string
+  bundleIds?: Prisma.AvailabilityCreatebundleIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   booking?: Prisma.BookingUncheckedCreateNestedOneWithoutAvailabilityInput
@@ -484,6 +511,7 @@ export type AvailabilityScalarWhereInput = {
   date?: Prisma.DateTimeFilter<"Availability"> | Date | string
   startTime?: Prisma.StringFilter<"Availability"> | string
   endTime?: Prisma.StringFilter<"Availability"> | string
+  bundleIds?: Prisma.StringNullableListFilter<"Availability">
   createdAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
 }
@@ -493,6 +521,7 @@ export type AvailabilityCreateWithoutBookingInput = {
   date: Date | string
   startTime: string
   endTime: string
+  bundleIds?: Prisma.AvailabilityCreatebundleIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   teacher: Prisma.TeacherProfileCreateNestedOneWithoutAvailabilityInput
@@ -504,6 +533,7 @@ export type AvailabilityUncheckedCreateWithoutBookingInput = {
   date: Date | string
   startTime: string
   endTime: string
+  bundleIds?: Prisma.AvailabilityCreatebundleIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -529,6 +559,7 @@ export type AvailabilityUpdateWithoutBookingInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutAvailabilityNestedInput
@@ -540,6 +571,7 @@ export type AvailabilityUncheckedUpdateWithoutBookingInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -549,6 +581,7 @@ export type AvailabilityCreateManyTeacherInput = {
   date: Date | string
   startTime: string
   endTime: string
+  bundleIds?: Prisma.AvailabilityCreatebundleIdsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -558,6 +591,7 @@ export type AvailabilityUpdateWithoutTeacherInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   booking?: Prisma.BookingUpdateOneWithoutAvailabilityNestedInput
@@ -568,6 +602,7 @@ export type AvailabilityUncheckedUpdateWithoutTeacherInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   booking?: Prisma.BookingUncheckedUpdateOneWithoutAvailabilityNestedInput
@@ -578,6 +613,7 @@ export type AvailabilityUncheckedUpdateManyWithoutTeacherInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startTime?: Prisma.StringFieldUpdateOperationsInput | string
   endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleIds?: Prisma.AvailabilityUpdatebundleIdsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -590,6 +626,7 @@ export type AvailabilitySelect<ExtArgs extends runtime.Types.Extensions.Internal
   date?: boolean
   startTime?: boolean
   endTime?: boolean
+  bundleIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
@@ -602,6 +639,7 @@ export type AvailabilitySelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   date?: boolean
   startTime?: boolean
   endTime?: boolean
+  bundleIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
@@ -613,6 +651,7 @@ export type AvailabilitySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   date?: boolean
   startTime?: boolean
   endTime?: boolean
+  bundleIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
@@ -624,11 +663,12 @@ export type AvailabilitySelectScalar = {
   date?: boolean
   startTime?: boolean
   endTime?: boolean
+  bundleIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AvailabilityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teacherId" | "date" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["availability"]>
+export type AvailabilityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teacherId" | "date" | "startTime" | "endTime" | "bundleIds" | "createdAt" | "updatedAt", ExtArgs["result"]["availability"]>
 export type AvailabilityInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.Availability$bookingArgs<ExtArgs>
@@ -652,6 +692,7 @@ export type $AvailabilityPayload<ExtArgs extends runtime.Types.Extensions.Intern
     date: Date
     startTime: string
     endTime: string
+    bundleIds: string[]
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["availability"]>
@@ -1084,6 +1125,7 @@ export interface AvailabilityFieldRefs {
   readonly date: Prisma.FieldRef<"Availability", 'DateTime'>
   readonly startTime: Prisma.FieldRef<"Availability", 'String'>
   readonly endTime: Prisma.FieldRef<"Availability", 'String'>
+  readonly bundleIds: Prisma.FieldRef<"Availability", 'String[]'>
   readonly createdAt: Prisma.FieldRef<"Availability", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Availability", 'DateTime'>
 }

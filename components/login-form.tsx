@@ -14,13 +14,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-    FieldSeparator,
-} from "@/components/ui/field";
+import { Eye, EyeClosed } from "@solar-icons/react";
+import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 export function LoginForm({
@@ -32,6 +27,11 @@ export function LoginForm({
     const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
     const [error, setError] = useState<string | null>(null);
     const [pending, setPending] = useState(false);
+    const [usernameFocused, setUsernameFocused] = useState(false);
+    const [passwordFocused, setPasswordFocused] = useState(false);
+    const [usernameValue, setUsernameValue] = useState("");
+    const [passwordValue, setPasswordValue] = useState("");
+    const [passwordVisible, setPasswordVisible] = useState(false);
 
     useEffect(() => {
         if (searchParams.get("registered") === "1") {
@@ -79,39 +79,106 @@ export function LoginForm({
                     <form onSubmit={onSubmit}>
                         <FieldGroup>
                             <Field>
-                                <FieldLabel htmlFor="username">
-                                    Username
-                                </FieldLabel>
-                                <Input
-                                    id="username"
-                                    name="username"
-                                    type="text"
-                                    placeholder="Your username"
-                                    required
-                                    autoComplete="username"
-                                    disabled={pending}
-                                />
+                                <div className="relative rounded-md border border-input shadow-xs">
+                                    <span
+                                        className={cn(
+                                            "pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-card px-1.5 text-sm text-muted-foreground transition-all duration-[240ms] ease-out",
+                                            usernameFocused || usernameValue
+                                                ? "opacity-100"
+                                                : "top-1/2 -translate-y-1/2 opacity-0"
+                                        )}
+                                        aria-hidden
+                                    >
+                                        Username
+                                    </span>
+                                    <Input
+                                        id="username"
+                                        name="username"
+                                        type="text"
+                                        placeholder={
+                                            usernameFocused || usernameValue
+                                                ? ""
+                                                : "Username"
+                                        }
+                                        required
+                                        autoComplete="username"
+                                        disabled={pending}
+                                        value={usernameValue}
+                                        onChange={(e) =>
+                                            setUsernameValue(e.target.value)
+                                        }
+                                        onFocus={() => setUsernameFocused(true)}
+                                        onBlur={() => {
+                                            setUsernameFocused(false);
+                                        }}
+                                        className="border-0 text-xs shadow-none placeholder:text-xs transition-all duration-[240ms] focus-visible:ring-0"
+                                    />
+                                </div>
                             </Field>
                             <Field>
-                                <div className="flex items-center">
-                                    <FieldLabel htmlFor="password">
-                                        Password
-                                    </FieldLabel>
+                                <div className="flex items-center justify-end">
                                     <a
                                         href="#"
-                                        className="ml-auto text-[10px] underline-offset-4 hover:underline"
+                                        className="text-muted-foreground text-[10px] underline-offset-4 hover:underline"
                                     >
                                         Forgot your password?
                                     </a>
                                 </div>
-                                <Input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    required
-                                    autoComplete="current-password"
-                                    disabled={pending}
-                                />
+                                <div className="relative rounded-md border border-input shadow-xs">
+                                    <span
+                                        className={cn(
+                                            "pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-card px-1.5 text-sm text-muted-foreground transition-all duration-[240ms] ease-out",
+                                            passwordFocused || passwordValue
+                                                ? "opacity-100"
+                                                : "top-1/2 -translate-y-1/2 opacity-0"
+                                        )}
+                                        aria-hidden
+                                    >
+                                        Password
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setPasswordVisible((v) => !v)
+                                        }
+                                        className="text-muted-foreground hover:text-foreground absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 transition-colors focus:outline-none"
+                                        aria-label={
+                                            passwordVisible
+                                                ? "Hide password"
+                                                : "Show password"
+                                        }
+                                    >
+                                        {passwordVisible ? (
+                                            <EyeClosed size={18} />
+                                        ) : (
+                                            <Eye size={18} />
+                                        )}
+                                    </button>
+                                    <Input
+                                        id="password"
+                                        name="password"
+                                        type={
+                                            passwordVisible ? "text" : "password"
+                                        }
+                                        placeholder={
+                                            passwordFocused || passwordValue
+                                                ? ""
+                                                : "Password"
+                                        }
+                                        required
+                                        autoComplete="current-password"
+                                        disabled={pending}
+                                        value={passwordValue}
+                                        onChange={(e) =>
+                                            setPasswordValue(e.target.value)
+                                        }
+                                        onFocus={() => setPasswordFocused(true)}
+                                        onBlur={() => {
+                                            setPasswordFocused(false);
+                                        }}
+                                        className="border-0 pr-10 text-xs shadow-none placeholder:text-xs transition-all duration-[240ms] focus-visible:ring-0"
+                                    />
+                                </div>
                             </Field>
                             {error && (
                                 <p

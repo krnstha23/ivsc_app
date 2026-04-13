@@ -30,7 +30,11 @@ export default async function EditBundlePage({
                 id: true,
                 name: true,
                 description: true,
-                price: true,
+                priceStandard: true,
+                pricePriority: true,
+                priceInstant: true,
+                duration: true,
+                hasEvaluation: true,
                 discountPercent: true,
                 isActive: true,
                 packageIds: true,
@@ -67,7 +71,11 @@ export default async function EditBundlePage({
                         id: bundle.id,
                         name: bundle.name,
                         description: bundle.description,
-                        price: Number(bundle.price),
+                        priceStandard: Number(bundle.priceStandard),
+                        pricePriority: Number(bundle.pricePriority),
+                        priceInstant: Number(bundle.priceInstant),
+                        duration: bundle.duration,
+                        hasEvaluation: bundle.hasEvaluation,
                         discountPercent:
                             bundle.discountPercent == null
                                 ? null

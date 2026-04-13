@@ -1,7 +1,7 @@
 # IVCS - System Design Document
 
-> **Last Updated**: March 4, 2026  
-> **Status**: Phase 1 Complete, Phase 2–3 In Progress  
+> **Last Updated**: April 10, 2026  
+> **Status**: Phase 1–3 Complete (except payment); Phase 4 pending  
 > **Branch**: `main`
 
 ---
@@ -10,29 +10,190 @@
 
 ### 1.1 Purpose
 
-IVCS is a scheduling platform that bridges the gap between **users (students)** and **teachers**. The system enables:
-
-- Teachers to define their availability
-- Administrators to create and manage timetables
-- Users to view and book available time slots with teachers
+IVCS is an **IELTS-oriented** practice platform: it connects **students** with **human examiners** for **live speaking** sessions, coordinates **writing** hand-in (PDF), supports **in-app teacher evaluation** and a **session room** for Meet links and outcomes, and sells access through **packages** and **bundles** with **Standard / Priority / Instant** lead-time pricing. The product is **not** “scheduling only”—scheduling, catalog, payments (when integrated), and the post-session workflow are one system.
 
 ### 1.2 Problem Statement
 
-Coordinating schedules between multiple teachers and users is complex:
+Delivering a credible mock-exam experience while operating at scale involves:
 
-- Teachers have varying availability across days/weeks
-- Users need visibility into when teachers are free
-- Conflicts must be prevented (double-booking)
-- Schedule changes need to propagate to all affected parties
+- **Scheduling:** teachers vary by day/week; students need fair, simple booking without seeing examiner identity prematurely; **double-booking** must be impossible for confirmed sessions.
+- **Trust and revenue:** a **confirmed** seat should mean **payment has succeeded**; until then the product must not treat the slot as finally taken (see **§1.4**, **§1.5**, **§11**).
+- **Exam-shaped workflow:** the **calendar slot** is for **speaking** (e.g. **Google Meet**); **writing** is submitted afterward (**PDF**); teachers **evaluate** in-app and students receive **email** (and in-app) outcomes.
+- **Operations:** admins need **full control** over users, catalog, bundles, and scheduling overrides (see **§2**).
 
 ### 1.3 Solution
 
-A centralized scheduling system that:
+A centralized web application that:
 
-1. Allows teachers to input their available time slots
-2. Provides an admin interface to create structured timetables
-3. Enables users to browse and book sessions
-4. Handles conflict detection and notifications
+1. Lets **teachers** publish **availability** (evolving from discrete rows toward **multi-block** days and **server-generated** segments per **§1.5**).
+2. Lets **admins** manage **users**, **packages**, **bundles** (including **per–lead-time-tier prices** on each bundle), and **override** scheduling or act on behalf of teachers when needed.
+3. Lets **students** book **speaking** sessions through **bundles** and **packages**, with a **target** flow of **date → preference → single offered slot** and **server-side teacher assignment** (**§1.6**).
+4. Uses **`Booking` status and payment fields** (not a separate hold subsystem as the primary story) so that **only a paid, confirmed booking** blocks a segment for other students (**§1.4**); detailed payment mechanics are **deferred to §11**.
+5. Provides a **session room** with an agreed **step order** (**§1.7**): Meet link → PDF upload → teacher evaluation → shared final evaluation (with **24h** student download window where applicable).
+
+### 1.4 Product vision — target experience (agreed Mar 2026)
+
+This section records the **intended end-state** for IVCS as an IELTS-oriented mock platform. The current codebase is primarily **scheduling + packages + bookings**; the items below are **targets** for future implementation unless already noted elsewhere in this document.
+
+#### Scheduling vs exam parts
+
+- A **calendar booking** is **only** for the **live speaking** session (human examiner). **Google Meet** is in scope for **creating/handling the meeting link**; delivery of the speaking test in the call is between teacher and student.
+- **Writing** is **not** what the booked slot length is “for”: students submit a **PDF** after speaking (see below).
+- **Session duration** is driven by the **bundle** (each bundle has a **fixed** length). **Teacher availability** is moving to **continuous time blocks** per day; the system **generates** bookable start times for students (see **§1.5**). The shipped app may still use discrete 15 / 30 / 45 teacher-created rows until that work lands.
+- Some **bundles may omit speaking**; those flows must not assume a Meet booking (details to be defined when implemented).
+
+#### Writing (PDF)
+
+- **Near-term:** **PDF upload only** for written work; **typed answers** are a possible later iteration based on student feedback.
+- **Order of operations:** PDF submission happens **after** the speaking session (teacher availability is for speaking only).
+- **Deadline (working assumption):** **1 hour** after the speaking test to upload the PDF (configurable later).
+- Implies **file storage**, validation, linkage to booking/enrollment, and **teacher access** to download/review.
+
+#### Google Meet
+
+- Speaking is conducted by a **human examiner**; the product mainly needs **Meet setup / link handoff** (exact API and lifecycle TBD).
+
+#### Teacher evaluation and notifications
+
+- Teachers **submit evaluation in the application** after the session; the student receives the outcome via **email** (templates, queue, retries TBD). The **in-app session room** flow is specified in **§1.7**.
+
+#### Payment
+
+- **Product rule:** a time segment is **fully booked** (other students blocked) only after **payment completes** and the booking is in a **confirmed + paid** state. Use **`Booking.status`** and **`paymentStatus`** (and related fields) to represent checkout and completion—**not** a separate “hold” table as the primary model.
+- **Checkout / webhooks / refunds:** intentionally **not** specified here; see **§11** (to be filled in after the rest of the app is complete).
+
+#### Target student journey (high level)
+
+1. Student chooses a **date**, provides a **preferred time**; the system offers **one** assigned slot (or nearest alternative); student **accepts** and completes **payment** — **confirmation that blocks the slot for others is gated on successful payment** (once integrated). Details in **§1.6**.
+2. Student attends the **speaking** session at the scheduled time (**Meet**).
+3. Within the configured window (e.g. **1 hour** after speaking), student uploads the **writing PDF** (session room **§1.7**).
+4. Teacher submits **evaluation** in-app; **email** notifies the student; **final evaluation** is visible in the session room per **§1.7**.
+
+#### Open design choices (defer to implementation)
+
+- **Speaking-free bundles:** writing-only path, teacher assignment, evaluation, and whether a calendar slot exists at all.
+- **Evaluation model:** single combined evaluation vs separate speaking/writing scores or notes.
+- **Start of the PDF upload window:** e.g. scheduled slot end vs an explicit “speaking completed” signal from the teacher or system.
+
+### 1.5 Teacher availability blocks, generated slots & booking categories (agreed updates)
+
+This section refines **§1.4** for how teachers publish availability, how students see times, and how **Standard / Priority / Instant** relate to **bundles**. It is **target behavior** for implementation; the current schema/UI may still reflect the older “one row per fixed-duration slot” model.
+
+#### Teacher availability input
+
+- Teachers define **one or more continuous blocks** per calendar day (e.g. 10:00–18:00), **not** a single “whole day only” restriction.
+- **Multiple blocks** on the same day are allowed (e.g. 10:00–12:00 and 14:00–18:00).
+- This replaces (at product level) the prior flow where teachers primarily created individual **15 / 30 / 45** minute `Availability` rows, though migration/compatibility is an implementation detail.
+
+#### Generated slots (server-side)
+
+- The system **computes** candidate **session segments** by **partitioning** each teacher’s blocks for a given date into lengths equal to the **bundle’s fixed session duration** (plus business rules below).
+- **Standard / Priority / Instant do not change session length.** Session length comes **only** from the **bundle** (separate purchasable/configured bundles, each with its own duration — design clarification: duration per bundle product; category affects **price and/or eligibility**, not length).
+- **Gap rule:** for the **same teacher** on the **same calendar day**, there must be **10 minutes** between the **end** of one booked session and the **start** of the next offered/generated slot (buffer / turnaround). The generator must respect already-booked segments when proposing new times.
+- **How students browse those segments** (anonymous, preference-based, single offer) is specified in **§1.6** — it replaces a raw “grid of all times × all teachers” for the student UI.
+
+#### Lead-time categories (Standard / Priority / Instant)
+
+- Categories apply when the **bundle/session is booked before the class start** (i.e. they are determined from **lead time** and/or **calendar-date rules** between **booking confirmation** and **session start**).
+- **Timezone for boundary math:** use **UTC+5:45** (e.g. **Asia/Kathmandu**). Stakeholders deferred broader timezone policy; all comparisons below are in this offset unless extended later.
+- **Definitions** (interpreted in **UTC+5:45**):
+  - **Standard:** **≥ 48 hours** before session start (lead time from **confirmation** to **session start**).
+  - **Priority:** **≥ 24 hours** and **< 48 hours** before session start (same lead-time definition).
+  - **Instant:** **Same civil calendar day:** the **booking confirmation** timestamp and the **session start** fall on the **same calendar date** in **UTC+5:45** (e.g. if the student confirms on **Monday**, any session that **Monday** in that timezone is eligible for **Instant** pricing for that booking—not “until midnight Nepali” as a separate rule; the **date** match is the product rule). Sessions on a **different** calendar date use **Priority** or **Standard** by the **24h / 48h** cutoffs above.
+- **Clarification (bundle vs category):** the **three names** are **booking-time categories**; **each bundle** has its own **fixed session duration** and **three list prices** (**Standard / Priority / Instant**) configured in admin (**§5.3**). Category affects **price and eligibility**, not session length.
+
+#### Payment and minimum notice
+
+- A session must not be treated as **fully booked** for other students until **payment** succeeds and **`Booking` reflects the confirmed/paid state** (see **§1.4** and **§11**).
+- There must be **enough time** after the student commits and **completes payment** before **session start** (processing buffer). **Exact minimum minutes** are **TBD** in **§11**; UX should block or warn when payment cannot complete before start.
+
+#### Implementation notes (for engineers)
+
+- Today’s **`Availability` ↔ `Booking` 1:1** model may need to evolve (e.g. parent **window** rows plus generated **bookable segments**, or many generated rows per window) so **multiple** sessions can fall inside one teacher block with **10** minute gaps.
+- Slot-generation logic must run in **UTC+5:45** for category boundaries and local date rules stated above.
+
+### 1.6 Student booking UX — preferred time, single offer, anonymous teachers
+
+This section records the **agreed student-facing flow** for choosing a session when **multiple teachers** may have capacity at similar times. It complements **§1.5** (how segments are generated). **Implemented** (Apr 10, 2026): `findSlotForPreference` + `createBookingForSlot` in `packages/actions.ts`; student UI in `bundle-cards.tsx`.
+
+#### Principles
+
+- Students **must not see teacher names** during booking (identity is assigned server-side; Meet/link handoff can remain generic on the student side per **§1.4**).
+- The UI stays **simple**: avoid listing every identical clock time once per hidden teacher.
+
+#### Flow
+
+1. Student selects **date** (and bundle / package context as applicable).
+2. Student enters a **preferred time** (exact time, time window, or part-of-day — **precise control shape TBD** at implementation).
+3. The server considers all **valid generated segments** for that date and bundle (respecting **§1.5** gap rules, `bundleIds` / package rules, existing **confirmed/paid** bookings, and any **pending-checkout** rows represented via **`Booking` / payment state** per **§1.4**).
+4. The server returns **one primary offering**: a single **concrete bookable segment** (specific start/end and internal teacher assignment) that **best matches** the preference (policy **TBD**: e.g. closest start at or after requested time, or minimum absolute delta—document in code when fixed).
+5. If **no** segment matches the preference (or all matching segments are unavailable), the server responds with the **nearest** acceptable alternative(s) (e.g. next available start on that day, and/or a small list of alternates — **count and “nearest” definition TBD**).
+6. When the student **accepts** the offered slot, the system creates or updates booking state so **payment** can complete; **blocking competing students** is expressed through **`Booking.status` / `paymentStatus`** (and timeouts/cleanup **TBD** in **§11**), not a separate hold entity as the primary design.
+
+#### Why this works with multiple teachers
+
+- Many teachers may have a segment at **the same wall-clock time**; the student sees **one** row (“your session”) for that interaction, not N duplicate times.
+- The **assignment algorithm** (agreed): among eligible teachers, choose the teacher with the **lowest count of confirmed sessions in the current week**, where **week boundaries follow the traditional Nepali calendar (Bikram Sambat)**. **Round-robin** breaks ties (stable rotation order to be defined in code, e.g. by `teacherId` or creation time). Implementation should use an **authoritative Bikram Sambat** library or data source for **week** boundaries.
+
+#### Product copy
+
+- Set expectations with short UX copy (e.g. that the system **schedules close to** the student’s preference when exact match is unavailable).
+
+#### Operational note
+
+- Stakeholders indicated typical **booking activity ends around early evening** (e.g. ~6pm local), which reduces awkward cross-midnight lead-time edge cases for **Instant** / same-day rules; exact cutoff **TBD** if enforced in software.
+
+### 1.7 Session room — agreed step order (Option A, target)
+
+A dedicated **session room** page is the hub for a **confirmed** speaking booking. Flow is **step-based** and **ordered** as follows (**Option A**, agreed). **Implemented** (Apr 10, 2026): `app/(app)/sessions/[bookingId]/room/page.tsx` + `components/session-room.tsx` + `app/(app)/sessions/actions.ts`. Writing-only bookings skip Step 1.
+
+#### Route and access
+
+- **Suggested path:** e.g. `/sessions/[bookingId]/room` (or `/bookings/[id]/room`) — one room per **confirmed** speaking booking.
+- **Who may access:** the **student** (`Booking.userId`) and the **assigned teacher** (`Booking.teacherId` / `TeacherProfile`). **Admin** may have full access for support (see **§2**).
+- **When the room is available:** e.g. from a configurable window **before** `scheduledAt` until after evaluation is published (exact open/close rules **TBD**).
+
+#### Step 1 — Google Meet (speaking)
+
+- Show the **Google Meet link** (and short instructions) to **both** student and teacher.
+- Meet URL source **TBD** in **§11** / implementation: manual entry, teacher/admin paste, or **Google Calendar / Meet API** later. Persist on `Booking` or a related record: e.g. `meetLink`, optional `meetCreatedAt`.
+
+#### Step 2 — Student writing PDF upload
+
+- After speaking, the **student** uploads the **writing PDF** in the room (aligned with **§1.4** near-term PDF-only policy and **~1 hour** deadline assumption).
+- **Teacher** may see upload status / file access per implementation; gating (e.g. upload required before teacher evaluation) follows this step order.
+
+#### Step 3 — Teacher evaluation (form)
+
+- **Teacher only:** form to **evaluate** (structure **TBD:** rubric, band scores, free text).
+- **Student** sees a **waiting** state until evaluation is submitted — **UX TBD**.
+- Transition to step 4 when evaluation is **saved/submitted** (single source of truth in DB).
+
+#### Step 4 — Final evaluation (student + teacher)
+
+- **Both** student and teacher see the **final evaluation** (read-only).
+- **Student:** may **download** the evaluation (e.g. PDF or generated export) for **24 hours** after the agreed publish timestamp (**TBD:** `evaluationPublishedAt` vs `submittedAt`). After expiry, **download** is denied; whether **on-screen view** remains **TBD**.
+- **Teacher:** same content; download policy **TBD** (may omit 24h restriction for teachers).
+
+#### Step state (avoid URL hacking)
+
+- Prefer **server-derived** current step from persisted flags (`meetLink` present, **PDF uploaded**, `evaluationSubmittedAt`, etc.) rather than relying only on `?step=` query params.
+
+#### Data model (to add when building)
+
+- **`meetLink`** (and optional Meet metadata) on `Booking` or child table.
+- **Writing submission** storage + linkage to `bookingId` (file path, virus scan status, **TBD**).
+- **`Evaluation`** (or fields on `Booking`): structured + narrative content, **`submittedAt` / `publishedAt`**.
+- **Download authorization:** server checks **role** + **24h window** for student on download route.
+
+#### Security
+
+- Authorize **every** load and mutation by **booking id** + session user vs booking’s **student** / **teacher** / **admin** as allowed.
+- Do not expose Meet links or PDFs to unauthenticated or unrelated users.
+
+#### Related flows
+
+- **Email** to student when evaluation is ready remains per **§1.4**; the room is the **authoritative** place to view and (within window) **download**.
 
 ---
 
@@ -40,26 +201,26 @@ A centralized scheduling system that:
 
 | Role               | Description               | Key Permissions                                                             |
 | ------------------ | ------------------------- | --------------------------------------------------------------------------- |
-| **Admin**          | System administrator      | Full CRUD on all entities, user management, system configuration            |
-| **Teacher**        | Instructor/tutor          | Manage own availability, view assigned bookings, update profile             |
-| **User (Student)** | End user seeking sessions | Browse teachers, view timetables, book available slots, manage own bookings |
+| **Admin**          | System administrator      | **Full control:** manage users, packages, and bundles; view and change bookings; **override scheduling**; **assign or reassign teachers**; perform **teacher-only** operations where the product allows (e.g. create or edit **availability** on behalf of a teacher). Exact UI surfaces evolve with implementation. |
+| **Teacher**        | Instructor/tutor          | Manage own availability; view bookings where they are the teacher           |
+| **User (Student)** | End user seeking sessions | Browse bundles/packages and create bookings; view confirmed bookings on calendar |
 
 ### 2.1 Role Hierarchy
 
 ```
 Admin
-  └── Can manage Teachers and Users
-  └── Can override any booking
-  └── Can configure system settings
+  └── Full control over catalog (packages, bundles with tier pricing), users, and scheduling
+  └── May act on behalf of teachers (e.g. availability) and override or reassign bookings
+  └── Configures system behavior as implemented (no separate “limited admin” tier)
 
 Teacher
   └── Can manage own availability
-  └── Can view/accept/decline bookings
-  └── Cannot modify other teachers
+  └── Can view assigned confirmed bookings
+  └── Cannot modify other teachers’ data unless product adds delegation
 
 User (Student)
   └── Can browse and book
-  └── Can cancel own bookings
+  └── Can view confirmed bookings
   └── Cannot access admin functions
 ```
 
@@ -109,10 +270,10 @@ User (Student)
 | ---------- | -------- | -------------------------- |
 | id         | UUID     | Primary key                |
 | userId     | UUID     | FK to User                 |
-| bio        | String   | Teacher description        |
-| subjects   | String[] | Areas of expertise         |
-| hourlyRate | Decimal  | Optional, if paid sessions |
-| isActive   | Boolean  | Available for booking      |
+| bio        | String?  | Optional teacher bio      |
+| isActive   | Boolean  | Whether the teacher is available for booking |
+| createdAt  | DateTime | Profile creation time     |
+| updatedAt  | DateTime | Last profile update time  |
 
 #### Availability
 
@@ -120,11 +281,29 @@ User (Student)
 | ------------ | ------- | --------------------------------- |
 | id           | UUID    | Primary key                       |
 | teacherId    | UUID    | FK to Teacher                     |
-| dayOfWeek    | Enum    | MON, TUE, WED, THU, FRI, SAT, SUN |
-| startTime    | Time    | Slot start (e.g., 09:00)          |
-| endTime      | Time    | Slot end (e.g., 10:00)            |
-| isRecurring  | Boolean | Weekly recurring or one-time      |
-| specificDate | Date    | If not recurring, specific date   |
+| date         | Date    | Slot date (no time component)    |
+| startTime    | String  | "HH:MM" (interpreted as UTC wall time) |
+| endTime      | String  | "HH:MM" (interpreted as UTC wall time) |
+| bundleIds    | String[]| Optional PackageBundle IDs allowed to book (empty = all) |
+| createdAt    | DateTime| Availability creation time       |
+| updatedAt    | DateTime| Last availability update time   |
+
+#### PackageBundle
+
+| Field            | Type     | Description |
+| ---------------- | -------- | ----------- |
+| id               | UUID     | Primary key |
+| name             | String   | Bundle display name |
+| description      | String?  | Optional marketing copy |
+| priceStandard    | Decimal  | Price for **Standard** lead-time tier (≥48h before session, **UTC+5:45**) |
+| pricePriority    | Decimal  | Price for **Priority** tier (24–48h before session) |
+| priceInstant     | Decimal  | Price for **Instant** tier (**same civil calendar day** as session in **UTC+5:45**) |
+| discountPercent  | Decimal? | Optional bundle-level discount display |
+| isActive         | Boolean  | Whether the bundle is offered |
+| isFeatured       | Boolean  | Featured placement (e.g. Students page) |
+| validFrom / validUntil | DateTime? | Optional catalog window |
+| packageIds       | String[] | Package IDs included in the bundle |
+| createdAt / updatedAt | DateTime | Audit |
 
 #### Booking
 
@@ -133,19 +312,16 @@ User (Student)
 | id          | UUID     | Primary key                              |
 | userId      | UUID     | FK to User (student)                     |
 | teacherId   | UUID     | FK to Teacher                            |
+| availabilityId | UUID | One booking per availability slot      |
 | scheduledAt | DateTime | Booked date and time                     |
 | duration    | Int      | Duration in minutes                      |
 | status      | Enum     | PENDING, CONFIRMED, CANCELLED, COMPLETED |
-| notes       | String   | Optional notes from user                 |
+| notes       | String?  | Optional notes from user                 |
+| packageId   | UUID?    | Optional linked package (when booking is package-based) |
+| paymentStatus | Enum   | PENDING, PAID, REFUNDED, FAILED         |
+| transactionId | String? | Optional payment transaction identifier |
 | createdAt   | DateTime | Booking creation time                    |
-
-#### Subject (Optional - for categorization)
-
-| Field       | Type   | Description                        |
-| ----------- | ------ | ---------------------------------- |
-| id          | UUID   | Primary key                        |
-| name        | String | Subject name (Math, English, etc.) |
-| description | String | Subject description                |
+| updatedAt   | DateTime | Last booking update time               |
 
 ---
 
@@ -155,45 +331,38 @@ User (Student)
 
 ```
 1. Teacher logs in
-2. Navigate to "My Availability"
-3. Add time slots:
-   - Select day(s) of week
-   - Set start/end time
-   - Choose recurring or specific date
-4. Save availability
-5. System validates no self-conflicts
-6. Availability visible to users
+2. Navigate to "Teachers" page (calendar)
+3. Click a date to open the slot popup
+4. Choose duration and start time
+5. Optionally restrict the slot to one or more package bundles
+6. Save availability (creates Availability rows)
+7. New slots become bookable immediately
 ```
 
 ### 4.2 User Booking Flow (Package-First)
 
+**Current implementation (shipped today):**
+
 ```
 1. User (student) logs in
-2. Browse packages (filter by price, teacher)
-3. Select a package
-4. View available time slots (predetermined by teacher's manual availability input)
-5. Select desired slot
-6. Confirm booking details
-7. Submit booking request
-8. System checks for conflicts
-9. If available: Create booking (PENDING or CONFIRMED)
-10. Deduct from student's enrolled package (classesUsed++)
-11. Notify teacher of new booking
-12. Notify student of confirmation
+2. Option A (bundle discovery): Browse featured bundles from the "Students" page, search by date, and book an available slot
+   - Creates a Booking tied to the Availability; `packageId` is optional (no enrollment required).
+3. Option B (package booking): Browse packages, open package detail, and use the "Book a session" flow
+   - Requires an ACTIVE StudentEnrollment with remaining classes.
+4. Select an available slot and confirm
+5. The server creates the Booking with status `CONFIRMED` immediately; payment checkout is not enforced yet.
+6. If `packageId` is provided, the system increments `StudentEnrollment.classesUsed` in the same transaction as the booking.
 ```
+
+**Target (per §1.4, §1.5, §1.6, §11):** introduce **payment-gated** confirmation so the slot is only **fully booked** after **successful payment**; represent checkout and timeouts via **`Booking.status`** and **`paymentStatus`**. Student flow becomes **date → preferred time → single offered slot → pay → confirmed**. Bundle **tier price** at checkout comes from **Standard / Priority / Instant** fields on **`PackageBundle`**.
 
 ### 4.3 Admin Timetable Management
 
 ```
 1. Admin logs in
-2. Navigate to "Timetable Management"
-3. View weekly/monthly calendar
-4. Can manually:
-   - Assign teachers to slots
-   - Block certain time periods
-   - Override existing bookings
-   - Bulk import availability
-5. Generate reports on utilization
+2. Manage system data via the dashboard pages (users, packages, bundles)
+3. View bookings using the shared Calendar page
+4. Manual timetable editing, booking overrides, and bulk slot blocking are not implemented yet
 ```
 
 ---
@@ -275,21 +444,28 @@ ivcs-app/
 **Dashboard model (Feb 20, 2026):** **Single dashboard** at `/dashboard` for all roles. One app, one layout; only the **sidebar pages** (nav items) differ by role:
 
 - **Admins** see **all pages** (shared + admin + teacher + user).
-- **Teachers** see **only teacher-related pages** (shared + teacher: Dashboard, Analytics, Lifecycle, Availability, My Bookings, Settings, Help, Search).
-- **Users (students)** see **only user-related pages** (shared + user: Dashboard, Analytics, My Bookings, Browse Teachers, My Packages, Settings, Help, Search).
+- **Admins**, **Teachers**, and **Users (students)** see the same top-level pages (Dashboard, Calendar, Teachers, Students, Packages).
+- The `/users` page is **admin-only**.
 
 Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar filters items with `filterByRole()`. Sub-routes (e.g. `/dashboard/bookings`) are protected so direct URL access respects the same permissions. No separate `/admin`, `/teacher`, or `/student` pages; all dashboard access is via `/dashboard`.
 
-**Sidebar pages by role (current — implemented):**
+**Sidebar pages by role (current — implemented, Apr 10 2026):**
 
-| Page       | Route        | ADMIN | TEACHER | USER (Student) |
-|------------|--------------|-------|---------|----------------|
-| Dashboard  | /dashboard   | ✓     | ✓       | ✓               |
-| Calendar   | /calendar    | ✓     | ✓       | ✓               |
-| Users      | /users       | ✓     | —       | —               |
-| Teachers   | /teachers    | ✓     | ✓       | ✓               |
-| Students   | /students    | ✓     | ✓       | ✓               |
-| Packages   | /packages    | ✓     | ✓       | ✓               |
+| Page              | Route              | ADMIN | TEACHER | USER (Student) |
+|-------------------|--------------------|-------|---------|----------------|
+| Dashboard         | /dashboard         | ✓     | ✓       | ✓               |
+| Calendar          | /calendar          | ✓     | ✓       | ✓               |
+| My Bookings       | /bookings          | —     | —       | ✓               |
+| My Enrollments    | /enrollments       | —     | —       | ✓               |
+| My Sessions       | /bookings/teaching | —     | ✓       | —               |
+| Users             | /users             | ✓     | —       | —               |
+| Manage Teachers   | /teachers/manage   | ✓     | —       | —               |
+| Enrollments       | /enrollments       | ✓     | —       | —               |
+| Teachers          | /teachers          | ✓     | ✓       | ✓               |
+| Students          | /students          | ✓     | ✓       | ✓               |
+| Packages          | /packages          | ✓     | ✓       | ✓               |
+| Timetable         | /timetable         | ✓     | —       | —               |
+| Reports           | /reports           | ✓     | —       | —               |
 
 **Dashboard home:** Section cards visible to all roles.
 
@@ -297,7 +473,7 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 
 ### 5.3 Database Schema (Prisma)
 
-**Status**: ✅ Implemented (Feb 4, 2026) - Migrations `20260204182111_init`, `20260208000000_add_username_to_users`, `20260221000000_rename_username_to_camelcase` (users.userName).
+**Status**: ✅ Implemented — baseline Feb 4, 2026; subsequent migrations include bundle tier pricing (`20260402120000_bundle_category_prices`, etc.). See `prisma/migrations/`.
 
 #### Models Overview
 
@@ -305,14 +481,15 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 |-------|------------|---------|
 | `User` | `users` | Base user with **username** (login), email, role (ADMIN, TEACHER, USER), auth fields |
 | `StudentProfile` | `student_profiles` | Extended student info, linked to enrollments |
-| `TeacherProfile` | `teacher_profiles` | Extended teacher info: bio, availability |
+| `TeacherProfile` | `teacher_profiles` | Extended teacher info: bio, availability, `isApproved` (self-reg approval gate) |
 | `Availability` | `availabilities` | Date-specific time slots teachers mark as available |
 | `Package` | `packages` | Purchasable class packages with pricing |
-| `Booking` | `bookings` | Scheduled sessions, links User → Teacher → Availability |
+| `Booking` | `bookings` | Scheduled sessions, links User → Teacher → Availability; includes `meetLink`, `bundleId`, `submissionStart`/`End` |
 | `ClassMetadata` | `class_metadata` | Completed class records for history/reporting |
-| `PackageBundle` | `package_bundles` | Marketing bundles grouping multiple packages (stores membership via `packageIds[]`) |
+| `PackageBundle` | `package_bundles` | Marketing bundles: `priceStandard`/`Priority`/`Instant`, `duration` (0=writing-only), `hasEvaluation` |
 | `StudentEnrollment` | `student_enrollments` | Junction: Student ↔ Package with enrollment tracking |
-| `TeacherPackage` | `teacher_packages` | Junction: Teacher ↔ Package assignment |
+| `Evaluation` | `evaluations` | Teacher evaluation per booking: integer `score` + free-text `feedback` |
+| `WritingSubmission` | `writing_submissions` | Student PDF uploads linked to bookings |
 
 #### Enums
 
@@ -327,16 +504,18 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 
 1. **snake_case table names**: All tables use `@@map()` for PostgreSQL convention (e.g. `users`, `teacher_profiles`).
 2. **camelCase column names**: All table columns use **camelCase** in the database (e.g. `userName`, `passwordHash`, `firstName`, `createdAt`). In Prisma, use the same camelCase field name so the generated client uses the correct column name in queries. New migrations must create columns in camelCase for consistency.
-3. **Explicit junction tables**: Most many-to-many relationships use explicit junctions for metadata support (e.g. TeacherPackage, StudentEnrollment). Bundles store package membership via `packageIds[]`.
+3. **Explicit junction tables**: Most many-to-many relationships use explicit junctions for metadata support (e.g. StudentEnrollment). Bundles store package membership via `packageIds[]`.
 4. **Package-centric model**: Teachers and Students link to Packages (not free-text subjects)
 5. **Enrollment tracking**: StudentEnrollment tracks classes total/used, expiry, status
-6. **Payment at booking level**: Enrollment created only after successful payment
+6. **Payment integration status**: Payment-related fields (`paymentStatus`, `transactionId`, `paymentId`) exist, but payment checkout/webhook processing is not implemented yet; package-based booking currently increments `StudentEnrollment.classesUsed` when the booking is created
 
 #### New Tables (Feb 4, 2026)
 
-**PackageBundle** - Marketing bundles
+**PackageBundle** - Marketing bundles (three **lead-time tier** prices)
 ```
-id, name, description, price, discountPercent,
+id, name, description,
+priceStandard, pricePriority, priceInstant,
+discountPercent,
 isActive, isFeatured, validFrom, validUntil,
 packageIds[], createdAt, updatedAt
 ```
@@ -349,19 +528,13 @@ paymentId, createdAt, updatedAt
 @@unique([studentId, packageId])
 ```
 
-**TeacherPackage** - Teacher ↔ Package junction
-```
-id, teacherId, packageId, createdAt
-@@unique([teacherId, packageId])
-```
-
 #### Removed Fields (Feb 4, 2026)
 
 | Model | Removed Field | Reason |
 |-------|---------------|--------|
 | `StudentProfile` | `subjects String[]` | Replaced by Package relations via StudentEnrollment |
 | `StudentProfile` | `packageId String?` | Replaced by StudentEnrollment (supports multiple) |
-| `TeacherProfile` | `subjects String[]` | Replaced by Package relations via TeacherPackage |
+| `TeacherProfile` | `subjects String[]` | Removed; availability booking restrictions are expressed via `Availability.bundleIds` |
 
 #### Username on User (Feb 8, 2026)
 
@@ -392,7 +565,9 @@ See `prisma/schema.prisma` for full implementation.
 | snake_case for all DB tables         | PostgreSQL naming convention; explicit @@map() on all models         | 2026-02-04 |
 | camelCase for DB column names        | All table columns in camelCase (e.g. userName, passwordHash); use same field name in Prisma so generated client queries match | 2026-02-21 |
 | Explicit junction tables             | All M:M relations use explicit junctions for metadata & control      | 2026-02-04 |
-| PackageBundle for marketing          | Group packages into purchasable bundles with custom pricing          | 2026-02-04 |
+| PackageBundle for marketing          | Group packages into purchasable bundles; **three prices** per bundle (**Standard / Priority / Instant**) | 2026-02-04; tier columns 2026-04-02 |
+| Teacher assignment for offered slot  | **Lowest** confirmed-session count in the **current Bikram Sambat (Nepali) week**; **round-robin** tie-break | 2026-04-02 |
+| Admin operational authority          | **Full control**: scheduling overrides, teacher assign/reassign, acting on behalf of teachers where implemented | 2026-04-02 |
 | Package-centric relationships        | Teachers/Students link to Packages, not free-text subjects           | 2026-02-04 |
 | paymentId on Enrollment (not amount) | Links enrollment to payment record; amount tracked in Transaction table | 2026-02-04 |
 | No expiration on packages            | Packages don't expire; removed expiresAt and EXPIRED status              | 2026-02-04 |
@@ -400,8 +575,8 @@ See `prisma/schema.prisma` for full implementation.
 | Username for login (User.username)    | Login credential is username (unique); email kept for account/notifications | 2026-02-08 |
 | Next.js 16 proxy convention           | Use `proxy.ts` instead of deprecated `middleware.ts` for route protection | 2026-02-08 |
 | Single dashboard, role-based nav only | One dashboard at `/dashboard` for all roles; admins see all sidebar pages, teachers only teacher-related, users only user-related (lib/permissions.ts); no separate /admin, /teacher, /student pages | 2026-02-20 |
-| Use @solar-icons/react for all UI icons | Replaced animated itshover wrappers with static Solar icons. Named imports directly in consumers (`import { Widget4 } from '@solar-icons/react'`). No wrapper files, no animation overhead. | 2026-03-04 |
-| Package-first booking flow              | Students select packages (not teachers) → view teacher-predetermined availability → book. Packages are the entry point, tied to teachers via TeacherPackage. | 2026-03-04 |
+| Use @solar-icons/react for all UI icons | Replaced the previous icon wrapper approach with static Solar icons. Named imports directly in consumers (`import { Widget4 } from '@solar-icons/react'`). No wrapper files, no animation overhead. | 2026-03-04 |
+| Package-first booking flow              | Students select packages (not teachers) → view teacher availability → book. Package-based bookings can be linked to StudentEnrollment to deduct remaining classes. | 2026-03-04 |
 | Zod validation on all server actions    | Server actions are public endpoints; manual string checks are fragile. Zod schemas provide format validation, type safety, and composable error reporting. | 2026-03-04 |
 | Role guards on server actions           | Page-level guards protect UI, but actions are callable directly. `createUser` now checks ADMIN role; `createAvailability` checks TEACHER role. | 2026-03-04 |
 
@@ -409,7 +584,7 @@ See `prisma/schema.prisma` for full implementation.
 
 | Decision            | Options                              | Recommendation                                       |
 | ------------------- | ------------------------------------ | ---------------------------------------------------- |
-| Time zone handling  | Store UTC + user TZ, Store local     | **UTC storage** + client-side conversion             |
+| Time zone handling  | Store UTC + user TZ, Store local     | **UTC storage** for date-only and UTC wall times (current implementation); per-user timezone conversion is not modeled yet |
 | Notification system | Email, In-app, Push                  | **Email + In-app** initially; push later             |
 | Payment provider    | Stripe, Razorpay, PayPal             | **Stripe** - best API, but depends on region         |
 | Recurring availability | Template-based generation vs manual | Manual for MVP; template generation in Phase 4       |
@@ -437,8 +612,7 @@ See `prisma/schema.prisma` for full implementation.
 ### 7.2 Time Zone Handling
 
 - Store all times in UTC in database
-- Convert to user's local time zone on display
-- Teachers and users may be in different time zones
+- Render booking/slot times using UTC (current implementation); per-user timezone conversion is not implemented yet
 
 ### 7.3 Cancellation Policy
 
@@ -448,9 +622,7 @@ See `prisma/schema.prisma` for full implementation.
 
 ### 7.4 Recurring Availability vs Exceptions
 
-- Teachers may have weekly recurring slots
-- Need ability to mark exceptions (holidays, sick days)
-- "Available every Monday 9-11 EXCEPT Jan 15"
+- Weekly recurring availability templates and exception rules are not implemented yet
 
 ---
 
@@ -529,46 +701,53 @@ See `prisma/schema.prisma` for full implementation.
 - [x] Booking flow (package-first):
   - [x] Student browses packages → sees available slots (predetermined by teacher) → books
   - [x] Server action with transaction: create booking + deduct classesUsed on enrollment
-  - [ ] Real-time availability check (optimistic locking; currently re-fetch after book)
-- [ ] Booking management
-  - [ ] Student bookings page: Upcoming, Past, Cancelled
-  - [ ] Cancel booking (with policy enforcement)
-  - [ ] Reschedule booking
-- [ ] Teacher booking view
-  - [ ] View assigned bookings
-  - [ ] Accept/decline pending bookings
+  - [x] Slot generation engine (`lib/slot-generator.ts`): partitions teacher blocks by bundle duration + 10min gap
+  - [x] Lead-time category computation (Standard/Priority/Instant) in UTC+5:45
+  - [x] Teacher assignment: BS ISO week load + round-robin (`lib/bikram-sambat.ts`)
+  - [x] Anonymous student booking UX: date + preferred time → single offered slot with price
+  - [x] Writing-only bundle flow: student picks submission window, teacher assigned, PDF upload in session room
+- [x] Booking management
+  - [x] Student bookings page (`/bookings`): Upcoming, Past, Cancelled tabs
+  - [x] Cancel booking (from calendar day view)
+  - [x] Reschedule booking (students, from calendar day view)
+- [x] Teacher booking view
+  - [x] View assigned bookings (`/bookings/teaching`)
+  - [x] Complete bookings (auto-confirm, no approval needed)
 
 ---
 
 ### Phase 3: Admin & Packages
 
-**3.1 Admin Dashboard** (partially built)
+**3.1 Admin Dashboard**
 - [x] Single dashboard: `app/(app)/dashboard/` – shared layout for all roles
 - [x] User management (`app/(app)/users/`)
   - [x] List all users with filter by name, username, role, active status
   - [x] Create user form (`/users/new`) with Zod-validated server action + ADMIN role guard
-  - [ ] Edit/activate/deactivate accounts
-  - [ ] Change user roles
-- [ ] Teacher management (approve, edit profiles, assign packages)
+  - [x] Edit user (`/users/[id]/edit`): details, role, active, optional password reset
+  - [x] Approve teachers (inline button on users page)
+- [x] Teacher management (`/teachers/manage`): approve, activate/deactivate, stats, admin-create-availability
 
-**3.2 Package Management** (partially built)
+**3.2 Package Management**
 - [x] Package listing (`app/(app)/packages/page.tsx`) with filter by name, active status
 - [x] Package CRUD (create/edit/deactivate) – `/packages/new`, `/packages/[id]/edit`, delete in table
-- [ ] Student package assignment
-  - [ ] Assign packages to students
-  - [ ] Track package usage/remaining classes
-- [ ] Package purchase flow (student-facing with Stripe placeholder)
+- [x] Student package assignment
+  - [x] Assign packages to students (`/enrollments/assign`)
+  - [x] Track package usage/remaining classes (`/enrollments`)
+  - [x] Admin edit enrollment (classesTotal, status)
+- [ ] Package purchase flow (student-facing — deferred to §11 with payment)
 
 **3.3 Timetable View**
-- [ ] Master calendar
-  - [ ] `app/(dashboard)/admin/timetable/page.tsx`
-  - [ ] Weekly/monthly view of all bookings
-  - [ ] Filter by teacher, student, subject
-  - [ ] Drag-and-drop rescheduling (nice-to-have)
-- [ ] Reporting
-  - [ ] Booking statistics
-  - [ ] Teacher utilization
-  - [ ] Revenue reports (if payments active)
+- [x] Master calendar (`/timetable`)
+  - [x] Weekly view of all bookings with 7-column grid (Mon–Sun)
+  - [x] Filter by teacher, student, status
+  - [x] Week navigation (prev/next/today)
+  - [ ] Drag-and-drop rescheduling (nice-to-have, deferred)
+- [x] Reporting (`/reports`)
+  - [x] Summary cards (total, this week, this month, active teachers)
+  - [x] Teacher utilization table (completion rate)
+  - [x] Status breakdown
+  - [x] Monthly trend (last 6 months)
+  - [ ] Revenue reports (deferred to §11 with payment)
 
 ---
 
@@ -621,13 +800,13 @@ See `prisma/schema.prisma` for full implementation.
 ## 9. Open Questions
 
 1. ~~**Is this a paid platform?**~~ ✅ **ANSWERED**: Yes, Package model exists with pricing
-2. **Class types?** 1-on-1 only, or group sessions? *(Assume 1-on-1 for MVP)*
-3. **Session duration?** Fixed slots (30/60 min) or flexible? *(Need to decide)*
-4. **Approval workflow?** Do teachers approve bookings, or auto-confirm? *(Recommend: auto-confirm for available slots)*
-5. **Multi-language support?** Is i18n needed? *(Defer to Phase 4+)*
-6. **Cancellation policy?** How much notice required? Refund policy?
+2. ~~**Class types?**~~ ✅ **ANSWERED**: 1-on-1 only
+3. ~~**Session duration?**~~ ✅ **ANSWERED**: Fixed per bundle (`PackageBundle.duration` in minutes; 0 = writing-only)
+4. ~~**Approval workflow?**~~ ✅ **ANSWERED**: Auto-confirm (no teacher approval step)
+5. ~~**Multi-language support?**~~ ✅ **ANSWERED**: Not required
+6. **Cancellation policy?** How much notice required? Refund policy? *(Deferred to §11 with payment)*
 7. ~~**Package expiration?**~~ ✅ **ANSWERED**: Packages don't expire
-8. **Teacher onboarding?** Admin creates teachers, or self-registration with approval?
+8. ~~**Teacher onboarding?**~~ ✅ **ANSWERED**: Self-registration with admin approval; can log in but pending state until approved; students auto-approved
 
 ---
 
@@ -702,7 +881,7 @@ lib/
 
 app/api/auth/[...nextauth]/route.ts   # GET, POST handlers
 
-app/login/page.tsx, app/register/page.tsx   # login wired; register placeholder
+app/login/page.tsx, app/register/page.tsx   # login wired; registration wired
 
 proxy.ts                 # Route protection (Next.js 16 convention; middleware deprecated)
 
@@ -710,7 +889,7 @@ components/providers.tsx # SessionProvider for client signIn
 components/login-form.tsx # Username + password, signIn('credentials')
 ```
 
-**Still to create:** `actions/auth/register.ts`, full registration form, `types/next-auth.d.ts` (optional).
+**Still to create:** Post-registration profile onboarding polish (optional); `types/next-auth.d.ts` (optional).
 
 **Authentication flow (implemented):**
 ```
@@ -720,7 +899,7 @@ Login:
 
 Route Protection:
   Request → proxy.ts (auth from lib/auth-edge) → Check session → Allow or Redirect to /login
-  Protected paths: /dashboard (and /dashboard/*)
+  Protected paths: /dashboard, /users, /teachers, /students, /packages, /calendar
 
 Dashboard (single, permission-based):
   All roles land on /dashboard. app/dashboard/layout.tsx provides shared shell (sidebar, header).
@@ -752,11 +931,11 @@ Dashboard (single, permission-based):
    - Redirect unauthenticated users to `/login`
    - Uses `lib/auth-edge.ts` (edge-safe; no Prisma) to avoid loading Node-only code in Edge
 
-5. **Registration** (`actions/auth/register.ts` – not yet implemented):
-   - Validate input (username + email uniqueness)
+5. **Registration** (`app/register/actions.ts` – implemented):
+   - Validate input (username/email uniqueness, password policy)
    - Hash password
-   - Create User (username, email, …) + StudentProfile (transaction)
-   - Redirect to login
+   - Create `User` + `StudentProfile` or `TeacherProfile` in a transaction
+   - Redirect to login with `registered=1`
 
 **Complexity:** Medium (core functionality)
 
@@ -774,11 +953,11 @@ npx shadcn@latest init
 npx shadcn@latest add button input label card form toast dialog select table
 ```
 
-**Icons:** Use **itshover** only. Add icons with:
-```bash
-npx shadcn@latest add https://itshover.com/r/<icon-name>.json
+**Icons:** Use **@solar-icons/react** for UI. Import named components directly in the consuming file (no icon wrapper files).
+```ts
+import { Widget4 } from "@solar-icons/react"
 ```
-Example: `arrow-back-icon`, `layout-dashboard-icon`, `filter-icon`. Icons live in `components/ui/` and require the `motion` package. Do not add Tabler Icons or Lucide for UI; use itshover for all new and replacement icons.
+Do not add Tabler Icons or Lucide for UI; use Solar icons for new and replacement icons.
 
 **Minimum components needed:**
 | Component | Usage |
@@ -818,47 +997,34 @@ components/
 **File structure:**
 ```
 app/
-├── (auth)/                     # Public - auth pages
-│   ├── layout.tsx              # Centered card layout
-│   ├── login/page.tsx
-│   └── register/page.tsx
-│
-├── (dashboard)/                # Protected - all dashboards
-│   ├── layout.tsx              # Shared shell (navbar)
-│   ├── page.tsx                # Redirect based on role
-│   │
-│   ├── admin/
-│   │   ├── layout.tsx          # Admin sidebar
-│   │   ├── page.tsx            # Admin home (stats)
-│   │   ├── users/page.tsx
-│   │   ├── packages/page.tsx
-│   │   └── bundles/page.tsx
-│   │
-│   ├── teacher/
-│   │   ├── layout.tsx          # Teacher sidebar
-│   │   ├── page.tsx            # Teacher home
-│   │   ├── profile/page.tsx
-│   │   ├── availability/page.tsx
-│   │   └── bookings/page.tsx
-│   │
-│   └── student/
-│       ├── layout.tsx          # Student sidebar
-│       ├── page.tsx            # Student home
-│       ├── browse/page.tsx     # Browse teachers
-│       ├── packages/page.tsx   # View/purchase packages
-│       └── bookings/page.tsx   # My bookings
+├── api/auth/[...nextauth]/route.ts
+├── proxy.ts
+├── (app)/                      # Protected app shell (sidebar + header)
+│   ├── layout.tsx              # Auth check + sidebar + header
+│   ├── dashboard/page.tsx     # Dashboard home
+│   ├── dashboard/[...slug]/page.tsx # Role-gated placeholders
+│   ├── calendar/page.tsx      # Shared calendar for confirmed bookings
+│   ├── teachers/page.tsx      # Availability management (teacher slot creation)
+│   ├── students/page.tsx      # Bundle browsing + slot booking
+│   ├── packages/page.tsx      # Package list
+│   ├── packages/[id]/page.tsx # Package detail
+│   ├── packages/[id]/book/page.tsx # Package booking flow (enrollment-aware)
+│   ├── users/page.tsx         # ADMIN: user list
+│   └── users/new/page.tsx    # ADMIN: create user
+├── login/page.tsx
+└── register/page.tsx
 ```
 
 **Navigation items per role:**
 
 | Admin | Teacher | Student |
 |-------|---------|---------|
-| Dashboard | Dashboard | Dashboard |
-| Users | My Profile | Browse Teachers |
-| Teachers | Availability | My Packages |
-| Packages | My Bookings | My Bookings |
-| Bundles | | |
-| Reports | | |
+| Dashboard (/dashboard) | Dashboard (/dashboard) | Dashboard (/dashboard) |
+| Calendar (/calendar) | Calendar (/calendar) | Calendar (/calendar) |
+| Users (/users) | — | — |
+| Teachers (/teachers) | Teachers (/teachers) | Teachers (/teachers) |
+| Students (/students) | Students (/students) | Students (/students) |
+| Packages (/packages) | Packages (/packages) | Packages (/packages) |
 
 ---
 
@@ -867,23 +1033,31 @@ app/
 **Phase 2 features by role:**
 
 **Admin:**
-- [ ] User management (list, activate/deactivate, change role)
-- [ ] Package CRUD
-- [ ] Bundle CRUD
-- [ ] Teacher approval (if self-registration)
+- [x] User management (list + filters + create + edit + role change + activate/deactivate)
+- [x] Package CRUD (create/edit/deactivate)
+- [x] Bundle CRUD (create/edit/deactivate) with tier pricing + duration + evaluation toggle
+- [x] Teacher approval (self-registration → pending → admin approves from `/users` or `/teachers/manage`)
+- [x] Teacher management page (`/teachers/manage`): approve, toggle active, stats, admin-create-availability
+- [x] Student enrollment management (`/enrollments`): assign, edit, track
+- [x] Timetable (`/timetable`) + Reports (`/reports`)
 
 **Teacher:**
-- [ ] Profile setup (bio, packages)
-- [ ] Availability management (calendar UI)
-- [ ] View assigned bookings
-- [ ] Accept/complete bookings
+- [x] Profile setup (bio editing via `/profile`)
+- [x] Availability management (calendar UI + create slots)
+- [x] Availability edit/delete (unbooked slots)
+- [x] View assigned bookings (`/bookings/teaching` + `/calendar`)
+- [x] Complete bookings (mark as COMPLETED)
+- [x] Session room: set Meet link, view PDF uploads, submit evaluation
 
 **Student:**
-- [ ] Browse teachers (filter by package)
-- [ ] View teacher availability
-- [ ] Book sessions
-- [ ] View/manage bookings
-- [ ] View enrolled packages
+- [x] Browse bundle offers and book slots via `/students` (anonymous, single-offered-slot UX)
+- [x] Browse packages and book sessions via `/packages/[id]/book` (enrollment-aware)
+- [x] View confirmed bookings via `/calendar`
+- [x] Cancel/reschedule bookings (from calendar day view)
+- [x] Dedicated "My bookings" page (`/bookings`) with Upcoming/Past/Cancelled tabs
+- [x] My Enrollments page (`/enrollments`) with progress tracking
+- [x] Session room: view Meet link, upload writing PDF, view evaluation + 24h download
+- [x] Writing-only bundle flow: choose submission window, upload PDF
 
 ---
 
@@ -898,24 +1072,39 @@ app/
 | 4 | Registration flow (multi-step form + server action) | ✅ Done | Auth + UI |
 | 5 | Dashboard layouts (`app/(app)/` route group, sidebar, header) | ✅ Done | Auth + UI |
 | 6 | Admin user management (list, create, filters) | ✅ Done | Dashboards |
-| 7 | Teacher availability (calendar, slot creation, day view) | ✅ Partial | Dashboards |
-| 8 | Package listing (list, filters) | ✅ Partial | Dashboards |
+| 7 | Teacher availability (calendar, slot creation, day view, edit/delete) | ✅ Done | Dashboards |
+| 8 | Package listing (list, filters, CRUD) | ✅ Done | Dashboards |
 | 9 | Zod validation + loading/error states + role guards on actions | ✅ Done | All above |
-| 10 | **Booking system (package-first flow)** | ✅ Done | Availability + Packages |
-| 11 | Profile management (teacher/student) | ⏳ Pending | Auth |
-| 12 | Package CRUD + enrollment + purchase | ✅ Partial (CRUD done) | Packages |
+| 10 | Booking system (package-first + slot generation + assignment) | ✅ Done | Availability + Packages |
+| 11 | Profile management (teacher/student) | ✅ Done | Auth |
+| 12 | Package CRUD + enrollment + assignment | ✅ Done | Packages |
+| 13 | Session room (Meet, PDF upload, evaluation, download) | ✅ Done | Booking |
+| 14 | Student bookings + teacher sessions pages | ✅ Done | Booking |
+| 15 | Admin teacher management + timetable + reporting | ✅ Done | Dashboards |
+| 16 | Writing-only bundle flow | ✅ Done | Session room |
 
-### Next on the plan (Mar 10, 2026)
+### Next on the plan
 
-1. ~~**Booking system (package-first)**~~ ✅ Done: Package detail page `/packages/[id]` with slot list and `createBooking` (transaction: booking + deduct enrollment). Students click package name to view & book.
-2. **Package CRUD**: Admin create/edit/deactivate done. Assign teachers to packages (TeacherPackage) – UI pending.
-3. **Profile management**: Teachers edit bio; students view enrolled packages and class usage.
-4. **Edit/delete availability**: Teachers can modify or remove existing availability slots.
-5. **User management completion**: Edit/deactivate users, change roles.
+**Phase 2–3 complete** (Apr 10, 2026). Remaining work is **Phase 4** (notifications, payment integration, polish, performance, DevOps) — see above. Payment and refund specifics are deferred to **§11**.
 
 ---
 
-## 11. Changelog
+## 11. Deferred specifications: payment, refunds, and finance
+
+> **Status:** Intentionally incomplete. The stakeholder will specify **payment and financial rules after the rest of the application is complete**. This section reserves headings only; no binding product rules here yet.
+
+Planned topics to document later:
+
+- **Payment provider** integration (API, checkout UI, webhooks, idempotency).
+- **State machine** alignment with **`Booking.status`** and **`paymentStatus`**: pending checkout, success, failure, expiry, and how each affects **slot visibility** for other students.
+- **Refunds** and **chargebacks**; **student-initiated cancellation** (must **free the teacher’s schedule**; refund amounts and timing TBD).
+- **Reconciliation**, taxes, invoices, and admin reporting (if in scope).
+
+Until this section is filled in, engineers should treat **§1.4**–**§1.6** as the **product intent** and keep the **current** codebase behavior (**immediate `CONFIRMED` booking** without payment) as a **known gap** documented in **§4.2**.
+
+---
+
+## 12. Changelog
 
 | Date       | Changes                                                    | Author |
 | ---------- | ---------------------------------------------------------- | ------ |
@@ -945,6 +1134,14 @@ app/
 | 2026-02-08 | Doc updated: planning, folder structure, Phase 1.2/1.3/1.4 status, proxy convention | -      |
 | 2026-02-20 | Single dashboard: one app at /dashboard; admins see all sidebar pages, teachers only teacher-related, users only user-related; lib/permissions.ts; sub-route placeholders + role check; doc updated | -      |
 | 2026-02-20 | Removed app/admin, app/teacher, app/student pages; auth protects only /dashboard | -      |
-| 2026-02-21 | Icons: standardised on itshover only; all UI icons from components/ui (itshover); design doc and Phase 1.4 / Step 3 updated to always use new icons | -      |
+| 2026-02-21 | Icons: standardized on @solar-icons/react for UI; named imports directly in components (no icon wrappers) | -      |
 | 2026-03-10 | Package-first booking: `getAvailableSlotsForPackage`, `getEnrollmentForPackage`, `createBooking` (Zod + USER role guard, transaction booking + classesUsed). Package detail `/packages/[id]` links to booking page `/packages/[id]/book`; `PackageBookingSection` (slot list, confirm modal, success/error). Packages table links name to detail. Edge case: avoid `@solar-icons/react` on this route tree (SSR createContext error); use emoji. DESIGN_DOC: Phase 2.2/2.3 and 3.2 updated; step 10 done. | -      |
 | 2026-02-21 | DB: users.userName (camelCase); Prisma model field renamed to userName so generated client uses correct column; SYSTEM_DESIGN.md: all columns camelCase | -      |
+| 2026-03-14 | Removed `teacher_packages` linkage; teacher booking restrictions now expressed via `Availability.bundleIds` (teacher slot popup) | -      |
+| 2026-03-30 | Public home (`app/page.tsx`) redesigned as ExamBridge-style marketing landing: palette `#0B0B0F` / `#F7F7F7` / `#7C5CFF`, Playfair Display headings via `layout.tsx`, hero uses `public/hero.png`, responsive header with mobile menu (`components/landing-header.tsx`); feature screenshots approximated with inline UI mocks for Listening / writing feedback / report. | -      |
+| 2026-03-30 | **Gap fill (profile, availability, users, bookings):** `/profile` + `updateOwnProfile` (user fields + teacher bio when a `TeacherProfile` exists). Teachers can **edit/delete** unbooked slots (`updateAvailability`, `deleteAvailability`, UI under day availability dialog). **Admin user edit** at `/users/[id]/edit` (`updateUser`: role, active, optional password reset); **createUser** now creates `StudentProfile` / `TeacherProfile` when applicable. **cancelBooking** / **rescheduleBooking** + open-slot helpers in `packages/actions`; calendar **day bookings** dialog exposes cancel (student/teacher/admin) and reschedule (students). Proxy protects `/profile`. | -      |
+| 2026-03-30 | **Product vision (§1.4):** Documented agreed target experience—speaking-only calendar bookings (Meet link), PDF writing after speaking (~1h window), teacher evaluation + email to student, payment-gated confirmation, bundle variants without speaking, and deferred design questions. | -      |
+| 2026-03-31 | **§1.5 Availability & categories:** Teachers add **multi-block** day ranges (not only whole-day); students get **generated** start times from blocks using **bundle-fixed** duration + **10 min** same-teacher same-day gap. **Standard (≥48h) / Priority (24–48h) / Instant** from lead time before class in **UTC+5:45**; category affects **price/eligibility**, not length. **Payment buffer** before session start (minutes TBD). Notes on schema migration from 1:1 Availability–Booking. | -      |
+| 2026-04-01 | **§1.6 Student booking UX:** **Date → preferred time → single offered slot** with **server-assigned teacher** (students **never** see teacher names). **Nearest** alternative(s) if preference unavailable; **hold** on accept until payment; assignment policy TBD. §1.5 retitled “generated slots (server-side)” and references §1.6 for presentation. Target journey in §1.4 updated. Optional note on ~6pm booking cutoff. | -      |
+| 2026-04-02 | **Stakeholder + doc alignment:** Rewrote **§1.1–§1.3** (IELTS/speaking/writing/session-room). **§1.7 Option A:** (1) Meet, (2) **student PDF**, (3) teacher eval, (4) final eval + student **24h** download. **Payment** via **`Booking` status / `paymentStatus`**; mechanics **deferred to §11**. **Instant** = **same civil calendar day** in **UTC+5:45**. **§1.6:** **Bikram Sambat week** load + **round-robin** tie-break; status-based blocking (no primary “hold” table). **§2:** **admin full control**. **§4.2** / **§5.3:** shipped vs target booking; **`PackageBundle`** tier columns **`priceStandard` / `pricePriority` / `priceInstant`**. New **§11** deferred finance; **§12** changelog. | -      |
+| 2026-04-10 | **Phase 2-3 complete.** Schema: `duration` + `hasEvaluation` on `PackageBundle`; `isApproved` on `TeacherProfile`; `meetLink`, `bundleId`, `submissionStart/End` on `Booking`; `Evaluation` + `WritingSubmission` models. Bundle form (duration, eval toggle, 3 prices). Teacher self-reg approval. Slot generation (`lib/slot-generator.ts`). Student single-offered-slot UX. Session room (4-step). Writing-only bundles. Student bookings + enrollments. Teacher sessions. Admin: manage teachers, enrollments, timetable, reports. Open questions resolved. | -      |

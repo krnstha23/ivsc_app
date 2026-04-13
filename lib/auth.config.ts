@@ -35,7 +35,10 @@ export const authConfig = {
         pathname.startsWith('/packages') ||
         pathname.startsWith('/calendar') ||
         pathname.startsWith('/students') ||
-        pathname.startsWith('/teachers')
+        pathname.startsWith('/teachers') ||
+        pathname.startsWith('/profile') ||
+        pathname.startsWith('/sessions') ||
+        pathname.startsWith('/enrollments')
 
       if (isProtectedRoute && !auth?.user) {
         return NextResponse.redirect(new URL('/login', request.url))

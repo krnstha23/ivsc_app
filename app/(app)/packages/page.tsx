@@ -49,7 +49,11 @@ export default async function PackagesPage({
       id: true,
       name: true,
       description: true,
-      price: true,
+      priceStandard: true,
+      pricePriority: true,
+      priceInstant: true,
+      duration: true,
+      hasEvaluation: true,
       discountPercent: true,
       isActive: true,
       isFeatured: true,
@@ -60,7 +64,9 @@ export default async function PackagesPage({
 
   const bundlesForClient = bundles.map((b) => ({
     ...b,
-    price: Number(b.price),
+    priceStandard: Number(b.priceStandard),
+    pricePriority: Number(b.pricePriority),
+    priceInstant: Number(b.priceInstant),
     discountPercent:
       b.discountPercent == null ? null : Number(b.discountPercent),
   }))

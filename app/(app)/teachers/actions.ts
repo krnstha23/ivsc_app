@@ -1,9 +1,14 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { Role } from "@/app/generated/prisma/enums";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createAvailabilitySchema, firstError } from "@/lib/validations";
+import {
+    createAvailabilitySchema,
+    updateAvailabilitySchema,
+    firstError,
+} from "@/lib/validations";
 
 export type CreateAvailabilityResult =
     | { success: true }
@@ -21,18 +26,91 @@ function dateKeyUtc(d: Date): string {
     return toUtcDateOnly(d).toISOString().slice(0, 10);
 }
 
-function addMinutesToTime(timeStr: string, addMinutes: number): string {
+function padTime(timeStr: string): string {
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return timeStr;
+    return `${match[1]!.padStart(2, "0")}:${match[2]}`;
+}
+
+function timeToMinutes(timeStr: string): number {
     const [h, m] = timeStr.split(":").map(Number);
-    const totalMinutes = (h ?? 0) * 60 + (m ?? 0) + addMinutes;
-    const outHours = Math.floor(totalMinutes / 60) % 24;
-    const outMinutes = totalMinutes % 60;
-    return `${String(outHours).padStart(2, "0")}:${String(outMinutes).padStart(2, "0")}`;
+    return (h ?? 0) * 60 + (m ?? 0);
+}
+
+export type BundleAvailabilitySlot = {
+    id: string;
+    teacherId: string;
+    teacherName: string;
+    startTime: string;
+    endTime: string;
+    durationMinutes: number;
+};
+
+/** Returns bookable availability slots for a bundle on a single date. */
+export async function getAvailableSlotsForBundle(
+    bundleId: string,
+    date: Date
+): Promise<BundleAvailabilitySlot[]> {
+    const session = await auth();
+    if (!session?.user) return [];
+
+    const start = toUtcDateOnly(date);
+    const end = nextUtcDateOnly(date);
+
+    const slots = await prisma.availability.findMany({
+        where: {
+            date: { gte: start, lt: end },
+            booking: null,
+            OR: [
+                { bundleIds: { isEmpty: true } },
+                { bundleIds: { has: bundleId } },
+            ],
+        },
+        select: {
+            id: true,
+            startTime: true,
+            endTime: true,
+            teacherId: true,
+            teacher: {
+                select: {
+                    user: {
+                        select: {
+                            firstName: true,
+                            middleName: true,
+                            lastName: true,
+                        },
+                    },
+                },
+            },
+        },
+        orderBy: { startTime: "asc" },
+    });
+
+    return slots.map((s) => {
+        const durationMinutes =
+            timeToMinutes(s.endTime) - timeToMinutes(s.startTime);
+        return {
+            id: s.id,
+            teacherId: s.teacherId,
+            teacherName: [
+                s.teacher.user.firstName,
+                s.teacher.user.middleName,
+                s.teacher.user.lastName,
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .trim() || "Teacher",
+            startTime: s.startTime,
+            endTime: s.endTime,
+            durationMinutes,
+        };
+    });
 }
 
 export async function createAvailability(payload: {
     date: Date;
-    durationMinutes: number;
-    time: string;
+    startTime: string;
+    endTime: string;
 }): Promise<CreateAvailabilityResult> {
     const session = await auth();
     const user = session?.user;
@@ -56,7 +134,7 @@ export async function createAvailability(payload: {
         return { success: false, error: firstError(parsed.error) };
     }
 
-    const { date, durationMinutes, time } = parsed.data;
+    const { date, startTime, endTime } = parsed.data;
 
     const teacherProfile = await prisma.teacherProfile.findUnique({
         where: { userId },
@@ -64,26 +142,27 @@ export async function createAvailability(payload: {
     if (!teacherProfile) {
         return { success: false, error: "Teacher profile not found." };
     }
-
-    const timeMatch = time.match(/^(\d{1,2}):(\d{2})$/);
-    if (!timeMatch) {
-        return { success: false, error: "Invalid time format." };
+    if (!teacherProfile.isApproved) {
+        return {
+            success: false,
+            error: "Your account is pending admin approval. You cannot create availability yet.",
+        };
     }
-    const startTime = `${timeMatch[1].padStart(2, "0")}:${timeMatch[2].padStart(2, "0")}`;
-    const endTime = addMinutesToTime(startTime, durationMinutes);
 
-    // Availability.date is stored as @db.Date (no time). Normalize in UTC to avoid DST/timezone edge cases.
     const dateOnly = toUtcDateOnly(date);
 
     await prisma.availability.create({
         data: {
             teacherId: teacherProfile.id,
             date: dateOnly,
-            startTime,
-            endTime,
+            startTime: padTime(startTime),
+            endTime: padTime(endTime),
+            bundleIds: [],
         },
     });
 
+    revalidatePath("/teachers");
+    revalidatePath("/calendar");
     return { success: true };
 }
 
@@ -124,7 +203,11 @@ export type TeacherDayAvailabilityResult = {
     slots: DaySlot[];
 };
 
-export type DaySlotWithTeacher = DaySlot & { teacherName: string };
+export type DaySlotWithTeacher = DaySlot & {
+    teacherName: string;
+    teacherId: string;
+    hasBooking: boolean;
+};
 
 /**
  * Returns all teachers' availability slots for a single day.
@@ -145,6 +228,8 @@ export async function getTeacherAvailabilityForDay(
             id: true,
             startTime: true,
             endTime: true,
+            teacherId: true,
+            booking: { select: { id: true } },
             teacher: {
                 select: {
                     user: {
@@ -161,6 +246,8 @@ export async function getTeacherAvailabilityForDay(
             id: s.id,
             startTime: s.startTime,
             endTime: s.endTime,
+            teacherId: s.teacherId,
+            hasBooking: s.booking != null,
             teacherName: [
                 s.teacher.user.firstName,
                 s.teacher.user.middleName,
@@ -171,4 +258,243 @@ export async function getTeacherAvailabilityForDay(
                 .trim() || "Teacher",
         })),
     };
+}
+
+export async function getSessionTeacherProfileId(): Promise<string | null> {
+    const session = await auth();
+    if (!session?.user) return null;
+    const role = (session.user as { role?: string }).role;
+    if (role !== Role.TEACHER && role !== Role.ADMIN) return null;
+    const userId = (session.user as { id?: string }).id;
+    if (!userId) return null;
+    const tp = await prisma.teacherProfile.findUnique({
+        where: { userId },
+        select: { id: true },
+    });
+    return tp?.id ?? null;
+}
+
+export type MutateSlotResult =
+    | { success: true }
+    | { success: false; error: string };
+
+export async function deleteAvailability(
+    availabilityId: string
+): Promise<MutateSlotResult> {
+    const session = await auth();
+    const user = session?.user;
+    if (!user) {
+        return { success: false, error: "You must be signed in." };
+    }
+    if ((user as { role?: string }).role !== Role.TEACHER) {
+        return { success: false, error: "Only teachers can delete availability." };
+    }
+    const userId = (user as { id?: string }).id;
+    if (!userId) {
+        return { success: false, error: "Invalid session." };
+    }
+
+    const teacherProfile = await prisma.teacherProfile.findUnique({
+        where: { userId },
+        select: { id: true },
+    });
+    if (!teacherProfile) {
+        return { success: false, error: "Teacher profile not found." };
+    }
+
+    const slot = await prisma.availability.findUnique({
+        where: { id: availabilityId },
+        select: { id: true, teacherId: true, booking: { select: { id: true } } },
+    });
+    if (!slot || slot.teacherId !== teacherProfile.id) {
+        return { success: false, error: "Slot not found or not yours." };
+    }
+    if (slot.booking) {
+        return {
+            success: false,
+            error: "This slot has a booking. Cancel the booking first.",
+        };
+    }
+
+    await prisma.availability.delete({ where: { id: availabilityId } });
+    revalidatePath("/teachers");
+    revalidatePath("/calendar");
+    return { success: true };
+}
+
+export async function approveTeacherFromManage(
+    userId: string
+): Promise<MutateSlotResult> {
+    const session = await auth();
+    const user = session?.user;
+    if (!user) return { success: false, error: "You must be signed in." };
+
+    if ((user as { role?: string }).role !== Role.ADMIN) {
+        return { success: false, error: "Only admins can approve teachers." };
+    }
+
+    const profile = await prisma.teacherProfile.findUnique({
+        where: { userId },
+        select: { id: true, isApproved: true },
+    });
+    if (!profile) {
+        return { success: false, error: "Teacher profile not found." };
+    }
+
+    await prisma.teacherProfile.update({
+        where: { id: profile.id },
+        data: { isApproved: true },
+    });
+
+    revalidatePath("/teachers/manage");
+    revalidatePath("/users");
+    return { success: true };
+}
+
+export async function toggleTeacherActive(
+    teacherId: string
+): Promise<MutateSlotResult> {
+    const session = await auth();
+    const user = session?.user;
+    if (!user) return { success: false, error: "You must be signed in." };
+
+    if ((user as { role?: string }).role !== Role.ADMIN) {
+        return { success: false, error: "Only admins can toggle teacher status." };
+    }
+
+    const teacher = await prisma.teacherProfile.findUnique({
+        where: { id: teacherId },
+        select: { id: true, isActive: true },
+    });
+    if (!teacher) {
+        return { success: false, error: "Teacher profile not found." };
+    }
+
+    await prisma.teacherProfile.update({
+        where: { id: teacherId },
+        data: { isActive: !teacher.isActive },
+    });
+
+    revalidatePath("/teachers/manage");
+    revalidatePath("/teachers");
+    return { success: true };
+}
+
+export async function adminCreateAvailability(payload: {
+    teacherId: string;
+    date: Date;
+    startTime: string;
+    endTime: string;
+}): Promise<CreateAvailabilityResult> {
+    const session = await auth();
+    const user = session?.user;
+    if (!user) return { success: false, error: "You must be signed in." };
+
+    if ((user as { role?: string }).role !== Role.ADMIN) {
+        return {
+            success: false,
+            error: "Only admins can create availability on behalf of teachers.",
+        };
+    }
+
+    const { teacherId, ...rest } = payload;
+
+    const parsed = createAvailabilitySchema.safeParse(rest);
+    if (!parsed.success) {
+        return { success: false, error: firstError(parsed.error) };
+    }
+
+    const { date, startTime, endTime } = parsed.data;
+
+    const teacherProfile = await prisma.teacherProfile.findUnique({
+        where: { id: teacherId },
+    });
+    if (!teacherProfile) {
+        return { success: false, error: "Teacher profile not found." };
+    }
+
+    const dateOnly = toUtcDateOnly(date);
+
+    await prisma.availability.create({
+        data: {
+            teacherId,
+            date: dateOnly,
+            startTime: padTime(startTime),
+            endTime: padTime(endTime),
+            bundleIds: [],
+        },
+    });
+
+    revalidatePath("/teachers");
+    revalidatePath("/teachers/manage");
+    revalidatePath("/calendar");
+    return { success: true };
+}
+
+export async function updateAvailability(payload: {
+    id: string;
+    date: Date;
+    startTime: string;
+    endTime: string;
+}): Promise<MutateSlotResult> {
+    const session = await auth();
+    const user = session?.user;
+    if (!user) {
+        return { success: false, error: "You must be signed in." };
+    }
+    if ((user as { role?: string }).role !== Role.TEACHER) {
+        return { success: false, error: "Only teachers can update availability." };
+    }
+    const userId = (user as { id?: string }).id;
+    if (!userId) {
+        return { success: false, error: "Invalid session." };
+    }
+
+    const parsed = updateAvailabilitySchema.safeParse(payload);
+    if (!parsed.success) {
+        return { success: false, error: firstError(parsed.error) };
+    }
+
+    const { id, date, startTime, endTime } = parsed.data;
+
+    const teacherProfile = await prisma.teacherProfile.findUnique({
+        where: { userId },
+        select: { id: true },
+    });
+    if (!teacherProfile) {
+        return { success: false, error: "Teacher profile not found." };
+    }
+
+    const slot = await prisma.availability.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            teacherId: true,
+            booking: { select: { id: true } },
+        },
+    });
+    if (!slot || slot.teacherId !== teacherProfile.id) {
+        return { success: false, error: "Slot not found or not yours." };
+    }
+    if (slot.booking) {
+        return {
+            success: false,
+            error: "This slot has a booking and cannot be changed.",
+        };
+    }
+
+    const dateOnly = toUtcDateOnly(date);
+
+    await prisma.availability.update({
+        where: { id },
+        data: {
+            date: dateOnly,
+            startTime: padTime(startTime),
+            endTime: padTime(endTime),
+        },
+    });
+
+    revalidatePath("/teachers");
+    revalidatePath("/calendar");
+    return { success: true };
 }

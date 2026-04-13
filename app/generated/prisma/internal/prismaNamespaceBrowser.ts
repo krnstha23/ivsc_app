@@ -57,10 +57,12 @@ export const ModelName = {
   Package: 'Package',
   PackageBundle: 'PackageBundle',
   StudentEnrollment: 'StudentEnrollment',
-  TeacherPackage: 'TeacherPackage',
   Availability: 'Availability',
   Booking: 'Booking',
-  ClassMetadata: 'ClassMetadata'
+  Evaluation: 'Evaluation',
+  WritingSubmission: 'WritingSubmission',
+  ClassMetadata: 'ClassMetadata',
+  StaticPage: 'StaticPage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -112,6 +114,7 @@ export const TeacherProfileScalarFieldEnum = {
   userId: 'userId',
   bio: 'bio',
   isActive: 'isActive',
+  isApproved: 'isApproved',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -136,8 +139,12 @@ export const PackageBundleScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  price: 'price',
+  priceStandard: 'priceStandard',
+  pricePriority: 'pricePriority',
+  priceInstant: 'priceInstant',
   discountPercent: 'discountPercent',
+  duration: 'duration',
+  hasEvaluation: 'hasEvaluation',
   isActive: 'isActive',
   isFeatured: 'isFeatured',
   validFrom: 'validFrom',
@@ -166,22 +173,13 @@ export const StudentEnrollmentScalarFieldEnum = {
 export type StudentEnrollmentScalarFieldEnum = (typeof StudentEnrollmentScalarFieldEnum)[keyof typeof StudentEnrollmentScalarFieldEnum]
 
 
-export const TeacherPackageScalarFieldEnum = {
-  id: 'id',
-  teacherId: 'teacherId',
-  packageId: 'packageId',
-  createdAt: 'createdAt'
-} as const
-
-export type TeacherPackageScalarFieldEnum = (typeof TeacherPackageScalarFieldEnum)[keyof typeof TeacherPackageScalarFieldEnum]
-
-
 export const AvailabilityScalarFieldEnum = {
   id: 'id',
   teacherId: 'teacherId',
   date: 'date',
   startTime: 'startTime',
   endTime: 'endTime',
+  bundleIds: 'bundleIds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -195,17 +193,48 @@ export const BookingScalarFieldEnum = {
   teacherId: 'teacherId',
   availabilityId: 'availabilityId',
   packageId: 'packageId',
+  bundleId: 'bundleId',
   scheduledAt: 'scheduledAt',
   duration: 'duration',
   status: 'status',
   notes: 'notes',
+  meetLink: 'meetLink',
   paymentStatus: 'paymentStatus',
   transactionId: 'transactionId',
+  submissionStart: 'submissionStart',
+  submissionEnd: 'submissionEnd',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const EvaluationScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  score: 'score',
+  feedback: 'feedback',
+  submittedAt: 'submittedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EvaluationScalarFieldEnum = (typeof EvaluationScalarFieldEnum)[keyof typeof EvaluationScalarFieldEnum]
+
+
+export const WritingSubmissionScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  filePath: 'filePath',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  uploadedAt: 'uploadedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WritingSubmissionScalarFieldEnum = (typeof WritingSubmissionScalarFieldEnum)[keyof typeof WritingSubmissionScalarFieldEnum]
 
 
 export const ClassMetadataScalarFieldEnum = {
@@ -221,6 +250,19 @@ export const ClassMetadataScalarFieldEnum = {
 } as const
 
 export type ClassMetadataScalarFieldEnum = (typeof ClassMetadataScalarFieldEnum)[keyof typeof ClassMetadataScalarFieldEnum]
+
+
+export const StaticPageScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  content: 'content',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StaticPageScalarFieldEnum = (typeof StaticPageScalarFieldEnum)[keyof typeof StaticPageScalarFieldEnum]
 
 
 export const SortOrder = {

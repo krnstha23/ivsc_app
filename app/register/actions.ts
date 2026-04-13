@@ -53,7 +53,9 @@ export async function createAccount(
         if (userType === "student") {
             await tx.studentProfile.create({ data: { userId: user.id } });
         } else {
-            await tx.teacherProfile.create({ data: { userId: user.id } });
+            await tx.teacherProfile.create({
+                data: { userId: user.id, isApproved: false },
+            });
         }
     });
 

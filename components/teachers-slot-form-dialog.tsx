@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,16 +13,8 @@ import {
   Field,
   FieldGroup,
   FieldLabel,
-  FieldSet,
-  FieldLegend,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-const DURATIONS = [
-  { value: 15, label: "15 min" },
-  { value: 30, label: "30 min" },
-  { value: 45, label: "45 min" },
-] as const;
 
 function formatDateForInput(d: Date) {
   const y = d.getFullYear();
@@ -32,118 +23,138 @@ function formatDateForInput(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
+export type SlotFormPayload = {
+  date: Date;
+  startTime: string;
+  endTime: string;
+};
+
+export type EditSlotPayload = SlotFormPayload & { id: string };
+
 export function TeachersSlotFormDialog({
   open,
   onOpenChange,
   selectedDate,
+  editingSlot,
   onCreate,
+  onUpdate,
   pending = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedDate: Date | null;
-  onCreate?: (payload: { date: Date; durationMinutes: number; time: string }) => void;
+  editingSlot?: EditSlotPayload | null;
+  onCreate?: (payload: SlotFormPayload) => void;
+  onUpdate?: (payload: EditSlotPayload) => void;
   pending?: boolean;
 }) {
-  const [duration, setDuration] = React.useState<15 | 30 | 45>(30);
-  const [time, setTime] = React.useState("09:00");
+  const [startTime, setStartTime] = React.useState("09:00");
+  const [endTime, setEndTime] = React.useState("17:00");
 
-  const dateStr = selectedDate ? formatDateForInput(selectedDate) : "";
+  const isEdit = Boolean(editingSlot);
 
-  const handleCreate = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    if (open) {
+      if (editingSlot) {
+        setStartTime(editingSlot.startTime);
+        setEndTime(editingSlot.endTime);
+      } else {
+        setStartTime("09:00");
+        setEndTime("17:00");
+      }
+    }
+  }, [open, editingSlot]);
+
+  const resolvedDate = editingSlot?.date ?? selectedDate;
+  const dateStr = resolvedDate ? formatDateForInput(resolvedDate) : "";
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDate) return;
-    onCreate?.({
-      date: selectedDate,
-      durationMinutes: duration,
-      time,
-    });
-    onOpenChange(false);
-  };
-
-  const handleCancel = () => {
+    if (!resolvedDate) return;
+    if (isEdit && editingSlot) {
+      onUpdate?.({ id: editingSlot.id, date: resolvedDate, startTime, endTime });
+    } else {
+      onCreate?.({ date: resolvedDate, startTime, endTime });
+    }
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Add availability</DialogTitle>
+      <DialogContent
+        showCloseButton
+        className="flex max-h-[90vh] flex-col sm:max-w-md"
+      >
+        <DialogHeader className="shrink-0">
+          <DialogTitle>
+            {isEdit ? "Edit availability block" : "Add availability block"}
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleCreate}>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="slot-date">Date</FieldLabel>
-              <Input
-                id="slot-date"
-                type="date"
-                value={dateStr}
-                disabled
-                className="bg-muted"
-              />
-            </Field>
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col gap-4"
+        >
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="slot-date">Date</FieldLabel>
+                <Input
+                  id="slot-date"
+                  type="date"
+                  value={dateStr}
+                  disabled
+                  className="bg-muted"
+                />
+              </Field>
 
-            <FieldSet>
-              <FieldLegend>Duration</FieldLegend>
-              <div
-                className="flex w-full flex-col gap-2 sm:flex-row sm:gap-2"
-                role="radiogroup"
-                aria-label="Duration"
-              >
-                {DURATIONS.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className={cn(
-                      "relative flex flex-1 cursor-pointer select-none items-center justify-center rounded-md border px-4 py-3 text-sm font-medium transition-colors",
-                      "hover:bg-accent hover:text-accent-foreground",
-                      "focus-within:ring-ring focus-within:ring-2 focus-within:ring-offset-2",
-                      duration === opt.value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-input bg-background",
-                      pending && "pointer-events-none opacity-50"
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="duration"
-                      value={opt.value}
-                      checked={duration === opt.value}
-                      onChange={() => setDuration(opt.value)}
-                      className="sr-only"
-                      aria-hidden
-                      disabled={pending}
-                    />
-                    <span>{opt.label}</span>
-                  </label>
-                ))}
+              <div className="grid grid-cols-2 gap-3">
+                <Field>
+                  <FieldLabel htmlFor="slot-start">Start time</FieldLabel>
+                  <Input
+                    id="slot-start"
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    required
+                    disabled={pending}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="slot-end">End time</FieldLabel>
+                  <Input
+                    id="slot-end"
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    required
+                    disabled={pending}
+                  />
+                </Field>
               </div>
-            </FieldSet>
 
-            <Field>
-              <FieldLabel htmlFor="slot-time">Time</FieldLabel>
-              <Input
-                id="slot-time"
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-                disabled={pending}
-              />
-            </Field>
-          </FieldGroup>
+              <p className="text-xs text-muted-foreground">
+                Define a continuous block. The system will generate bookable
+                session slots from this block based on each bundle&apos;s
+                duration with a 10-minute gap between sessions.
+              </p>
+            </FieldGroup>
+          </div>
 
-          <DialogFooter className="mt-6 gap-2 sm:gap-0">
+          <DialogFooter className="shrink-0 gap-2 sm:gap-0">
             <Button
               type="button"
               variant="outline"
-              onClick={handleCancel}
+              onClick={() => onOpenChange(false)}
               disabled={pending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={pending}>
-              {pending ? "Creating…" : "Create"}
+            <Button type="submit" disabled={pending || !resolvedDate}>
+              {pending
+                ? "Saving…"
+                : isEdit
+                  ? "Save changes"
+                  : "Create"}
             </Button>
           </DialogFooter>
         </form>

@@ -27,21 +27,31 @@ export type AggregatePackageBundle = {
 }
 
 export type PackageBundleAvgAggregateOutputType = {
-  price: runtime.Decimal | null
+  priceStandard: runtime.Decimal | null
+  pricePriority: runtime.Decimal | null
+  priceInstant: runtime.Decimal | null
   discountPercent: runtime.Decimal | null
+  duration: number | null
 }
 
 export type PackageBundleSumAggregateOutputType = {
-  price: runtime.Decimal | null
+  priceStandard: runtime.Decimal | null
+  pricePriority: runtime.Decimal | null
+  priceInstant: runtime.Decimal | null
   discountPercent: runtime.Decimal | null
+  duration: number | null
 }
 
 export type PackageBundleMinAggregateOutputType = {
   id: string | null
   name: string | null
   description: string | null
-  price: runtime.Decimal | null
+  priceStandard: runtime.Decimal | null
+  pricePriority: runtime.Decimal | null
+  priceInstant: runtime.Decimal | null
   discountPercent: runtime.Decimal | null
+  duration: number | null
+  hasEvaluation: boolean | null
   isActive: boolean | null
   isFeatured: boolean | null
   validFrom: Date | null
@@ -54,8 +64,12 @@ export type PackageBundleMaxAggregateOutputType = {
   id: string | null
   name: string | null
   description: string | null
-  price: runtime.Decimal | null
+  priceStandard: runtime.Decimal | null
+  pricePriority: runtime.Decimal | null
+  priceInstant: runtime.Decimal | null
   discountPercent: runtime.Decimal | null
+  duration: number | null
+  hasEvaluation: boolean | null
   isActive: boolean | null
   isFeatured: boolean | null
   validFrom: Date | null
@@ -68,8 +82,12 @@ export type PackageBundleCountAggregateOutputType = {
   id: number
   name: number
   description: number
-  price: number
+  priceStandard: number
+  pricePriority: number
+  priceInstant: number
   discountPercent: number
+  duration: number
+  hasEvaluation: number
   isActive: number
   isFeatured: number
   validFrom: number
@@ -82,21 +100,31 @@ export type PackageBundleCountAggregateOutputType = {
 
 
 export type PackageBundleAvgAggregateInputType = {
-  price?: true
+  priceStandard?: true
+  pricePriority?: true
+  priceInstant?: true
   discountPercent?: true
+  duration?: true
 }
 
 export type PackageBundleSumAggregateInputType = {
-  price?: true
+  priceStandard?: true
+  pricePriority?: true
+  priceInstant?: true
   discountPercent?: true
+  duration?: true
 }
 
 export type PackageBundleMinAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  price?: true
+  priceStandard?: true
+  pricePriority?: true
+  priceInstant?: true
   discountPercent?: true
+  duration?: true
+  hasEvaluation?: true
   isActive?: true
   isFeatured?: true
   validFrom?: true
@@ -109,8 +137,12 @@ export type PackageBundleMaxAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  price?: true
+  priceStandard?: true
+  pricePriority?: true
+  priceInstant?: true
   discountPercent?: true
+  duration?: true
+  hasEvaluation?: true
   isActive?: true
   isFeatured?: true
   validFrom?: true
@@ -123,8 +155,12 @@ export type PackageBundleCountAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  price?: true
+  priceStandard?: true
+  pricePriority?: true
+  priceInstant?: true
   discountPercent?: true
+  duration?: true
+  hasEvaluation?: true
   isActive?: true
   isFeatured?: true
   validFrom?: true
@@ -225,8 +261,12 @@ export type PackageBundleGroupByOutputType = {
   id: string
   name: string
   description: string | null
-  price: runtime.Decimal
+  priceStandard: runtime.Decimal
+  pricePriority: runtime.Decimal
+  priceInstant: runtime.Decimal
   discountPercent: runtime.Decimal | null
+  duration: number
+  hasEvaluation: boolean
   isActive: boolean
   isFeatured: boolean
   validFrom: Date | null
@@ -263,8 +303,12 @@ export type PackageBundleWhereInput = {
   id?: Prisma.StringFilter<"PackageBundle"> | string
   name?: Prisma.StringFilter<"PackageBundle"> | string
   description?: Prisma.StringNullableFilter<"PackageBundle"> | string | null
-  price?: Prisma.DecimalFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard?: Prisma.DecimalFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority?: Prisma.DecimalFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant?: Prisma.DecimalFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: Prisma.DecimalNullableFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration?: Prisma.IntFilter<"PackageBundle"> | number
+  hasEvaluation?: Prisma.BoolFilter<"PackageBundle"> | boolean
   isActive?: Prisma.BoolFilter<"PackageBundle"> | boolean
   isFeatured?: Prisma.BoolFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
@@ -278,8 +322,12 @@ export type PackageBundleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  price?: Prisma.SortOrder
+  priceStandard?: Prisma.SortOrder
+  pricePriority?: Prisma.SortOrder
+  priceInstant?: Prisma.SortOrder
   discountPercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  duration?: Prisma.SortOrder
+  hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   validFrom?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -296,8 +344,12 @@ export type PackageBundleWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.PackageBundleWhereInput | Prisma.PackageBundleWhereInput[]
   name?: Prisma.StringFilter<"PackageBundle"> | string
   description?: Prisma.StringNullableFilter<"PackageBundle"> | string | null
-  price?: Prisma.DecimalFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard?: Prisma.DecimalFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority?: Prisma.DecimalFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant?: Prisma.DecimalFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: Prisma.DecimalNullableFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration?: Prisma.IntFilter<"PackageBundle"> | number
+  hasEvaluation?: Prisma.BoolFilter<"PackageBundle"> | boolean
   isActive?: Prisma.BoolFilter<"PackageBundle"> | boolean
   isFeatured?: Prisma.BoolFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
@@ -311,8 +363,12 @@ export type PackageBundleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  price?: Prisma.SortOrder
+  priceStandard?: Prisma.SortOrder
+  pricePriority?: Prisma.SortOrder
+  priceInstant?: Prisma.SortOrder
   discountPercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  duration?: Prisma.SortOrder
+  hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   validFrom?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -334,8 +390,12 @@ export type PackageBundleScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"PackageBundle"> | string
   name?: Prisma.StringWithAggregatesFilter<"PackageBundle"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"PackageBundle"> | string | null
-  price?: Prisma.DecimalWithAggregatesFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard?: Prisma.DecimalWithAggregatesFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority?: Prisma.DecimalWithAggregatesFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant?: Prisma.DecimalWithAggregatesFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: Prisma.DecimalNullableWithAggregatesFilter<"PackageBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration?: Prisma.IntWithAggregatesFilter<"PackageBundle"> | number
+  hasEvaluation?: Prisma.BoolWithAggregatesFilter<"PackageBundle"> | boolean
   isActive?: Prisma.BoolWithAggregatesFilter<"PackageBundle"> | boolean
   isFeatured?: Prisma.BoolWithAggregatesFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"PackageBundle"> | Date | string | null
@@ -349,8 +409,12 @@ export type PackageBundleCreateInput = {
   id?: string
   name: string
   description?: string | null
-  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority: runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration: number
+  hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
   validFrom?: Date | string | null
@@ -364,8 +428,12 @@ export type PackageBundleUncheckedCreateInput = {
   id?: string
   name: string
   description?: string | null
-  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority: runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration: number
+  hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
   validFrom?: Date | string | null
@@ -379,8 +447,12 @@ export type PackageBundleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  hasEvaluation?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -394,8 +466,12 @@ export type PackageBundleUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  hasEvaluation?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -409,8 +485,12 @@ export type PackageBundleCreateManyInput = {
   id?: string
   name: string
   description?: string | null
-  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority: runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration: number
+  hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
   validFrom?: Date | string | null
@@ -424,8 +504,12 @@ export type PackageBundleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  hasEvaluation?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -439,8 +523,12 @@ export type PackageBundleUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceStandard?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pricePriority?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  priceInstant?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  hasEvaluation?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -462,8 +550,12 @@ export type PackageBundleCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  price?: Prisma.SortOrder
+  priceStandard?: Prisma.SortOrder
+  pricePriority?: Prisma.SortOrder
+  priceInstant?: Prisma.SortOrder
   discountPercent?: Prisma.SortOrder
+  duration?: Prisma.SortOrder
+  hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   validFrom?: Prisma.SortOrder
@@ -474,16 +566,23 @@ export type PackageBundleCountOrderByAggregateInput = {
 }
 
 export type PackageBundleAvgOrderByAggregateInput = {
-  price?: Prisma.SortOrder
+  priceStandard?: Prisma.SortOrder
+  pricePriority?: Prisma.SortOrder
+  priceInstant?: Prisma.SortOrder
   discountPercent?: Prisma.SortOrder
+  duration?: Prisma.SortOrder
 }
 
 export type PackageBundleMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  price?: Prisma.SortOrder
+  priceStandard?: Prisma.SortOrder
+  pricePriority?: Prisma.SortOrder
+  priceInstant?: Prisma.SortOrder
   discountPercent?: Prisma.SortOrder
+  duration?: Prisma.SortOrder
+  hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   validFrom?: Prisma.SortOrder
@@ -496,8 +595,12 @@ export type PackageBundleMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  price?: Prisma.SortOrder
+  priceStandard?: Prisma.SortOrder
+  pricePriority?: Prisma.SortOrder
+  priceInstant?: Prisma.SortOrder
   discountPercent?: Prisma.SortOrder
+  duration?: Prisma.SortOrder
+  hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   validFrom?: Prisma.SortOrder
@@ -507,8 +610,11 @@ export type PackageBundleMinOrderByAggregateInput = {
 }
 
 export type PackageBundleSumOrderByAggregateInput = {
-  price?: Prisma.SortOrder
+  priceStandard?: Prisma.SortOrder
+  pricePriority?: Prisma.SortOrder
+  priceInstant?: Prisma.SortOrder
   discountPercent?: Prisma.SortOrder
+  duration?: Prisma.SortOrder
 }
 
 export type PackageBundleCreatepackageIdsInput = {
@@ -521,6 +627,14 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -538,8 +652,12 @@ export type PackageBundleSelect<ExtArgs extends runtime.Types.Extensions.Interna
   id?: boolean
   name?: boolean
   description?: boolean
-  price?: boolean
+  priceStandard?: boolean
+  pricePriority?: boolean
+  priceInstant?: boolean
   discountPercent?: boolean
+  duration?: boolean
+  hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
   validFrom?: boolean
@@ -553,8 +671,12 @@ export type PackageBundleSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   id?: boolean
   name?: boolean
   description?: boolean
-  price?: boolean
+  priceStandard?: boolean
+  pricePriority?: boolean
+  priceInstant?: boolean
   discountPercent?: boolean
+  duration?: boolean
+  hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
   validFrom?: boolean
@@ -568,8 +690,12 @@ export type PackageBundleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   id?: boolean
   name?: boolean
   description?: boolean
-  price?: boolean
+  priceStandard?: boolean
+  pricePriority?: boolean
+  priceInstant?: boolean
   discountPercent?: boolean
+  duration?: boolean
+  hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
   validFrom?: boolean
@@ -583,8 +709,12 @@ export type PackageBundleSelectScalar = {
   id?: boolean
   name?: boolean
   description?: boolean
-  price?: boolean
+  priceStandard?: boolean
+  pricePriority?: boolean
+  priceInstant?: boolean
   discountPercent?: boolean
+  duration?: boolean
+  hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
   validFrom?: boolean
@@ -594,7 +724,7 @@ export type PackageBundleSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PackageBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "price" | "discountPercent" | "isActive" | "isFeatured" | "validFrom" | "validUntil" | "packageIds" | "createdAt" | "updatedAt", ExtArgs["result"]["packageBundle"]>
+export type PackageBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "priceStandard" | "pricePriority" | "priceInstant" | "discountPercent" | "duration" | "hasEvaluation" | "isActive" | "isFeatured" | "validFrom" | "validUntil" | "packageIds" | "createdAt" | "updatedAt", ExtArgs["result"]["packageBundle"]>
 
 export type $PackageBundlePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PackageBundle"
@@ -603,8 +733,12 @@ export type $PackageBundlePayload<ExtArgs extends runtime.Types.Extensions.Inter
     id: string
     name: string
     description: string | null
-    price: runtime.Decimal
+    priceStandard: runtime.Decimal
+    pricePriority: runtime.Decimal
+    priceInstant: runtime.Decimal
     discountPercent: runtime.Decimal | null
+    duration: number
+    hasEvaluation: boolean
     isActive: boolean
     isFeatured: boolean
     validFrom: Date | null
@@ -1038,8 +1172,12 @@ export interface PackageBundleFieldRefs {
   readonly id: Prisma.FieldRef<"PackageBundle", 'String'>
   readonly name: Prisma.FieldRef<"PackageBundle", 'String'>
   readonly description: Prisma.FieldRef<"PackageBundle", 'String'>
-  readonly price: Prisma.FieldRef<"PackageBundle", 'Decimal'>
+  readonly priceStandard: Prisma.FieldRef<"PackageBundle", 'Decimal'>
+  readonly pricePriority: Prisma.FieldRef<"PackageBundle", 'Decimal'>
+  readonly priceInstant: Prisma.FieldRef<"PackageBundle", 'Decimal'>
   readonly discountPercent: Prisma.FieldRef<"PackageBundle", 'Decimal'>
+  readonly duration: Prisma.FieldRef<"PackageBundle", 'Int'>
+  readonly hasEvaluation: Prisma.FieldRef<"PackageBundle", 'Boolean'>
   readonly isActive: Prisma.FieldRef<"PackageBundle", 'Boolean'>
   readonly isFeatured: Prisma.FieldRef<"PackageBundle", 'Boolean'>
   readonly validFrom: Prisma.FieldRef<"PackageBundle", 'DateTime'>

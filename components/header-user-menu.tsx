@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { useTheme } from "next-themes"
 import { UserRounded, Moon, Sun2, Logout2 } from "@solar-icons/react"
@@ -70,9 +71,11 @@ export function HeaderUserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <UserRounded size={16} className="size-4" />
-            Account
+          <DropdownMenuItem asChild>
+            <Link href="/profile" className="cursor-pointer">
+              <UserRounded size={16} className="size-4" />
+              Profile
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
