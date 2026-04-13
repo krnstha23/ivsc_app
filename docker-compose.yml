@@ -30,9 +30,22 @@ services:
         condition: service_healthy
 
   migrate:
-    build: .
-    command: >
-      sh -c "node ./node_modules/prisma/build/index.js migrate deploy --schema ./prisma/schema.prisma"
+    build:
+      context: .
+      target: builder
+    command: sh -c "npx prisma migrate deploy --schema ./prisma/schema.prisma"
+    environment:
+      DATABASE_URL: "postgresql://ivcs:ivcs_secret@db:5432/ivcs_db?schema=public"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  seed:
+    build:
+      context: .
+      target: builder
+    command: sh -c "npx prisma db seed"
     environment:
       DATABASE_URL: "postgresql://ivcs:ivcs_secret@db:5432/ivcs_db?schema=public"
     depends_on:
