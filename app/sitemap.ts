@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 const BASE = "https://scoremirror.test";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

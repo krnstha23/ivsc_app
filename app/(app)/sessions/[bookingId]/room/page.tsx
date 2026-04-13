@@ -139,17 +139,17 @@ export default async function SessionRoomPage({
                         teacherName,
                         writingSubmission: booking.writingSubmission
                             ? {
-                                  fileName: booking.writingSubmission.fileName,
-                                  fileSize: booking.writingSubmission.fileSize,
-                                  filePath: booking.writingSubmission.filePath,
-                                  uploadedAt: booking.writingSubmission.uploadedAt.toISOString(),
+                                  fileName: (booking.writingSubmission as { fileName: string }).fileName,
+                                  fileSize: (booking.writingSubmission as { fileSize: number }).fileSize,
+                                  filePath: (booking.writingSubmission as { filePath: string }).filePath,
+                                  uploadedAt: (booking.writingSubmission as { uploadedAt: Date }).uploadedAt.toISOString(),
                               }
                             : null,
                         evaluation: booking.evaluation
                             ? {
-                                  score: booking.evaluation.score,
-                                  feedback: booking.evaluation.feedback,
-                                  submittedAt: booking.evaluation.submittedAt.toISOString(),
+                                  score: (booking.evaluation as { score: number }).score,
+                                  feedback: (booking.evaluation as { feedback: string }).feedback,
+                                  submittedAt: (booking.evaluation as { submittedAt: Date }).submittedAt.toISOString(),
                               }
                             : null,
                         hasEvaluation,
