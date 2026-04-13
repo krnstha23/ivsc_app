@@ -1,4 +1,10 @@
-i
+import type { Metadata } from "next";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Toaster } from "sonner";
+import { auth } from "@/lib/auth";
+import { Providers } from "@/components/providers";
+import "./globals.css";
+
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],

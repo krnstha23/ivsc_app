@@ -26,8 +26,7 @@ const prisma = new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
 });
 
-const DEV_PASSWORD = "password30+ countriesma/seed.ts
-3";
+const DEV_PASSWORD = "password123";
 
 function addDays(date: Date, days: number): Date {
     const out = new Date(date);
