@@ -38,19 +38,20 @@ export async function GET(
     }
 
     const deadline =
-        new Date(booking.evaluation.submittedAt).getTime() + 24 * 60 * 60 * 1000;
+        new Date((booking.evaluation as { submittedAt: Date }).submittedAt).getTime() + 24 * 60 * 60 * 1000;
     if (Date.now() > deadline) {
         return NextResponse.json({ error: "Download window expired" }, { status: 403 });
     }
 
-    const filePath = join(process.cwd(), booking.writingSubmission.filePath);
+    const ws = booking.writingSubmission as { filePath: string; fileName: string };
+    const filePath = join(process.cwd(), ws.filePath);
 
     try {
         const fileBuffer = await readFile(filePath);
         return new NextResponse(fileBuffer, {
             headers: {
                 "Content-Type": "application/pdf",
-                "Content-Disposition": `attachment; filename="${booking.writingSubmission.fileName}"`,
+                "Content-Disposition": `attachment; filename="${ws.fileName}"`,
             },
         });
     } catch {
