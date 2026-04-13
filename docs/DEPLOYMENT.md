@@ -159,40 +159,60 @@ docker compose run --rm seed
 
 > The seed creates users with password `password123`. Change all passwords immediately.
 
-## 8. Set Up Reverse Proxy with SSL
+## 8. Set Up Reverse Proxy with SSL (Nginx + Cloudflare)
 
-### Option A: Caddy (recommended — automatic HTTPS)
+> **Important**: Only use one reverse proxy. If Caddy or another web server is installed, stop and disable it first:
+> ```bash
+> sudo systemctl stop caddy && sudo systemctl disable caddy
+> ```
 
-```bash
-sudo apt install -y caddy
-```
-
-Edit `/etc/caddy/Caddyfile`:
-
-```
-app.yourdomain.com {
-    reverse_proxy localhost:3000
-}
-```
+Install Nginx:
 
 ```bash
-sudo systemctl restart caddy
+sudo apt install -y nginx
 ```
 
-Caddy automatically provisions and renews Let's Encrypt certificates.
-
-### Option B: Nginx + Certbot
+Remove the default site to avoid port 80 conflicts:
 
 ```bash
-sudo apt install -y nginx certbot python3-certbot-nginx
+sudo rm -f /etc/nginx/sites-enabled/default
 ```
+
+#### Generate the Origin Certificate
+
+1. Log in to the [Cloudflare dashboard](https://dash.cloudflare.com)
+2. Select your domain
+3. Go to **SSL/TLS** → **Origin Server**
+4. Click **Create Certificate**
+5. Keep defaults (RSA, 15 years), ensure both `yourdomain.com` and `*.yourdomain.com` are listed
+6. Click **Create**
+7. Copy the **Origin Certificate** and **Private Key**
+
+#### Save the certificate on the server
+
+```bash
+sudo mkdir -p /etc/ssl/cloudflare
+
+sudo nano /etc/ssl/cloudflare/cert.pem
+# Paste the Origin Certificate, save (Ctrl+O, Enter, Ctrl+X)
+
+sudo nano /etc/ssl/cloudflare/key.pem
+# Paste the Private Key, save
+
+sudo chmod 600 /etc/ssl/cloudflare/key.pem
+```
+
+#### Configure Nginx
 
 Create `/etc/nginx/sites-available/ivcs`:
 
 ```nginx
 server {
-    listen 80;
-    server_name app.yourdomain.com;
+    listen 443 ssl;
+    server_name www.yourdomain.com yourdomain.com;
+
+    ssl_certificate /etc/ssl/cloudflare/cert.pem;
+    ssl_certificate_key /etc/ssl/cloudflare/key.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -206,16 +226,26 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 }
+
+server {
+    listen 80;
+    server_name www.yourdomain.com yourdomain.com;
+    return 301 https://$host$request_uri;
+}
 ```
 
-Enable and get SSL:
+Enable the site, test config, and start Nginx:
 
 ```bash
 sudo ln -s /etc/nginx/sites-available/ivcs /etc/nginx/sites-enabled/
 sudo nginx -t
-sudo systemctl restart nginx
-sudo certbot --nginx -d app.yourdomain.com
+sudo systemctl enable nginx
+sudo systemctl start nginx
 ```
+
+#### Set Cloudflare SSL mode
+
+In Cloudflare dashboard → **SSL/TLS** → set encryption mode to **Full (strict)**.
 
 ## 9. Set Up Database Backups
 
