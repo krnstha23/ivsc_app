@@ -32,7 +32,7 @@ services:
   migrate:
     build: .
     command: >
-      sh -c "npx prisma migrate deploy --schema ./prisma/schema.prisma"
+      sh -c "node ./node_modules/prisma/build/index.js migrate deploy --schema ./prisma/schema.prisma"
     environment:
       DATABASE_URL: "postgresql://ivcs:ivcs_secret@db:5432/ivcs_db?schema=public"
     depends_on:
