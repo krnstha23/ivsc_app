@@ -80,7 +80,7 @@ export default async function StaticPagesListPage() {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                pages.map((page) => (
+                                pages.map((page: typeof pages[number]) => (
                                     <TableRow key={page.id}>
                                         <TableCell className="font-medium">
                                             {page.title}
