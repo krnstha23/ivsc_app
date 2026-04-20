@@ -178,7 +178,29 @@ function ListeningMock() {
     );
 }
 
-function formatRs(n: number) {
+/** Static landing prices (NPR) — aligned to `public/price.png`; replace with catalog data when wired. */
+const LANDING_PRICING_TIERS = [
+    {
+        key: "standard",
+        title: "Standard (48h+)",
+        amount: 1400,
+        tagline: "Plan ahead",
+    },
+    {
+        key: "priority",
+        title: "Priority (24-48h)",
+        amount: 1680,
+        tagline: "Need it soon",
+    },
+    {
+        key: "instant",
+        title: "Instant (Same day)",
+        amount: 1820,
+        tagline: "Book for today",
+    },
+] as const;
+
+function formatNpr(n: number) {
     return n.toLocaleString("en-NP", { maximumFractionDigits: 0 });
 }
 
@@ -188,26 +210,6 @@ export default async function HomePage() {
         select: { title: true, slug: true },
         orderBy: { createdAt: "asc" },
     });
-
-    const featuredBundle = await prisma.packageBundle.findFirst({
-        where: { isActive: true, isFeatured: true },
-        select: {
-            id: true,
-            priceStandard: true,
-            pricePriority: true,
-            priceInstant: true,
-        },
-    });
-
-    const standardPrice = featuredBundle
-        ? Number(featuredBundle.priceStandard)
-        : 1200;
-    const priorityPrice = featuredBundle
-        ? Number(featuredBundle.pricePriority)
-        : 1400;
-    const instantPrice = featuredBundle
-        ? Number(featuredBundle.priceInstant)
-        : 1600;
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -440,7 +442,7 @@ export default async function HomePage() {
                 </div>
             </section>
 
-            {/* Pricing */}
+            {/* Pricing — tiers from public/price.png; cards match feature-band system */}
             <section
                 id="pricing"
                 className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
@@ -464,42 +466,37 @@ export default async function HomePage() {
                         include speaking sessions and writing review — see
                         catalog for full detail.
                     </p>
-                    <div className="mt-12 grid gap-6 sm:grid-cols-3 sm:gap-8">
-                        {(
-                            [
-                                {
-                                    label: "Standard (48h+)",
-                                    price: standardPrice,
-                                },
-                                {
-                                    label: "Priority (24–48h)",
-                                    price: priorityPrice,
-                                },
-                                {
-                                    label: "Book for today",
-                                    price: instantPrice,
-                                },
-                            ] as const
-                        ).map((tier) => (
+                    <div className="mt-12 grid gap-6 md:grid-cols-3 md:gap-8">
+                        {LANDING_PRICING_TIERS.map((tier) => (
                             <div
-                                key={tier.label}
-                                className="flex flex-col rounded-2xl border border-black/[0.06] bg-white p-6 text-center shadow-[0_20px_50px_-20px_rgba(15,15,25,0.15)] sm:p-8"
+                                key={tier.key}
+                                className="flex h-full flex-col rounded-2xl border border-black/[0.06] bg-white p-6 text-center shadow-[0_20px_50px_-20px_rgba(15,15,25,0.18)] sm:p-8"
                             >
-                                <h3 className="text-sm font-bold text-[#0B0B0F] sm:text-base">
-                                    {tier.label}
+                                <h3 className="text-base font-semibold text-[#0B0B0F]">
+                                    {tier.title}
                                 </h3>
-                                <p className="mt-6 flex flex-wrap items-baseline justify-center gap-1">
+                                <p className="mt-3 text-sm leading-normal text-[#5c5c6a]">
+                                    {tier.tagline}
+                                </p>
+                                <p className="mt-6 flex flex-wrap items-baseline justify-center gap-1.5">
                                     <span className="text-sm font-medium text-[#5c5c6a]">
-                                        Rs
+                                        NPR
                                     </span>
                                     <Display className="text-4xl font-semibold text-[#0B0B0F] sm:text-5xl">
-                                        {formatRs(tier.price)}
+                                        {formatNpr(tier.amount)}
                                     </Display>
                                 </p>
+                                <div
+                                    className="mt-8 flex-1"
+                                    aria-hidden
+                                />
                                 <Link
-                                    href="/packages"
-                                    className="mt-8 inline-flex min-h-11 items-center justify-center rounded-2xl text-sm font-semibold text-white transition hover:opacity-95"
-                                    style={{ backgroundColor: accent }}
+                                    href="/login"
+                                    className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl px-7 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
+                                    style={{
+                                        backgroundColor: accent,
+                                        boxShadow: `0 12px 40px -8px ${accent}88`,
+                                    }}
                                 >
                                     Select
                                 </Link>
@@ -507,9 +504,9 @@ export default async function HomePage() {
                         ))}
                     </div>
                     <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-[#7a7a8a] sm:text-sm">
-                        Prices reflect the featured bundle when one is marked in
-                        the catalog; otherwise shown amounts are indicative.
-                        Combos and add-ons appear on the packages page.
+                        Shown amounts are static placeholders (NPR). Live
+                        bundle pricing is available after sign-in on the
+                        packages page.
                     </p>
                 </div>
             </section>
