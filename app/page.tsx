@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 export const metadata: Metadata = {
     title: "ScoreMirror – Computer-Based IELTS Mock Tests",
     description:
-        "Walk into your IELTS exam already familiar with it. Full computer-based mock tests, human review, and performance reports.",
+        "Full computer-based IELTS mock tests with human writing review, timed sections, and performance reports — so test day feels familiar.",
     keywords: [
         "IELTS mock test",
         "computer-based IELTS",
@@ -30,6 +30,7 @@ export const metadata: Metadata = {
 const accent = "#7C5CFF";
 const dark = "#0B0B0F";
 const light = "#F7F7F7";
+const coolBand = "#eef0f4";
 
 function Display({
     children,
@@ -68,6 +69,18 @@ function CheckLi({ children }: { children: React.ReactNode }) {
                     <path d="M20 6 9 17l-5-5" />
                 </svg>
             </span>
+            <span>{children}</span>
+        </li>
+    );
+}
+
+function CardBullet({ children }: { children: React.ReactNode }) {
+    return (
+        <li className="flex gap-2 text-sm leading-relaxed text-[#3d3d4a]">
+            <span
+                className="mt-2 size-1 shrink-0 rounded-full bg-[#c4c4d0]"
+                aria-hidden
+            />
             <span>{children}</span>
         </li>
     );
@@ -165,125 +178,8 @@ function ListeningMock() {
     );
 }
 
-function WritingFeedbackMock() {
-    return (
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_25px_60px_-15px_rgba(15,15,25,0.25)]">
-            <div
-                className="flex items-center justify-between border-b border-black/[0.06] px-4 py-3"
-                style={{ backgroundColor: `${accent}0f` }}
-            >
-                <span className="text-xs font-bold text-[#222]">
-                    Writing Task 2 · Feedback
-                </span>
-                <span
-                    className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white"
-                    style={{ backgroundColor: accent }}
-                >
-                    Reviewed
-                </span>
-            </div>
-            <div className="grid gap-3 p-4 sm:grid-cols-[1fr_11rem]">
-                <div className="min-h-[140px] rounded-xl border border-black/[0.06] bg-[#fafafa] p-3 text-[11px] leading-relaxed text-[#333]">
-                    <p>
-                        <mark
-                            className="rounded px-0.5"
-                            style={{ backgroundColor: `${accent}33` }}
-                        >
-                            Governments should invest
-                        </mark>{" "}
-                        more in public transport to reduce congestion in cities…
-                    </p>
-                </div>
-                <div className="flex flex-col gap-2">
-                    {(
-                        [
-                            ["Grammar", "Article use; tense consistency"],
-                            ["Cohesion", "Linking words in paragraph 2"],
-                            ["Vocab", "Academic collocations"],
-                        ] as const
-                    ).map(([title, note]) => (
-                        <div
-                            key={title}
-                            className="rounded-lg border border-black/[0.06] bg-white p-2.5 shadow-sm"
-                        >
-                            <p
-                                className="text-[10px] font-bold"
-                                style={{ color: accent }}
-                            >
-                                {title}
-                            </p>
-                            <p className="mt-0.5 text-[10px] text-[#555]">
-                                {note}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function ReportMock() {
-    return (
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_25px_60px_-15px_rgba(15,15,25,0.25)]">
-            <div className="border-b border-black/[0.06] bg-[#f8f8fa] px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#666]">
-                    Performance report
-                </p>
-                <div className="mt-2 flex flex-wrap items-end gap-2">
-                    <Display className="text-3xl font-semibold text-[#111]">
-                        6.5
-                    </Display>
-                    <span className="text-xs font-medium text-[#555]">
-                        Competent user
-                    </span>
-                </div>
-            </div>
-            <div className="space-y-4 p-4">
-                {(
-                    [
-                        ["Listening", 82],
-                        ["Reading", 70],
-                        ["Writing", 65],
-                        ["Speaking", 74],
-                    ] as const
-                ).map(([skill, pct]) => (
-                    <div key={skill}>
-                        <div className="flex justify-between text-[10px] font-semibold text-[#444]">
-                            <span>{skill}</span>
-                            <span>{pct}%</span>
-                        </div>
-                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-[#eee]">
-                            <div
-                                className="h-full rounded-full"
-                                style={{
-                                    width: `${pct}%`,
-                                    backgroundColor: accent,
-                                }}
-                            />
-                        </div>
-                    </div>
-                ))}
-                <div className="rounded-lg border border-black/[0.06] bg-[#fafafa] p-3">
-                    <p className="text-[9px] font-bold uppercase text-[#888]">
-                        Score trend
-                    </p>
-                    <div className="mt-2 flex h-12 items-end gap-1">
-                        {[40, 55, 48, 62, 58, 70, 65].map((h, i) => (
-                            <div
-                                key={i}
-                                className="flex-1 rounded-t-sm opacity-90"
-                                style={{
-                                    height: `${h}%`,
-                                    backgroundColor: accent,
-                                }}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+function formatRs(n: number) {
+    return n.toLocaleString("en-NP", { maximumFractionDigits: 0 });
 }
 
 export default async function HomePage() {
@@ -292,6 +188,27 @@ export default async function HomePage() {
         select: { title: true, slug: true },
         orderBy: { createdAt: "asc" },
     });
+
+    const featuredBundle = await prisma.packageBundle.findFirst({
+        where: { isActive: true, isFeatured: true },
+        select: {
+            id: true,
+            priceStandard: true,
+            pricePriority: true,
+            priceInstant: true,
+        },
+    });
+
+    const standardPrice = featuredBundle
+        ? Number(featuredBundle.priceStandard)
+        : 1200;
+    const priorityPrice = featuredBundle
+        ? Number(featuredBundle.pricePriority)
+        : 1400;
+    const instantPrice = featuredBundle
+        ? Number(featuredBundle.priceInstant)
+        : 1600;
+
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -300,6 +217,13 @@ export default async function HomePage() {
         description:
             "Full computer-based IELTS mock tests with human review and performance reports.",
     };
+
+    const legalPages = footerPages.filter((p) =>
+        /terms|privacy|policy|legal/i.test(p.title),
+    );
+    const otherPages = footerPages.filter(
+        (p) => !/terms|privacy|policy|legal/i.test(p.title),
+    );
 
     return (
         <div className="flex min-h-svh flex-col">
@@ -316,28 +240,23 @@ export default async function HomePage() {
 
                 <div className="relative z-[1] mx-auto grid max-w-6xl items-center gap-10 px-4 sm:gap-14 sm:px-6 lg:grid-cols-2 lg:gap-16">
                     <div className="min-w-0 text-center lg:text-left">
-                        <p
-                            className="mb-5 inline-flex rounded-full px-3.5 py-1.5 text-xs font-medium text-white sm:text-[13px]"
-                            style={{ backgroundColor: `${accent}cc` }}
-                        >
-                            Computer-Based IELTS — Academic &amp; General
-                        </p>
                         <h1 className="text-[1.75rem] font-normal leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.75rem] md:leading-[1.12]">
                             <Display>
-                                Walk into your IELTS exam{" "}
+                                Your IELTS exam environment. Practised with{" "}
                                 <em
                                     className="font-semibold italic"
                                     style={{ color: accent }}
                                 >
-                                    already familiar
-                                </em>{" "}
-                                with it.
+                                    real structure
+                                </em>
+                                .
                             </Display>
                         </h1>
                         <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/65 sm:text-base lg:mx-0 mx-auto">
-                            Practice in a timed, computer-delivered environment
-                            that mirrors the real test — so pacing, navigation,
-                            and focus feel second nature.
+                            Timed, computer-delivered mock tests with human
+                            feedback on writing and a clear performance report —
+                            so pacing, navigation, and focus feel second nature
+                            on test day.
                         </p>
                         <div className="mt-8 flex flex-col flex-wrap justify-center gap-3 sm:flex-row sm:gap-4 lg:justify-start">
                             <Link
@@ -354,33 +273,8 @@ export default async function HomePage() {
                                 href="#experience"
                                 className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/40 bg-transparent px-7 text-sm font-semibold text-white transition hover:bg-white/10 sm:min-h-0 sm:px-8 sm:py-3.5"
                             >
-                                Preview the experience
+                                How we evaluate
                             </Link>
-                        </div>
-                        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
-                            <div className="flex -space-x-2.5">
-                                {[
-                                    "#a78bfa",
-                                    "#818cf8",
-                                    "#c084fc",
-                                    "#22d3ee",
-                                ].map((c, i) => (
-                                    <span
-                                        key={i}
-                                        className="inline-flex size-9 items-center justify-center rounded-full border-2 border-[#0B0B0F] text-[10px] font-bold text-white"
-                                        style={{ backgroundColor: c }}
-                                        aria-hidden
-                                    >
-                                        {String.fromCharCode(65 + i)}
-                                    </span>
-                                ))}
-                            </div>
-                            <p className="max-w-[260px] text-left text-xs text-white/55 sm:max-w-none sm:text-sm">
-                                <span className="text-white/85 font-medium">
-                                    4,200+ candidates
-                                </span>{" "}
-                                preparing across Nepal.
-                            </p>
                         </div>
                     </div>
 
@@ -407,231 +301,290 @@ export default async function HomePage() {
                 </div>
             </section>
 
-            {/* Transition quote */}
+            {/* Feature cards */}
             <section
+                id="features"
                 className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
                 style={{ backgroundColor: light }}
             >
-                <p className="mx-auto max-w-3xl text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
-                    <Display>
-                        You are not practising questions. You are{" "}
-                        <em
-                            className="font-semibold italic"
-                            style={{ color: accent }}
-                        >
-                            rehearsing the exam.
-                        </em>
-                    </Display>
-                </p>
+                <div className="mx-auto max-w-6xl">
+                    <h2 className="mx-auto max-w-3xl text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
+                        <Display>
+                            Not a coaching reel. Not a loose question bank. A{" "}
+                            <em
+                                className="font-semibold italic"
+                                style={{ color: accent }}
+                            >
+                                full mock
+                            </em>{" "}
+                            in one sitting.
+                        </Display>
+                    </h2>
+                    <div className="mt-12 grid gap-6 md:grid-cols-3 md:gap-8">
+                        {(
+                            [
+                                {
+                                    title: "Computer-delivered mock",
+                                    bullets: [
+                                        "All four skills in one timed flow",
+                                        "Navigation and prompts aligned to exam style",
+                                        "Stay in one interface from listening to writing",
+                                    ],
+                                    href: "#experience",
+                                    cta: "See the interface",
+                                },
+                                {
+                                    title: "Human writing review",
+                                    bullets: [
+                                        "Comments on task achievement and cohesion",
+                                        "Grammar and vocabulary tied to descriptors",
+                                        "Actionable notes for your next attempt",
+                                    ],
+                                    href: "#pricing",
+                                    cta: "View pricing",
+                                },
+                                {
+                                    title: "What makes us different",
+                                    bullets: [
+                                        "Performance report with skill breakdowns",
+                                        "Trend view so you can track improvement",
+                                        "Simple, transparent bundle pricing",
+                                    ],
+                                    href: "#faq",
+                                    cta: "Read the FAQs",
+                                },
+                            ] as const
+                        ).map((card) => (
+                            <div
+                                key={card.title}
+                                className="flex flex-col rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_20px_50px_-20px_rgba(15,15,25,0.18)] sm:p-8"
+                            >
+                                <h3 className="text-lg font-semibold text-[#0B0B0F]">
+                                    {card.title}
+                                </h3>
+                                <ul className="mt-5 flex flex-1 flex-col gap-3">
+                                    {card.bullets.map((b) => (
+                                        <CardBullet key={b}>{b}</CardBullet>
+                                    ))}
+                                </ul>
+                                <Link
+                                    href={card.href}
+                                    className="mt-8 inline-flex text-sm font-semibold transition hover:opacity-80"
+                                    style={{ color: accent }}
+                                >
+                                    {card.cta} →
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </section>
 
-            {/* The Experience */}
+            {/* Exam interface — ListeningMock */}
             <section
                 id="experience"
                 className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
-                style={{ backgroundColor: light }}
+                style={{ backgroundColor: coolBand }}
             >
                 <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                    <div className="order-2 lg:order-1">
-                        <ListeningMock />
-                    </div>
-                    <div className="order-1 lg:order-2">
-                        <p
-                            className="text-xs font-bold uppercase tracking-[0.2em]"
-                            style={{ color: accent }}
-                        >
-                            The experience
-                        </p>
-                        <h2 className="mt-3 text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
+                    <div className="min-w-0">
+                        <h2 className="text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
                             <Display>
-                                Designed around the{" "}
+                                Computer-delivered IELTS is not harder.{" "}
                                 <em
                                     className="font-semibold italic"
                                     style={{ color: accent }}
                                 >
-                                    real exam experience
+                                    It is just different.
                                 </em>
                             </Display>
                         </h2>
-                        <div className="mt-8 space-y-6 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
+                        <div className="mt-6 space-y-5 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
                             <p>
-                                <strong className="text-[#0B0B0F]">
-                                    Timed sections that respect real
-                                    constraints.
-                                </strong>{" "}
-                                Each part runs on the clock, with navigation and
-                                prompts aligned to what you will see on test
-                                day.
+                                The official test rewards familiarity with
+                                on-screen timing, question layouts, and
+                                navigation. Paper habits do not transfer
+                                automatically — you need reps in the same
+                                medium.
                             </p>
                             <p>
-                                <strong className="text-[#0B0B0F]">
-                                    Continuous, distraction-minimised flow.
-                                </strong>{" "}
-                                Stay inside one coherent interface from
-                                listening through to writing, without breaking
-                                your focus.
-                            </p>
-                            <p>
-                                <strong className="text-[#0B0B0F]">
-                                    Navigation mirrors the official layout.
-                                </strong>{" "}
-                                Learn where controls live now — so you are never
-                                hunting for buttons when it counts.
+                                ScoreMirror keeps you inside a coherent,
+                                distraction-minimised flow so you learn where
+                                controls live before it counts.
                             </p>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Human Review */}
-            <section className="bg-white px-4 py-16 sm:px-6 sm:py-20 md:py-24">
-                <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                    <div className="order-1">
-                        <p
-                            className="text-xs font-bold uppercase tracking-[0.2em]"
-                            style={{ color: accent }}
-                        >
-                            Human review
-                        </p>
-                        <h2 className="mt-3 text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
-                            <Display>
-                                Reviewed by experienced{" "}
-                                <em
-                                    className="font-semibold italic"
-                                    style={{ color: accent }}
-                                >
-                                    IELTS instructors
-                                </em>
-                            </Display>
-                        </h2>
-                        <p className="mt-6 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
-                            Automated scoring can miss nuance. Our instructors
-                            comment on task achievement, coherence, grammar, and
-                            vocabulary — with actionable notes you can apply on
-                            your next attempt.
-                        </p>
                         <ul className="mt-8 space-y-4">
                             <CheckLi>
-                                Personalised comments tied to band descriptors
+                                Same section timing and progression as exam day
                             </CheckLi>
                             <CheckLi>
-                                Highlighted patterns in grammar and vocabulary
+                                Practice from anywhere — no travel for the
+                                mock interface
                             </CheckLi>
                             <CheckLi>
-                                Suggested upgrades for cohesion and tone
+                                A recorded trail of attempts via your reports
                             </CheckLi>
                         </ul>
-                    </div>
-                    <div className="order-2">
-                        <WritingFeedbackMock />
-                    </div>
-                </div>
-            </section>
-
-            {/* Performance report */}
-            <section className="bg-white px-4 py-16 sm:px-6 sm:py-20 md:py-24">
-                <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                    <div className="order-1">
                         <p
-                            className="text-xs font-bold uppercase tracking-[0.2em]"
+                            className="mt-8 text-[0.9375rem] font-semibold"
                             style={{ color: accent }}
                         >
-                            Performance report
+                            No guesswork. Just the rhythm of the real test.
                         </p>
-                        <h2 className="mt-3 text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
-                            <Display>
-                                Understand your{" "}
-                                <em
-                                    className="font-semibold italic"
-                                    style={{ color: accent }}
-                                >
-                                    performance clearly
-                                </em>
-                            </Display>
-                        </h2>
-                        <p className="mt-6 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
-                            See strengths and weak spots at a glance — with
-                            overall band, skill breakdowns, and a trend view so
-                            you know whether you are improving week to week.
-                        </p>
-                        <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
-                            {(
-                                [
-                                    ["6.5", "Overall"],
-                                    ["7.0", "Listening"],
-                                    ["6.0", "Writing"],
-                                ] as const
-                            ).map(([score, label]) => (
-                                <div
-                                    key={label}
-                                    className="rounded-xl border border-black/[0.06] bg-[#fafafa] px-3 py-4 text-center shadow-sm sm:px-4"
-                                >
-                                    <p
-                                        className="text-lg font-semibold text-[#111] sm:text-xl"
-                                        style={{
-                                            fontFamily:
-                                                "var(--font-playfair), serif",
-                                        }}
-                                    >
-                                        {score}
-                                    </p>
-                                    <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-[#666] sm:text-[11px]">
-                                        {label}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
                     </div>
-                    <div className="order-2">
-                        <ReportMock />
+                    <div className="flex min-w-0 justify-center lg:justify-end">
+                        <div className="w-full max-w-[min(100%,520px)]">
+                            <ListeningMock />
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Pricing */}
             <section
+                id="pricing"
                 className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
                 style={{ backgroundColor: light }}
             >
-                <div className="mx-auto max-w-6xl text-center">
-                    <h2 className="text-2xl text-[#0B0B0F] sm:text-3xl md:text-[2rem]">
-                        <Display>Simple and transparent</Display>
+                <div className="mx-auto max-w-6xl">
+                    <h2 className="text-center text-2xl text-[#0B0B0F] sm:text-3xl md:text-[2rem]">
+                        <Display>
+                            Pricing based on when you{" "}
+                            <em
+                                className="font-semibold italic"
+                                style={{ color: accent }}
+                            >
+                                need it
+                            </em>
+                            .
+                        </Display>
                     </h2>
-                    <p className="mx-auto mt-4 max-w-xl text-sm text-[#5c5c6a] sm:text-base">
-                        One full mock. Every section. No surprise add-ons.
+                    <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5c5c6a] sm:text-base">
+                        Choose a lead time that fits your schedule. Bundles may
+                        include speaking sessions and writing review — see
+                        catalog for full detail.
                     </p>
-                    <div className="mx-auto mt-12 max-w-md rounded-2xl border border-black/[0.06] bg-white px-8 py-10 text-left shadow-[0_24px_60px_-24px_rgba(15,15,25,0.2)] sm:px-10 sm:py-12">
-                        <h3 className="text-lg font-bold text-[#0B0B0F]">
-                            Full IELTS Mock Test
-                        </h3>
-                        <p className="mt-4 flex items-baseline gap-2">
-                            <span className="text-sm font-medium text-[#5c5c6a]">
-                                Rs
-                            </span>
-                            <Display className="text-5xl font-semibold text-[#0B0B0F]">
-                                1200
-                            </Display>
-                            <span className="text-sm text-[#5c5c6a]">
-                                / per test
-                            </span>
-                        </p>
-                        <ul className="mt-8 space-y-4">
-                            <CheckLi>All four skills in one sitting</CheckLi>
-                            <CheckLi>Computer-delivered interface</CheckLi>
-                            <CheckLi>
-                                Timed sections and official-style flow
-                            </CheckLi>
-                            <CheckLi>Human feedback on writing tasks</CheckLi>
-                            <CheckLi>Downloadable performance report</CheckLi>
-                        </ul>
-                        <Link
-                            href="/packages"
-                            className="mt-10 flex min-h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-white transition hover:opacity-95 sm:min-h-[3.25rem]"
-                            style={{ backgroundColor: accent }}
-                        >
-                            Start Mock Test
-                        </Link>
+                    <div className="mt-12 grid gap-6 sm:grid-cols-3 sm:gap-8">
+                        {(
+                            [
+                                {
+                                    label: "Standard (48h+)",
+                                    price: standardPrice,
+                                },
+                                {
+                                    label: "Priority (24–48h)",
+                                    price: priorityPrice,
+                                },
+                                {
+                                    label: "Book for today",
+                                    price: instantPrice,
+                                },
+                            ] as const
+                        ).map((tier) => (
+                            <div
+                                key={tier.label}
+                                className="flex flex-col rounded-2xl border border-black/[0.06] bg-white p-6 text-center shadow-[0_20px_50px_-20px_rgba(15,15,25,0.15)] sm:p-8"
+                            >
+                                <h3 className="text-sm font-bold text-[#0B0B0F] sm:text-base">
+                                    {tier.label}
+                                </h3>
+                                <p className="mt-6 flex flex-wrap items-baseline justify-center gap-1">
+                                    <span className="text-sm font-medium text-[#5c5c6a]">
+                                        Rs
+                                    </span>
+                                    <Display className="text-4xl font-semibold text-[#0B0B0F] sm:text-5xl">
+                                        {formatRs(tier.price)}
+                                    </Display>
+                                </p>
+                                <Link
+                                    href="/packages"
+                                    className="mt-8 inline-flex min-h-11 items-center justify-center rounded-2xl text-sm font-semibold text-white transition hover:opacity-95"
+                                    style={{ backgroundColor: accent }}
+                                >
+                                    Select
+                                </Link>
+                            </div>
+                        ))}
                     </div>
+                    <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-[#7a7a8a] sm:text-sm">
+                        Prices reflect the featured bundle when one is marked in
+                        the catalog; otherwise shown amounts are indicative.
+                        Combos and add-ons appear on the packages page.
+                    </p>
+                </div>
+            </section>
+
+            {/* FAQ */}
+            <section
+                id="faq"
+                className="bg-white px-4 py-16 sm:px-6 sm:py-20 md:py-24"
+            >
+                <div className="mx-auto max-w-3xl">
+                    <h2 className="text-center text-2xl text-[#0B0B0F] sm:text-3xl md:text-[2rem]">
+                        <Display>
+                            Read this before you book another{" "}
+                            <em
+                                className="font-semibold italic"
+                                style={{ color: accent }}
+                            >
+                                loose practice session
+                            </em>
+                            .
+                        </Display>
+                    </h2>
+                    <div className="mt-10 space-y-3">
+                        {(
+                            [
+                                {
+                                    q: "Why might an informal mock score mislead you?",
+                                    a: "Informal mocks often skip strict timing, on-screen navigation, or consistent rubric application. A computer-delivered full mock surfaces gaps in exam mechanics — not just topic knowledge.",
+                                },
+                                {
+                                    q: "Computer-delivered vs paper — what actually changes?",
+                                    a: "You interact with timers, scrolling, highlighting, and section transitions differently. Rehearsing in a browser-like flow reduces cognitive load on test day.",
+                                },
+                                {
+                                    q: "Automated feedback vs human review on writing?",
+                                    a: "Automated tools can miss nuance in task achievement and tone. Human reviewers align comments with band descriptors so you know what to fix next.",
+                                },
+                            ] as const
+                        ).map((item) => (
+                            <details
+                                key={item.q}
+                                className="group rounded-2xl border border-black/[0.06] bg-[#fafafa] transition-colors open:bg-white open:shadow-sm"
+                            >
+                                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-left text-sm font-semibold text-[#0B0B0F] sm:px-5 sm:text-base [&::-webkit-details-marker]:hidden">
+                                    <span className="min-w-0 pr-2">
+                                        {item.q}
+                                    </span>
+                                    <svg
+                                        className="size-5 shrink-0 text-[#888] transition-transform duration-200 group-open:rotate-180"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        aria-hidden
+                                    >
+                                        <path d="M6 9l6 6 6-6" />
+                                    </svg>
+                                </summary>
+                                <div className="border-t border-black/[0.06] px-4 pb-4 pt-3 text-sm leading-relaxed text-[#3d3d4a] sm:px-5">
+                                    {item.a}
+                                </div>
+                            </details>
+                        ))}
+                    </div>
+                    {otherPages.length > 0 && (
+                        <div className="mt-8 text-center">
+                            <Link
+                                href={`/${otherPages[0].slug}`}
+                                className="text-sm font-semibold transition hover:opacity-80"
+                                style={{ color: accent }}
+                            >
+                                View all articles →
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -652,58 +605,133 @@ export default async function HomePage() {
                         >
                             you feel ready
                         </em>
+                        .
                     </Display>
                 </h2>
                 <p className="mx-auto mt-5 max-w-lg text-sm text-white/65 sm:text-base">
                     Experience the exam once — everything changes after that.
                 </p>
-                <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
                     <Link
                         href="/packages"
-                        className="inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-semibold text-white transition hover:opacity-95"
-                        style={{ backgroundColor: accent }}
+                        className="inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
+                        style={{
+                            backgroundColor: accent,
+                            boxShadow: `0 12px 40px -8px ${accent}88`,
+                        }}
                     >
-                        Start Mock Test
+                        Start a Mock Test
                     </Link>
                     <Link
                         href="#experience"
-                        className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/35 px-8 text-sm font-semibold text-white transition hover:bg-white/10"
+                        className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/40 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10 sm:min-h-0 sm:px-8 sm:py-3.5"
                     >
-                        Preview first
+                        How we evaluate
                     </Link>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-black/[0.06] bg-white px-4 py-10 sm:px-6 sm:py-12">
-                <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 md:flex-row md:justify-between">
-                    <Link
-                        href="/"
-                        className="text-lg font-semibold"
-                        style={{ color: accent }}
-                    >
-                        ScoreMirror
-                    </Link>
-                    <nav
-                        className="flex flex-wrap items-center justify-center gap-6 text-sm text-[#3d3d4a]"
-                        aria-label="Footer"
-                    >
-                        {footerPages.map((page) => (
+            <footer className="border-t border-black/[0.06] bg-white px-4 py-12 sm:px-6 sm:py-14">
+                <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+                    <div className="lg:col-span-1">
+                        <Link
+                            href="/"
+                            className="text-lg font-semibold"
+                            style={{ color: accent }}
+                        >
+                            ScoreMirror
+                        </Link>
+                        <p className="mt-3 max-w-xs text-sm leading-relaxed text-[#5c5c6a]">
+                            Computer-based IELTS mocks, human writing review, and
+                            reports — built for exam day confidence.
+                        </p>
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#888]">
+                            Quick links
+                        </p>
+                        <nav
+                            className="mt-4 flex flex-col gap-2 text-sm text-[#3d3d4a]"
+                            aria-label="Quick links"
+                        >
+                            <Link href="/" className="hover:opacity-80">
+                                Home
+                            </Link>
+                            <Link href="#features" className="hover:opacity-80">
+                                Features
+                            </Link>
                             <Link
-                                key={page.slug}
-                                href={`/${page.slug}`}
+                                href="#experience"
                                 className="hover:opacity-80"
                             >
-                                {page.title}
+                                The experience
                             </Link>
-                        ))}
-                    </nav>
-                    <p className="text-xs text-[#9a9aaa]">
-                        © {new Date().getFullYear()} ScoreMirror
-                    </p>
+                            <Link href="#pricing" className="hover:opacity-80">
+                                Pricing
+                            </Link>
+                            <Link href="/login" className="hover:opacity-80">
+                                Log in
+                            </Link>
+                            <Link href="/register" className="hover:opacity-80">
+                                Get started
+                            </Link>
+                        </nav>
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#888]">
+                            Services
+                        </p>
+                        <nav
+                            className="mt-4 flex flex-col gap-2 text-sm text-[#3d3d4a]"
+                            aria-label="Services"
+                        >
+                            <Link href="/packages" className="hover:opacity-80">
+                                Mock tests &amp; bundles
+                            </Link>
+                            <Link href="#faq" className="hover:opacity-80">
+                                FAQs
+                            </Link>
+                        </nav>
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#888]">
+                            Legal &amp; pages
+                        </p>
+                        <nav
+                            className="mt-4 flex flex-col gap-2 text-sm text-[#3d3d4a]"
+                            aria-label="Legal"
+                        >
+                            {legalPages.map((page) => (
+                                <Link
+                                    key={page.slug}
+                                    href={`/${page.slug}`}
+                                    className="hover:opacity-80"
+                                >
+                                    {page.title}
+                                </Link>
+                            ))}
+                            {otherPages.map((page) => (
+                                <Link
+                                    key={page.slug}
+                                    href={`/${page.slug}`}
+                                    className="hover:opacity-80"
+                                >
+                                    {page.title}
+                                </Link>
+                            ))}
+                            {footerPages.length === 0 && (
+                                <span className="text-[#9a9aaa]">
+                                    No pages yet
+                                </span>
+                            )}
+                        </nav>
+                    </div>
                 </div>
+                <p className="mx-auto mt-12 max-w-6xl border-t border-black/[0.06] pt-8 text-center text-xs text-[#9a9aaa] sm:text-left">
+                    © {new Date().getFullYear()} ScoreMirror
+                </p>
             </footer>
         </div>
     );
 }
-

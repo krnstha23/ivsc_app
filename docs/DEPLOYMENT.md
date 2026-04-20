@@ -1,13 +1,20 @@
-# Production Server Setup Guide
-
+Production Server Setup Guide
+cs/DEPLOYMENT.md
 This guide walks through setting up the IVCS (ScoreMirror) app on a fresh Linux server using Docker.
+cs/DEPLOYMENT.md
 
 ## Prerequisites
 
+cs/DEPLOYMENT.md
+
 - A Linux VPS (Ubuntu 22.04/24.04 LTS recommended)
-- Minimum specs: 1-2 vCPUs, 2 GB RAM, 20 GB disk
+  cs/DEPLOYMENT.md
+  Minimum specs: 1-2 vCPUs, 2 GB RAM, 20 GB disk
+  cs/DEPLOYMENT.md
 - A domain name pointed at the server's IP (e.g. `app.yourdomain.com`)
-- SSH access to the server
+  cs/DEPLOYMENT.md
+  SSH access to the server
+  cs/DEPLOYMENT.md
 
 ## 1. Server Hardening
 
@@ -118,8 +125,8 @@ In `docker-compose.yml`, remove the `ports` block from the `db` service so Postg
 
 ```yaml
 # REMOVE these two lines from the db service:
-    ports:
-      - "5432:5432"
+ports:
+    - "5432:5432"
 ```
 
 ## 6. Build and Start
@@ -162,6 +169,7 @@ docker compose run --rm seed
 ## 8. Set Up Reverse Proxy with SSL (Nginx + Cloudflare)
 
 > **Important**: Only use one reverse proxy. If Caddy or another web server is installed, stop and disable it first:
+>
 > ```bash
 > sudo systemctl stop caddy && sudo systemctl disable caddy
 > ```

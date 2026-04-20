@@ -15,7 +15,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Eye, EyeClosed } from "@solar-icons/react";
-import { Field, FieldGroup } from "@/components/ui/field";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 export function LoginForm({
@@ -71,13 +71,13 @@ export function LoginForm({
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <Card>
+            <Card className="py-[calc(theme(spacing.6)*1.25)]">
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Welcome back</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={onSubmit}>
-                        <FieldGroup>
+                    <form onSubmit={onSubmit} className="flex flex-col gap-7">
+                        <div className="flex flex-col gap-3.5">
                             <Field>
                                 <div className="relative rounded-md border border-input shadow-xs">
                                     <span
@@ -116,84 +116,88 @@ export function LoginForm({
                                 </div>
                             </Field>
                             <Field>
-                                <div className="flex items-center justify-end">
+                                <div className="relative pt-5">
+                                    <div className="relative rounded-md border border-input shadow-xs">
+                                        <span
+                                            className={cn(
+                                                "pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-card px-1.5 text-sm text-muted-foreground transition-all duration-[240ms] ease-out",
+                                                passwordFocused || passwordValue
+                                                    ? "opacity-100"
+                                                    : "top-1/2 -translate-y-1/2 opacity-0"
+                                            )}
+                                            aria-hidden
+                                        >
+                                            Password
+                                        </span>
+                                        <Input
+                                            id="password"
+                                            name="password"
+                                            type={
+                                                passwordVisible
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            placeholder={
+                                                passwordFocused || passwordValue
+                                                    ? ""
+                                                    : "Password"
+                                            }
+                                            required
+                                            autoComplete="current-password"
+                                            disabled={pending}
+                                            value={passwordValue}
+                                            onChange={(e) =>
+                                                setPasswordValue(e.target.value)
+                                            }
+                                            onFocus={() =>
+                                                setPasswordFocused(true)
+                                            }
+                                            onBlur={() => {
+                                                setPasswordFocused(false);
+                                            }}
+                                            className="border-0 pr-10 text-xs shadow-none placeholder:text-xs transition-all duration-[240ms] focus-visible:ring-0"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setPasswordVisible((v) => !v)
+                                            }
+                                            className="text-muted-foreground hover:text-foreground absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 transition-colors focus:outline-none"
+                                            aria-label={
+                                                passwordVisible
+                                                    ? "Hide password"
+                                                    : "Show password"
+                                            }
+                                        >
+                                            {passwordVisible ? (
+                                                <EyeClosed size={18} />
+                                            ) : (
+                                                <Eye size={18} />
+                                            )}
+                                        </button>
+                                    </div>
                                     <a
                                         href="#"
-                                        className="text-muted-foreground text-[10px] underline-offset-4 hover:underline"
+                                        className="text-muted-foreground absolute right-0 top-0 text-[10px] underline-offset-4 hover:underline"
                                     >
                                         Forgot your password?
                                     </a>
                                 </div>
-                                <div className="relative rounded-md border border-input shadow-xs">
-                                    <span
-                                        className={cn(
-                                            "pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-card px-1.5 text-sm text-muted-foreground transition-all duration-[240ms] ease-out",
-                                            passwordFocused || passwordValue
-                                                ? "opacity-100"
-                                                : "top-1/2 -translate-y-1/2 opacity-0"
-                                        )}
-                                        aria-hidden
-                                    >
-                                        Password
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setPasswordVisible((v) => !v)
-                                        }
-                                        className="text-muted-foreground hover:text-foreground absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 transition-colors focus:outline-none"
-                                        aria-label={
-                                            passwordVisible
-                                                ? "Hide password"
-                                                : "Show password"
-                                        }
-                                    >
-                                        {passwordVisible ? (
-                                            <EyeClosed size={18} />
-                                        ) : (
-                                            <Eye size={18} />
-                                        )}
-                                    </button>
-                                    <Input
-                                        id="password"
-                                        name="password"
-                                        type={
-                                            passwordVisible ? "text" : "password"
-                                        }
-                                        placeholder={
-                                            passwordFocused || passwordValue
-                                                ? ""
-                                                : "Password"
-                                        }
-                                        required
-                                        autoComplete="current-password"
-                                        disabled={pending}
-                                        value={passwordValue}
-                                        onChange={(e) =>
-                                            setPasswordValue(e.target.value)
-                                        }
-                                        onFocus={() => setPasswordFocused(true)}
-                                        onBlur={() => {
-                                            setPasswordFocused(false);
-                                        }}
-                                        className="border-0 pr-10 text-xs shadow-none placeholder:text-xs transition-all duration-[240ms] focus-visible:ring-0"
-                                    />
-                                </div>
                             </Field>
-                            {error && (
-                                <p
-                                    className="text-sm text-destructive"
-                                    role="alert"
-                                >
-                                    {error}
-                                </p>
-                            )}
-                            <Field>
-                                <Button type="submit" disabled={pending}>
-                                    {pending ? "Signing in…" : "Sign in"}
-                                </Button>
-                            </Field>
-                        </FieldGroup>
+                        </div>
+                        {error && (
+                            <p
+                                className="text-sm text-destructive"
+                                role="alert"
+                            >
+                                {error}
+                            </p>
+                        )}
+                        <Field>
+                            <Button type="submit" disabled={pending}>
+                                {pending ? "Signing in…" : "Sign in"}
+                            </Button>
+                        </Field>
                     </form>
                     <p className="mt-4 text-center text-sm text-muted-foreground">
                         Don&apos;t have an account?{" "}
