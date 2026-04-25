@@ -25,7 +25,6 @@ export function LoginForm({
     const router = useRouter();
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
-    const [error, setError] = useState<string | null>(null);
     const [pending, setPending] = useState(false);
     const [usernameFocused, setUsernameFocused] = useState(false);
     const [passwordFocused, setPasswordFocused] = useState(false);
@@ -40,9 +39,8 @@ export function LoginForm({
         }
     }, [searchParams, router]);
 
-    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+        async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        setError(null);
         setPending(true);
         const form = e.currentTarget;
         const formData = new FormData(form);
@@ -57,9 +55,7 @@ export function LoginForm({
 
         setPending(false);
         if (result?.error) {
-            const message = "Invalid username or password.";
-            setError(message);
-            toast.error(message);
+            toast.error("Invalid username or password.");
             return;
         }
         if (result?.ok) {
@@ -185,14 +181,6 @@ export function LoginForm({
                                 </div>
                             </Field>
                         </div>
-                        {error && (
-                            <p
-                                className="text-sm text-destructive"
-                                role="alert"
-                            >
-                                {error}
-                            </p>
-                        )}
                         <Field>
                             <Button type="submit" disabled={pending}>
                                 {pending ? "Signing in…" : "Sign in"}

@@ -13,8 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
     CalendarMark,
     ClockCircle,
-    BookMinimalistic,
-    UserRounded,
 } from "@solar-icons/react";
 
 export type BookingItem = {
@@ -25,7 +23,6 @@ export type BookingItem = {
     notes: string | null;
     meetLink: string | null;
     packageName: string | null;
-    teacherName: string;
 };
 
 interface BookingsTabsProps {
@@ -104,18 +101,6 @@ function BookingCard({ booking }: { booking: BookingItem }) {
                     </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                        <UserRounded className="size-4" />
-                        {booking.teacherName}
-                    </span>
-                    {booking.packageName && (
-                        <span className="flex items-center gap-1.5">
-                            <BookMinimalistic className="size-4" />
-                            {booking.packageName}
-                        </span>
-                    )}
-                </div>
             </div>
 
             <div className="flex items-center gap-3">

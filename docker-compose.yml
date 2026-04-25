@@ -25,6 +25,10 @@ services:
       DATABASE_URL: "postgresql://ivcs:ivcs_secret@db:5432/ivcs_db?schema=public"
       AUTH_SECRET: "${AUTH_SECRET:?Set AUTH_SECRET in .env}"
       AUTH_URL: "${AUTH_URL:-http://localhost:3000}"
+      GOOGLE_SERVICE_ACCOUNT_KEY_PATH: "secrets/google-meet-key.json"
+      GOOGLE_MEET_HOST_EMAIL: "${GOOGLE_MEET_HOST_EMAIL:?Set GOOGLE_MEET_HOST_EMAIL in .env}"
+    volumes:
+      - /etc/scoremirror/secrets:/app/secrets:ro
     depends_on:
       db:
         condition: service_healthy

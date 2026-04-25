@@ -235,7 +235,7 @@ export default async function HomePage() {
             />
             {/* Hero */}
             <section
-                className="relative pb-16 pt-28 sm:pb-24 sm:pt-32 lg:pb-28 lg:pt-36"
+                className="relative pt-28 sm:pb-24 sm:pt-32 lg:pb-28 lg:pt-36"
                 style={{ backgroundColor: dark }}
             >
                 <LandingHeader />
@@ -244,21 +244,20 @@ export default async function HomePage() {
                     <div className="min-w-0 text-center lg:text-left">
                         <h1 className="text-[1.75rem] font-normal leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.75rem] md:leading-[1.12]">
                             <Display>
-                                Your IELTS exam environment. Practised with{" "}
+                                Your IELTS speaking level. Evaluated by{" "}
                                 <em
                                     className="font-semibold italic"
                                     style={{ color: accent }}
                                 >
-                                    real structure
+                                    real humans
                                 </em>
                                 .
                             </Display>
                         </h1>
                         <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/65 sm:text-base lg:mx-0 mx-auto">
-                            Timed, computer-delivered mock tests with human
-                            feedback on writing and a clear performance report —
-                            so pacing, navigation, and focus feel second nature
-                            on test day.
+                            A premium, human-led speaking and writing evaluation
+                            service for IELTS. No score guarantees. No quick
+                            tricks. Just your real caliber — reflected.
                         </p>
                         <div className="mt-8 flex flex-col flex-wrap justify-center gap-3 sm:flex-row sm:gap-4 lg:justify-start">
                             <Link
@@ -269,15 +268,19 @@ export default async function HomePage() {
                                     boxShadow: `0 12px 40px -8px ${accent}88`,
                                 }}
                             >
-                                Start a Mock Test
+                                Book Speaking Evaluation
                             </Link>
                             <Link
-                                href="#experience"
+                                href="/how-we-evaluate"
                                 className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/40 bg-transparent px-7 text-sm font-semibold text-white transition hover:bg-white/10 sm:min-h-0 sm:px-8 sm:py-3.5"
                             >
                                 How we evaluate
                             </Link>
                         </div>
+                        <p className="mt-5 text-xs leading-relaxed text-white/45 lg:mx-0 mx-auto max-w-sm">
+                            Evaluators trained under real-exam standard metrics.
+                            Just honest, expert feedback.
+                        </p>
                     </div>
 
                     <div className="relative flex min-w-0 justify-center lg:justify-end">
@@ -312,48 +315,49 @@ export default async function HomePage() {
                 <div className="mx-auto max-w-6xl">
                     <h2 className="mx-auto max-w-3xl text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
                         <Display>
-                            Not a coaching reel. Not a loose question bank. A{" "}
+                            Not a coaching institute. Not a mock test platform.{" "}
                             <em
                                 className="font-semibold italic"
                                 style={{ color: accent }}
                             >
-                                full mock
-                            </em>{" "}
-                            in one sitting.
+                                A caliber check.
+                            </em>
                         </Display>
                     </h2>
                     <div className="mt-12 grid gap-6 md:grid-cols-3 md:gap-8">
                         {(
                             [
                                 {
-                                    title: "Computer-delivered mock",
+                                    title: "Live Speaking Evaluation (VCS)",
                                     bullets: [
-                                        "All four skills in one timed flow",
-                                        "Navigation and prompts aligned to exam style",
-                                        "Stay in one interface from listening to writing",
+                                        "12–14 minute video call on Google Meet",
+                                        "Real-time human evaluation",
+                                        "Recording + diagnostic report",
+                                        "Brief verbal Q&A after session",
                                     ],
-                                    href: "#experience",
-                                    cta: "See the interface",
+                                    href: "/speaking-evaluation",
+                                    cta: "Learn More",
                                 },
                                 {
-                                    title: "Human writing review",
+                                    title: "Writing Evaluation (Async)",
                                     bullets: [
-                                        "Comments on task achievement and cohesion",
-                                        "Grammar and vocabulary tied to descriptors",
-                                        "Actionable notes for your next attempt",
+                                        "Submit Task 1 + Task 2",
+                                        "Word-level feedback",
+                                        "Detailed rubric analysis",
+                                        "No automated scoring",
                                     ],
-                                    href: "#pricing",
-                                    cta: "View pricing",
+                                    href: "/writing-evaluation",
+                                    cta: "Learn More",
                                 },
                                 {
                                     title: "What makes us different",
                                     bullets: [
-                                        "Performance report with skill breakdowns",
-                                        "Trend view so you can track improvement",
-                                        "Simple, transparent bundle pricing",
+                                        "We don't teach. We evaluate.",
+                                        "No batch classes. No group pressure.",
+                                        "Just your performance. Diagnosed.",
                                     ],
-                                    href: "#faq",
-                                    cta: "Read the FAQs",
+                                    href: "/why-us",
+                                    cta: "Learn More",
                                 },
                             ] as const
                         ).map((card) => (
@@ -491,7 +495,7 @@ export default async function HomePage() {
                                     aria-hidden
                                 />
                                 <Link
-                                    href="/login"
+                                    href="/packages"
                                     className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl px-7 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
                                     style={{
                                         backgroundColor: accent,
@@ -571,17 +575,15 @@ export default async function HomePage() {
                             </details>
                         ))}
                     </div>
-                    {otherPages.length > 0 && (
-                        <div className="mt-8 text-center">
-                            <Link
-                                href={`/${otherPages[0].slug}`}
-                                className="text-sm font-semibold transition hover:opacity-80"
-                                style={{ color: accent }}
-                            >
-                                View all articles →
-                            </Link>
-                        </div>
-                    )}
+                    <div className="mt-8 text-center">
+                        <Link
+                            href="#faq"
+                            className="text-sm font-semibold transition hover:opacity-80"
+                            style={{ color: accent }}
+                        >
+                            View all articles →
+                        </Link>
+                    </div>
                 </div>
             </section>
 
@@ -640,8 +642,8 @@ export default async function HomePage() {
                             ScoreMirror
                         </Link>
                         <p className="mt-3 max-w-xs text-sm leading-relaxed text-[#5c5c6a]">
-                            Computer-based IELTS mocks, human writing review, and
-                            reports — built for exam day confidence.
+                            Human-led speaking and writing evaluation for IELTS.
+                            Honest feedback. Real caliber.
                         </p>
                     </div>
                     <div>
@@ -655,14 +657,11 @@ export default async function HomePage() {
                             <Link href="/" className="hover:opacity-80">
                                 Home
                             </Link>
-                            <Link href="#features" className="hover:opacity-80">
-                                Features
+                            <Link href="/about-us" className="hover:opacity-80">
+                                About Us
                             </Link>
-                            <Link
-                                href="#experience"
-                                className="hover:opacity-80"
-                            >
-                                The experience
+                            <Link href="/how-we-evaluate" className="hover:opacity-80">
+                                How We Evaluate
                             </Link>
                             <Link href="#pricing" className="hover:opacity-80">
                                 Pricing
@@ -683,8 +682,14 @@ export default async function HomePage() {
                             className="mt-4 flex flex-col gap-2 text-sm text-[#3d3d4a]"
                             aria-label="Services"
                         >
-                            <Link href="/packages" className="hover:opacity-80">
-                                Mock tests &amp; bundles
+                            <Link href="/speaking-evaluation" className="hover:opacity-80">
+                                Speaking Evaluation
+                            </Link>
+                            <Link href="/writing-evaluation" className="hover:opacity-80">
+                                Writing Evaluation
+                            </Link>
+                            <Link href="/why-us" className="hover:opacity-80">
+                                Why Us
                             </Link>
                             <Link href="#faq" className="hover:opacity-80">
                                 FAQs

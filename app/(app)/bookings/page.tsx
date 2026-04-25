@@ -25,17 +25,6 @@ export default async function BookingsPage({
         status: true,
         notes: true,
         meetLink: true,
-        teacher: {
-            select: {
-                user: {
-                    select: {
-                        firstName: true,
-                        middleName: true,
-                        lastName: true,
-                    },
-                },
-            },
-        },
         package: { select: { name: true } },
     } as const;
 
@@ -81,13 +70,6 @@ export default async function BookingsPage({
             notes: b.notes,
             meetLink: b.meetLink,
             packageName: b.package?.name ?? null,
-            teacherName: [
-                b.teacher.user.firstName,
-                b.teacher.user.middleName,
-                b.teacher.user.lastName,
-            ]
-                .filter(Boolean)
-                .join(" "),
         }));
     }
 

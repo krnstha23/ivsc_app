@@ -59,6 +59,7 @@ export const ModelName = {
   StudentEnrollment: 'StudentEnrollment',
   Availability: 'Availability',
   Booking: 'Booking',
+  WritingQuestion: 'WritingQuestion',
   Evaluation: 'Evaluation',
   WritingSubmission: 'WritingSubmission',
   ClassMetadata: 'ClassMetadata',
@@ -203,11 +204,28 @@ export const BookingScalarFieldEnum = {
   transactionId: 'transactionId',
   submissionStart: 'submissionStart',
   submissionEnd: 'submissionEnd',
+  writingQuestionId: 'writingQuestionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const WritingQuestionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  filePath: 'filePath',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  uploadedBy: 'uploadedBy',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WritingQuestionScalarFieldEnum = (typeof WritingQuestionScalarFieldEnum)[keyof typeof WritingQuestionScalarFieldEnum]
 
 
 export const EvaluationScalarFieldEnum = {

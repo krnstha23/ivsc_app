@@ -360,6 +360,253 @@ async function main() {
             ],
         });
 
+        // --- Session Room test scenarios ---
+        // 7 bookings covering every step for both speaking and writing-only bundles.
+        // IDs are printed at the end of the seed output for quick navigation.
+
+        // Past availability blocks for speaking-session room bookings
+        const roomSpkAv1 = await tx.availability.create({
+            data: {
+                teacherId: teacherProfile1.id,
+                date: toDateOnly(addDays(today, -3)),
+                startTime: "10:00",
+                endTime: "10:30",
+                bundleIds: [bundleSpeaking.id],
+            },
+        });
+        const roomSpkAv2 = await tx.availability.create({
+            data: {
+                teacherId: teacherProfile2.id,
+                date: toDateOnly(addDays(today, -4)),
+                startTime: "11:00",
+                endTime: "11:30",
+                bundleIds: [bundleSpeaking.id],
+            },
+        });
+        const roomSpkAv3 = await tx.availability.create({
+            data: {
+                teacherId: teacherProfile2.id,
+                date: toDateOnly(addDays(today, -5)),
+                startTime: "13:00",
+                endTime: "13:30",
+                bundleIds: [bundleSpeaking.id],
+            },
+        });
+        const roomSpkAv4 = await tx.availability.create({
+            data: {
+                teacherId: teacherProfile1.id,
+                date: toDateOnly(addDays(today, -8)),
+                startTime: "14:00",
+                endTime: "14:45",
+                bundleIds: [bundleFullPrep.id],
+            },
+        });
+
+        // Past availability blocks for writing-only room bookings
+        const roomWrtAv1 = await tx.availability.create({
+            data: {
+                teacherId: teacherProfile1.id,
+                date: today,
+                startTime: "00:00",
+                endTime: "00:00",
+                bundleIds: [bundleWriting.id],
+            },
+        });
+        const roomWrtAv2 = await tx.availability.create({
+            data: {
+                teacherId: teacherProfile1.id,
+                date: toDateOnly(addDays(today, -2)),
+                startTime: "00:00",
+                endTime: "00:00",
+                bundleIds: [bundleWriting.id],
+            },
+        });
+        const roomWrtAv3 = await tx.availability.create({
+            data: {
+                teacherId: teacherProfile2.id,
+                date: toDateOnly(addDays(today, -5)),
+                startTime: "00:00",
+                endTime: "00:00",
+                bundleIds: [bundleWriting.id],
+            },
+        });
+
+        // Step 1 — Speaking (no Meet link yet)
+        const roomStep1 = await tx.booking.create({
+            data: {
+                userId: student1.id,
+                teacherId: teacherProfile1.id,
+                availabilityId: roomSpkAv1.id,
+                bundleId: bundleSpeaking.id,
+                scheduledAt: new Date(
+                    `${addDays(today, -3).toISOString().split("T")[0]}T10:00:00.000Z`,
+                ),
+                duration: 30,
+                status: BookingStatus.CONFIRMED,
+                paymentStatus: PaymentStatus.PAID,
+            },
+        });
+
+        // Step 2 — Speaking (Meet link set, no PDF yet)
+        const roomStep2 = await tx.booking.create({
+            data: {
+                userId: student2.id,
+                teacherId: teacherProfile2.id,
+                availabilityId: roomSpkAv2.id,
+                bundleId: bundleSpeaking.id,
+                scheduledAt: new Date(
+                    `${addDays(today, -4).toISOString().split("T")[0]}T11:00:00.000Z`,
+                ),
+                duration: 30,
+                status: BookingStatus.CONFIRMED,
+                paymentStatus: PaymentStatus.PAID,
+                meetLink: "https://meet.google.com/abc-defg-hij",
+            },
+        });
+
+        // Step 3 — Speaking (Meet done + PDF uploaded, no evaluation yet)
+        const roomStep3 = await tx.booking.create({
+            data: {
+                userId: student1.id,
+                teacherId: teacherProfile2.id,
+                availabilityId: roomSpkAv3.id,
+                bundleId: bundleSpeaking.id,
+                scheduledAt: new Date(
+                    `${addDays(today, -5).toISOString().split("T")[0]}T13:00:00.000Z`,
+                ),
+                duration: 30,
+                status: BookingStatus.CONFIRMED,
+                paymentStatus: PaymentStatus.PAID,
+                meetLink: "https://meet.google.com/klm-nopq-rst",
+            },
+        });
+        await tx.writingSubmission.create({
+            data: {
+                bookingId: roomStep3.id,
+                filePath: "uploads/seed-writing-step3.pdf",
+                fileName: "writing-task.pdf",
+                fileSize: 204800,
+            },
+        });
+
+        // Step 4 — Speaking with fullPrep bundle (fully completed: Meet + PDF + evaluation)
+        const roomStep4 = await tx.booking.create({
+            data: {
+                userId: student2.id,
+                teacherId: teacherProfile1.id,
+                availabilityId: roomSpkAv4.id,
+                bundleId: bundleFullPrep.id,
+                scheduledAt: new Date(
+                    `${addDays(today, -8).toISOString().split("T")[0]}T14:00:00.000Z`,
+                ),
+                duration: 45,
+                status: BookingStatus.COMPLETED,
+                paymentStatus: PaymentStatus.PAID,
+                meetLink: "https://meet.google.com/uvw-xyza-bcd",
+            },
+        });
+        await tx.writingSubmission.create({
+            data: {
+                bookingId: roomStep4.id,
+                filePath: "uploads/seed-writing-step4.pdf",
+                fileName: "ielts-writing-final.pdf",
+                fileSize: 318000,
+            },
+        });
+        await tx.evaluation.create({
+            data: {
+                bookingId: roomStep4.id,
+                score: 7,
+                feedback:
+                    "Strong coherence and cohesion. Task achievement was good — the student addressed all parts of the prompt with relevant supporting detail. Lexical resource is above average. Minor grammatical range issues but overall a solid Band 7 performance.",
+            },
+        });
+
+        // Step 5 — Writing-only (no upload yet, submission window open)
+        const roomStep5 = await tx.booking.create({
+            data: {
+                userId: student3.id,
+                teacherId: teacherProfile1.id,
+                availabilityId: roomWrtAv1.id,
+                bundleId: bundleWriting.id,
+                scheduledAt: today,
+                duration: 0,
+                status: BookingStatus.CONFIRMED,
+                paymentStatus: PaymentStatus.PAID,
+                submissionStart: today,
+                submissionEnd: addDays(today, 3),
+            },
+        });
+
+        // Step 6 — Writing-only (PDF uploaded, awaiting evaluation)
+        const roomStep6 = await tx.booking.create({
+            data: {
+                userId: student1.id,
+                teacherId: teacherProfile1.id,
+                availabilityId: roomWrtAv2.id,
+                bundleId: bundleWriting.id,
+                scheduledAt: addDays(today, -2),
+                duration: 0,
+                status: BookingStatus.CONFIRMED,
+                paymentStatus: PaymentStatus.PAID,
+                submissionStart: addDays(today, -2),
+                submissionEnd: today,
+            },
+        });
+        await tx.writingSubmission.create({
+            data: {
+                bookingId: roomStep6.id,
+                filePath: "uploads/seed-writing-step6.pdf",
+                fileName: "writing-submission.pdf",
+                fileSize: 172032,
+            },
+        });
+
+        // Step 7 — Writing-only (fully evaluated)
+        const roomStep7 = await tx.booking.create({
+            data: {
+                userId: student3.id,
+                teacherId: teacherProfile2.id,
+                availabilityId: roomWrtAv3.id,
+                bundleId: bundleWriting.id,
+                scheduledAt: addDays(today, -5),
+                duration: 0,
+                status: BookingStatus.COMPLETED,
+                paymentStatus: PaymentStatus.PAID,
+                submissionStart: addDays(today, -5),
+                submissionEnd: addDays(today, -3),
+            },
+        });
+        await tx.writingSubmission.create({
+            data: {
+                bookingId: roomStep7.id,
+                filePath: "uploads/seed-writing-step7.pdf",
+                fileName: "task1-task2-final.pdf",
+                fileSize: 251904,
+            },
+        });
+        await tx.evaluation.create({
+            data: {
+                bookingId: roomStep7.id,
+                score: 6,
+                feedback:
+                    "Good attempt on both tasks. Task 1 response was informative but could benefit from a clearer overview. Task 2 argument was relevant but lacks full development in body paragraph 2. Band 6.5 is achievable with more practice on complex sentence structures.",
+            },
+        });
+
+        // Surface IDs for manual testing (printed after transaction)
+        Object.assign(globalThis, {
+            __roomIds: {
+                roomStep1: roomStep1.id,
+                roomStep2: roomStep2.id,
+                roomStep3: roomStep3.id,
+                roomStep4: roomStep4.id,
+                roomStep5: roomStep5.id,
+                roomStep6: roomStep6.id,
+                roomStep7: roomStep7.id,
+            },
+        });
+
         // --- Static pages ---
         await tx.staticPage.createMany({
             data: [
@@ -388,12 +635,21 @@ async function main() {
         });
 
         void admin;
-        void bundleWriting;
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ids = (globalThis as any).__roomIds as Record<string, string>;
     console.log(
-        "Seed completed: users, profiles, packages, bundles, enrollments, availability, bookings, class metadata, static pages.",
+        "\nSeed completed: users, profiles, packages, bundles, enrollments, availability, bookings, class metadata, static pages, session room scenarios.",
     );
+    console.log("\nSession Room test URLs (login as the matching student or teacher):");
+    console.log(`  Speaking — Step 1  no Meet link       → /sessions/${ids.roomStep1}/room  [student1 / teacher1]`);
+    console.log(`  Speaking — Step 2  Meet link set       → /sessions/${ids.roomStep2}/room  [student2 / teacher2]`);
+    console.log(`  Speaking — Step 3  PDF uploaded        → /sessions/${ids.roomStep3}/room  [student1 / teacher2]`);
+    console.log(`  Speaking — Step 4  Fully evaluated     → /sessions/${ids.roomStep4}/room  [student2 / teacher1]`);
+    console.log(`  Writing  — Step 1  Fresh window        → /sessions/${ids.roomStep5}/room  [student3 / teacher1]`);
+    console.log(`  Writing  — Step 2  PDF uploaded        → /sessions/${ids.roomStep6}/room  [student1 / teacher1]`);
+    console.log(`  Writing  — Step 3  Fully evaluated     → /sessions/${ids.roomStep7}/room  [student3 / teacher2]`);
 }
 
 main()

@@ -21,17 +21,17 @@ export function LandingHeader() {
                     <Link href="/" className={navLinkClass}>
                         Home
                     </Link>
-                    <Link href="/#features" className={navLinkClass}>
-                        Features
+                    <Link href="/about-us" className={navLinkClass}>
+                        About Us
                     </Link>
-                    <Link href="/#experience" className={navLinkClass}>
-                        Experience
+                    <Link href="/how-we-evaluate" className={navLinkClass}>
+                        How We Evaluate
                     </Link>
-                    <Link href="/#pricing" className={navLinkClass}>
-                        Pricing
+                    <Link href="/speaking-evaluation" className={navLinkClass}>
+                        Speaking
                     </Link>
-                    <Link href="/packages" className={navLinkClass}>
-                        Packages
+                    <Link href="/writing-evaluation" className={navLinkClass}>
+                        Writing
                     </Link>
                 </nav>
 

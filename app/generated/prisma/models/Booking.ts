@@ -50,6 +50,7 @@ export type BookingMinAggregateOutputType = {
   transactionId: string | null
   submissionStart: Date | null
   submissionEnd: Date | null
+  writingQuestionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -70,6 +71,7 @@ export type BookingMaxAggregateOutputType = {
   transactionId: string | null
   submissionStart: Date | null
   submissionEnd: Date | null
+  writingQuestionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -90,6 +92,7 @@ export type BookingCountAggregateOutputType = {
   transactionId: number
   submissionStart: number
   submissionEnd: number
+  writingQuestionId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -120,6 +123,7 @@ export type BookingMinAggregateInputType = {
   transactionId?: true
   submissionStart?: true
   submissionEnd?: true
+  writingQuestionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -140,6 +144,7 @@ export type BookingMaxAggregateInputType = {
   transactionId?: true
   submissionStart?: true
   submissionEnd?: true
+  writingQuestionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -160,6 +165,7 @@ export type BookingCountAggregateInputType = {
   transactionId?: true
   submissionStart?: true
   submissionEnd?: true
+  writingQuestionId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -267,6 +273,7 @@ export type BookingGroupByOutputType = {
   transactionId: string | null
   submissionStart: Date | null
   submissionEnd: Date | null
+  writingQuestionId: string | null
   createdAt: Date
   updatedAt: Date
   _count: BookingCountAggregateOutputType | null
@@ -310,12 +317,14 @@ export type BookingWhereInput = {
   transactionId?: Prisma.StringNullableFilter<"Booking"> | string | null
   submissionStart?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
   submissionEnd?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
+  writingQuestionId?: Prisma.StringNullableFilter<"Booking"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Booking"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Booking"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   teacher?: Prisma.XOR<Prisma.TeacherProfileScalarRelationFilter, Prisma.TeacherProfileWhereInput>
   availability?: Prisma.XOR<Prisma.AvailabilityScalarRelationFilter, Prisma.AvailabilityWhereInput>
   package?: Prisma.XOR<Prisma.PackageNullableScalarRelationFilter, Prisma.PackageWhereInput> | null
+  writingQuestion?: Prisma.XOR<Prisma.WritingQuestionNullableScalarRelationFilter, Prisma.WritingQuestionWhereInput> | null
   evaluation?: Prisma.XOR<Prisma.EvaluationNullableScalarRelationFilter, Prisma.EvaluationWhereInput> | null
   writingSubmission?: Prisma.XOR<Prisma.WritingSubmissionNullableScalarRelationFilter, Prisma.WritingSubmissionWhereInput> | null
 }
@@ -336,12 +345,14 @@ export type BookingOrderByWithRelationInput = {
   transactionId?: Prisma.SortOrderInput | Prisma.SortOrder
   submissionStart?: Prisma.SortOrderInput | Prisma.SortOrder
   submissionEnd?: Prisma.SortOrderInput | Prisma.SortOrder
+  writingQuestionId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   teacher?: Prisma.TeacherProfileOrderByWithRelationInput
   availability?: Prisma.AvailabilityOrderByWithRelationInput
   package?: Prisma.PackageOrderByWithRelationInput
+  writingQuestion?: Prisma.WritingQuestionOrderByWithRelationInput
   evaluation?: Prisma.EvaluationOrderByWithRelationInput
   writingSubmission?: Prisma.WritingSubmissionOrderByWithRelationInput
 }
@@ -365,12 +376,14 @@ export type BookingWhereUniqueInput = Prisma.AtLeast<{
   transactionId?: Prisma.StringNullableFilter<"Booking"> | string | null
   submissionStart?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
   submissionEnd?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
+  writingQuestionId?: Prisma.StringNullableFilter<"Booking"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Booking"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Booking"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   teacher?: Prisma.XOR<Prisma.TeacherProfileScalarRelationFilter, Prisma.TeacherProfileWhereInput>
   availability?: Prisma.XOR<Prisma.AvailabilityScalarRelationFilter, Prisma.AvailabilityWhereInput>
   package?: Prisma.XOR<Prisma.PackageNullableScalarRelationFilter, Prisma.PackageWhereInput> | null
+  writingQuestion?: Prisma.XOR<Prisma.WritingQuestionNullableScalarRelationFilter, Prisma.WritingQuestionWhereInput> | null
   evaluation?: Prisma.XOR<Prisma.EvaluationNullableScalarRelationFilter, Prisma.EvaluationWhereInput> | null
   writingSubmission?: Prisma.XOR<Prisma.WritingSubmissionNullableScalarRelationFilter, Prisma.WritingSubmissionWhereInput> | null
 }, "id" | "availabilityId">
@@ -391,6 +404,7 @@ export type BookingOrderByWithAggregationInput = {
   transactionId?: Prisma.SortOrderInput | Prisma.SortOrder
   submissionStart?: Prisma.SortOrderInput | Prisma.SortOrder
   submissionEnd?: Prisma.SortOrderInput | Prisma.SortOrder
+  writingQuestionId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BookingCountOrderByAggregateInput
@@ -419,6 +433,7 @@ export type BookingScalarWhereWithAggregatesInput = {
   transactionId?: Prisma.StringNullableWithAggregatesFilter<"Booking"> | string | null
   submissionStart?: Prisma.DateTimeNullableWithAggregatesFilter<"Booking"> | Date | string | null
   submissionEnd?: Prisma.DateTimeNullableWithAggregatesFilter<"Booking"> | Date | string | null
+  writingQuestionId?: Prisma.StringNullableWithAggregatesFilter<"Booking"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Booking"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Booking"> | Date | string
 }
@@ -441,6 +456,7 @@ export type BookingCreateInput = {
   teacher: Prisma.TeacherProfileCreateNestedOneWithoutBookingsInput
   availability: Prisma.AvailabilityCreateNestedOneWithoutBookingInput
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
+  writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
 }
@@ -461,6 +477,7 @@ export type BookingUncheckedCreateInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
@@ -485,6 +502,7 @@ export type BookingUpdateInput = {
   teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutBookingsNestedInput
   availability?: Prisma.AvailabilityUpdateOneRequiredWithoutBookingNestedInput
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
+  writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
 }
@@ -505,6 +523,7 @@ export type BookingUncheckedUpdateInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
@@ -527,6 +546,7 @@ export type BookingCreateManyInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -563,6 +583,7 @@ export type BookingUncheckedUpdateManyInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -598,6 +619,7 @@ export type BookingCountOrderByAggregateInput = {
   transactionId?: Prisma.SortOrder
   submissionStart?: Prisma.SortOrder
   submissionEnd?: Prisma.SortOrder
+  writingQuestionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -622,6 +644,7 @@ export type BookingMaxOrderByAggregateInput = {
   transactionId?: Prisma.SortOrder
   submissionStart?: Prisma.SortOrder
   submissionEnd?: Prisma.SortOrder
+  writingQuestionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -642,6 +665,7 @@ export type BookingMinOrderByAggregateInput = {
   transactionId?: Prisma.SortOrder
   submissionStart?: Prisma.SortOrder
   submissionEnd?: Prisma.SortOrder
+  writingQuestionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -821,6 +845,48 @@ export type EnumPaymentStatusFieldUpdateOperationsInput = {
   set?: $Enums.PaymentStatus
 }
 
+export type BookingCreateNestedManyWithoutWritingQuestionInput = {
+  create?: Prisma.XOR<Prisma.BookingCreateWithoutWritingQuestionInput, Prisma.BookingUncheckedCreateWithoutWritingQuestionInput> | Prisma.BookingCreateWithoutWritingQuestionInput[] | Prisma.BookingUncheckedCreateWithoutWritingQuestionInput[]
+  connectOrCreate?: Prisma.BookingCreateOrConnectWithoutWritingQuestionInput | Prisma.BookingCreateOrConnectWithoutWritingQuestionInput[]
+  createMany?: Prisma.BookingCreateManyWritingQuestionInputEnvelope
+  connect?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+}
+
+export type BookingUncheckedCreateNestedManyWithoutWritingQuestionInput = {
+  create?: Prisma.XOR<Prisma.BookingCreateWithoutWritingQuestionInput, Prisma.BookingUncheckedCreateWithoutWritingQuestionInput> | Prisma.BookingCreateWithoutWritingQuestionInput[] | Prisma.BookingUncheckedCreateWithoutWritingQuestionInput[]
+  connectOrCreate?: Prisma.BookingCreateOrConnectWithoutWritingQuestionInput | Prisma.BookingCreateOrConnectWithoutWritingQuestionInput[]
+  createMany?: Prisma.BookingCreateManyWritingQuestionInputEnvelope
+  connect?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+}
+
+export type BookingUpdateManyWithoutWritingQuestionNestedInput = {
+  create?: Prisma.XOR<Prisma.BookingCreateWithoutWritingQuestionInput, Prisma.BookingUncheckedCreateWithoutWritingQuestionInput> | Prisma.BookingCreateWithoutWritingQuestionInput[] | Prisma.BookingUncheckedCreateWithoutWritingQuestionInput[]
+  connectOrCreate?: Prisma.BookingCreateOrConnectWithoutWritingQuestionInput | Prisma.BookingCreateOrConnectWithoutWritingQuestionInput[]
+  upsert?: Prisma.BookingUpsertWithWhereUniqueWithoutWritingQuestionInput | Prisma.BookingUpsertWithWhereUniqueWithoutWritingQuestionInput[]
+  createMany?: Prisma.BookingCreateManyWritingQuestionInputEnvelope
+  set?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+  disconnect?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+  delete?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+  connect?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+  update?: Prisma.BookingUpdateWithWhereUniqueWithoutWritingQuestionInput | Prisma.BookingUpdateWithWhereUniqueWithoutWritingQuestionInput[]
+  updateMany?: Prisma.BookingUpdateManyWithWhereWithoutWritingQuestionInput | Prisma.BookingUpdateManyWithWhereWithoutWritingQuestionInput[]
+  deleteMany?: Prisma.BookingScalarWhereInput | Prisma.BookingScalarWhereInput[]
+}
+
+export type BookingUncheckedUpdateManyWithoutWritingQuestionNestedInput = {
+  create?: Prisma.XOR<Prisma.BookingCreateWithoutWritingQuestionInput, Prisma.BookingUncheckedCreateWithoutWritingQuestionInput> | Prisma.BookingCreateWithoutWritingQuestionInput[] | Prisma.BookingUncheckedCreateWithoutWritingQuestionInput[]
+  connectOrCreate?: Prisma.BookingCreateOrConnectWithoutWritingQuestionInput | Prisma.BookingCreateOrConnectWithoutWritingQuestionInput[]
+  upsert?: Prisma.BookingUpsertWithWhereUniqueWithoutWritingQuestionInput | Prisma.BookingUpsertWithWhereUniqueWithoutWritingQuestionInput[]
+  createMany?: Prisma.BookingCreateManyWritingQuestionInputEnvelope
+  set?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+  disconnect?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+  delete?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+  connect?: Prisma.BookingWhereUniqueInput | Prisma.BookingWhereUniqueInput[]
+  update?: Prisma.BookingUpdateWithWhereUniqueWithoutWritingQuestionInput | Prisma.BookingUpdateWithWhereUniqueWithoutWritingQuestionInput[]
+  updateMany?: Prisma.BookingUpdateManyWithWhereWithoutWritingQuestionInput | Prisma.BookingUpdateManyWithWhereWithoutWritingQuestionInput[]
+  deleteMany?: Prisma.BookingScalarWhereInput | Prisma.BookingScalarWhereInput[]
+}
+
 export type BookingCreateNestedOneWithoutEvaluationInput = {
   create?: Prisma.XOR<Prisma.BookingCreateWithoutEvaluationInput, Prisma.BookingUncheckedCreateWithoutEvaluationInput>
   connectOrCreate?: Prisma.BookingCreateOrConnectWithoutEvaluationInput
@@ -866,6 +932,7 @@ export type BookingCreateWithoutUserInput = {
   teacher: Prisma.TeacherProfileCreateNestedOneWithoutBookingsInput
   availability: Prisma.AvailabilityCreateNestedOneWithoutBookingInput
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
+  writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
 }
@@ -885,6 +952,7 @@ export type BookingUncheckedCreateWithoutUserInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
@@ -936,6 +1004,7 @@ export type BookingScalarWhereInput = {
   transactionId?: Prisma.StringNullableFilter<"Booking"> | string | null
   submissionStart?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
   submissionEnd?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
+  writingQuestionId?: Prisma.StringNullableFilter<"Booking"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Booking"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Booking"> | Date | string
 }
@@ -957,6 +1026,7 @@ export type BookingCreateWithoutTeacherInput = {
   user: Prisma.UserCreateNestedOneWithoutBookingsInput
   availability: Prisma.AvailabilityCreateNestedOneWithoutBookingInput
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
+  writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
 }
@@ -976,6 +1046,7 @@ export type BookingUncheckedCreateWithoutTeacherInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
@@ -1025,6 +1096,7 @@ export type BookingCreateWithoutPackageInput = {
   user: Prisma.UserCreateNestedOneWithoutBookingsInput
   teacher: Prisma.TeacherProfileCreateNestedOneWithoutBookingsInput
   availability: Prisma.AvailabilityCreateNestedOneWithoutBookingInput
+  writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
 }
@@ -1044,6 +1116,7 @@ export type BookingUncheckedCreateWithoutPackageInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
@@ -1093,6 +1166,7 @@ export type BookingCreateWithoutAvailabilityInput = {
   user: Prisma.UserCreateNestedOneWithoutBookingsInput
   teacher: Prisma.TeacherProfileCreateNestedOneWithoutBookingsInput
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
+  writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
 }
@@ -1112,6 +1186,7 @@ export type BookingUncheckedCreateWithoutAvailabilityInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
@@ -1151,6 +1226,7 @@ export type BookingUpdateWithoutAvailabilityInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutBookingsNestedInput
   teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutBookingsNestedInput
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
+  writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
 }
@@ -1170,10 +1246,81 @@ export type BookingUncheckedUpdateWithoutAvailabilityInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+}
+
+export type BookingCreateWithoutWritingQuestionInput = {
+  id?: string
+  bundleId?: string | null
+  scheduledAt: Date | string
+  duration: number
+  status?: $Enums.BookingStatus
+  notes?: string | null
+  meetLink?: string | null
+  paymentStatus?: $Enums.PaymentStatus
+  transactionId?: string | null
+  submissionStart?: Date | string | null
+  submissionEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutBookingsInput
+  teacher: Prisma.TeacherProfileCreateNestedOneWithoutBookingsInput
+  availability: Prisma.AvailabilityCreateNestedOneWithoutBookingInput
+  package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
+  evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
+  writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+}
+
+export type BookingUncheckedCreateWithoutWritingQuestionInput = {
+  id?: string
+  userId: string
+  teacherId: string
+  availabilityId: string
+  packageId?: string | null
+  bundleId?: string | null
+  scheduledAt: Date | string
+  duration: number
+  status?: $Enums.BookingStatus
+  notes?: string | null
+  meetLink?: string | null
+  paymentStatus?: $Enums.PaymentStatus
+  transactionId?: string | null
+  submissionStart?: Date | string | null
+  submissionEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
+  writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+}
+
+export type BookingCreateOrConnectWithoutWritingQuestionInput = {
+  where: Prisma.BookingWhereUniqueInput
+  create: Prisma.XOR<Prisma.BookingCreateWithoutWritingQuestionInput, Prisma.BookingUncheckedCreateWithoutWritingQuestionInput>
+}
+
+export type BookingCreateManyWritingQuestionInputEnvelope = {
+  data: Prisma.BookingCreateManyWritingQuestionInput | Prisma.BookingCreateManyWritingQuestionInput[]
+  skipDuplicates?: boolean
+}
+
+export type BookingUpsertWithWhereUniqueWithoutWritingQuestionInput = {
+  where: Prisma.BookingWhereUniqueInput
+  update: Prisma.XOR<Prisma.BookingUpdateWithoutWritingQuestionInput, Prisma.BookingUncheckedUpdateWithoutWritingQuestionInput>
+  create: Prisma.XOR<Prisma.BookingCreateWithoutWritingQuestionInput, Prisma.BookingUncheckedCreateWithoutWritingQuestionInput>
+}
+
+export type BookingUpdateWithWhereUniqueWithoutWritingQuestionInput = {
+  where: Prisma.BookingWhereUniqueInput
+  data: Prisma.XOR<Prisma.BookingUpdateWithoutWritingQuestionInput, Prisma.BookingUncheckedUpdateWithoutWritingQuestionInput>
+}
+
+export type BookingUpdateManyWithWhereWithoutWritingQuestionInput = {
+  where: Prisma.BookingScalarWhereInput
+  data: Prisma.XOR<Prisma.BookingUpdateManyMutationInput, Prisma.BookingUncheckedUpdateManyWithoutWritingQuestionInput>
 }
 
 export type BookingCreateWithoutEvaluationInput = {
@@ -1194,6 +1341,7 @@ export type BookingCreateWithoutEvaluationInput = {
   teacher: Prisma.TeacherProfileCreateNestedOneWithoutBookingsInput
   availability: Prisma.AvailabilityCreateNestedOneWithoutBookingInput
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
+  writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
 }
 
@@ -1213,6 +1361,7 @@ export type BookingUncheckedCreateWithoutEvaluationInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
@@ -1252,6 +1401,7 @@ export type BookingUpdateWithoutEvaluationInput = {
   teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutBookingsNestedInput
   availability?: Prisma.AvailabilityUpdateOneRequiredWithoutBookingNestedInput
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
+  writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
 }
 
@@ -1271,6 +1421,7 @@ export type BookingUncheckedUpdateWithoutEvaluationInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
@@ -1294,6 +1445,7 @@ export type BookingCreateWithoutWritingSubmissionInput = {
   teacher: Prisma.TeacherProfileCreateNestedOneWithoutBookingsInput
   availability: Prisma.AvailabilityCreateNestedOneWithoutBookingInput
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
+  writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
 }
 
@@ -1313,6 +1465,7 @@ export type BookingUncheckedCreateWithoutWritingSubmissionInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
@@ -1352,6 +1505,7 @@ export type BookingUpdateWithoutWritingSubmissionInput = {
   teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutBookingsNestedInput
   availability?: Prisma.AvailabilityUpdateOneRequiredWithoutBookingNestedInput
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
+  writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
 }
 
@@ -1371,6 +1525,7 @@ export type BookingUncheckedUpdateWithoutWritingSubmissionInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
@@ -1391,6 +1546,7 @@ export type BookingCreateManyUserInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1412,6 +1568,7 @@ export type BookingUpdateWithoutUserInput = {
   teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutBookingsNestedInput
   availability?: Prisma.AvailabilityUpdateOneRequiredWithoutBookingNestedInput
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
+  writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
 }
@@ -1431,6 +1588,7 @@ export type BookingUncheckedUpdateWithoutUserInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
@@ -1452,6 +1610,7 @@ export type BookingUncheckedUpdateManyWithoutUserInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1471,6 +1630,7 @@ export type BookingCreateManyTeacherInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1492,6 +1652,7 @@ export type BookingUpdateWithoutTeacherInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutBookingsNestedInput
   availability?: Prisma.AvailabilityUpdateOneRequiredWithoutBookingNestedInput
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
+  writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
 }
@@ -1511,6 +1672,7 @@ export type BookingUncheckedUpdateWithoutTeacherInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
@@ -1532,6 +1694,7 @@ export type BookingUncheckedUpdateManyWithoutTeacherInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1551,6 +1714,7 @@ export type BookingCreateManyPackageInput = {
   transactionId?: string | null
   submissionStart?: Date | string | null
   submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1572,6 +1736,7 @@ export type BookingUpdateWithoutPackageInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutBookingsNestedInput
   teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutBookingsNestedInput
   availability?: Prisma.AvailabilityUpdateOneRequiredWithoutBookingNestedInput
+  writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
 }
@@ -1591,6 +1756,7 @@ export type BookingUncheckedUpdateWithoutPackageInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
@@ -1602,6 +1768,91 @@ export type BookingUncheckedUpdateManyWithoutPackageInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   availabilityId?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BookingCreateManyWritingQuestionInput = {
+  id?: string
+  userId: string
+  teacherId: string
+  availabilityId: string
+  packageId?: string | null
+  bundleId?: string | null
+  scheduledAt: Date | string
+  duration: number
+  status?: $Enums.BookingStatus
+  notes?: string | null
+  meetLink?: string | null
+  paymentStatus?: $Enums.PaymentStatus
+  transactionId?: string | null
+  submissionStart?: Date | string | null
+  submissionEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BookingUpdateWithoutWritingQuestionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutBookingsNestedInput
+  teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutBookingsNestedInput
+  availability?: Prisma.AvailabilityUpdateOneRequiredWithoutBookingNestedInput
+  package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
+  evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
+  writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+}
+
+export type BookingUncheckedUpdateWithoutWritingQuestionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  teacherId?: Prisma.StringFieldUpdateOperationsInput | string
+  availabilityId?: Prisma.StringFieldUpdateOperationsInput | string
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
+  writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+}
+
+export type BookingUncheckedUpdateManyWithoutWritingQuestionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  teacherId?: Prisma.StringFieldUpdateOperationsInput | string
+  availabilityId?: Prisma.StringFieldUpdateOperationsInput | string
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   duration?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1634,12 +1885,14 @@ export type BookingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   transactionId?: boolean
   submissionStart?: boolean
   submissionEnd?: boolean
+  writingQuestionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
   availability?: boolean | Prisma.AvailabilityDefaultArgs<ExtArgs>
   package?: boolean | Prisma.Booking$packageArgs<ExtArgs>
+  writingQuestion?: boolean | Prisma.Booking$writingQuestionArgs<ExtArgs>
   evaluation?: boolean | Prisma.Booking$evaluationArgs<ExtArgs>
   writingSubmission?: boolean | Prisma.Booking$writingSubmissionArgs<ExtArgs>
 }, ExtArgs["result"]["booking"]>
@@ -1660,12 +1913,14 @@ export type BookingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   transactionId?: boolean
   submissionStart?: boolean
   submissionEnd?: boolean
+  writingQuestionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
   availability?: boolean | Prisma.AvailabilityDefaultArgs<ExtArgs>
   package?: boolean | Prisma.Booking$packageArgs<ExtArgs>
+  writingQuestion?: boolean | Prisma.Booking$writingQuestionArgs<ExtArgs>
 }, ExtArgs["result"]["booking"]>
 
 export type BookingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1684,12 +1939,14 @@ export type BookingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   transactionId?: boolean
   submissionStart?: boolean
   submissionEnd?: boolean
+  writingQuestionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
   availability?: boolean | Prisma.AvailabilityDefaultArgs<ExtArgs>
   package?: boolean | Prisma.Booking$packageArgs<ExtArgs>
+  writingQuestion?: boolean | Prisma.Booking$writingQuestionArgs<ExtArgs>
 }, ExtArgs["result"]["booking"]>
 
 export type BookingSelectScalar = {
@@ -1708,16 +1965,18 @@ export type BookingSelectScalar = {
   transactionId?: boolean
   submissionStart?: boolean
   submissionEnd?: boolean
+  writingQuestionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BookingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "teacherId" | "availabilityId" | "packageId" | "bundleId" | "scheduledAt" | "duration" | "status" | "notes" | "meetLink" | "paymentStatus" | "transactionId" | "submissionStart" | "submissionEnd" | "createdAt" | "updatedAt", ExtArgs["result"]["booking"]>
+export type BookingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "teacherId" | "availabilityId" | "packageId" | "bundleId" | "scheduledAt" | "duration" | "status" | "notes" | "meetLink" | "paymentStatus" | "transactionId" | "submissionStart" | "submissionEnd" | "writingQuestionId" | "createdAt" | "updatedAt", ExtArgs["result"]["booking"]>
 export type BookingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
   availability?: boolean | Prisma.AvailabilityDefaultArgs<ExtArgs>
   package?: boolean | Prisma.Booking$packageArgs<ExtArgs>
+  writingQuestion?: boolean | Prisma.Booking$writingQuestionArgs<ExtArgs>
   evaluation?: boolean | Prisma.Booking$evaluationArgs<ExtArgs>
   writingSubmission?: boolean | Prisma.Booking$writingSubmissionArgs<ExtArgs>
 }
@@ -1726,12 +1985,14 @@ export type BookingIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
   availability?: boolean | Prisma.AvailabilityDefaultArgs<ExtArgs>
   package?: boolean | Prisma.Booking$packageArgs<ExtArgs>
+  writingQuestion?: boolean | Prisma.Booking$writingQuestionArgs<ExtArgs>
 }
 export type BookingIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
   availability?: boolean | Prisma.AvailabilityDefaultArgs<ExtArgs>
   package?: boolean | Prisma.Booking$packageArgs<ExtArgs>
+  writingQuestion?: boolean | Prisma.Booking$writingQuestionArgs<ExtArgs>
 }
 
 export type $BookingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1741,6 +2002,7 @@ export type $BookingPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     teacher: Prisma.$TeacherProfilePayload<ExtArgs>
     availability: Prisma.$AvailabilityPayload<ExtArgs>
     package: Prisma.$PackagePayload<ExtArgs> | null
+    writingQuestion: Prisma.$WritingQuestionPayload<ExtArgs> | null
     evaluation: Prisma.$EvaluationPayload<ExtArgs> | null
     writingSubmission: Prisma.$WritingSubmissionPayload<ExtArgs> | null
   }
@@ -1760,6 +2022,7 @@ export type $BookingPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     transactionId: string | null
     submissionStart: Date | null
     submissionEnd: Date | null
+    writingQuestionId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["booking"]>
@@ -2160,6 +2423,7 @@ export interface Prisma__BookingClient<T, Null = never, ExtArgs extends runtime.
   teacher<T extends Prisma.TeacherProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeacherProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__TeacherProfileClient<runtime.Types.Result.GetResult<Prisma.$TeacherProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   availability<T extends Prisma.AvailabilityDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AvailabilityDefaultArgs<ExtArgs>>): Prisma.Prisma__AvailabilityClient<runtime.Types.Result.GetResult<Prisma.$AvailabilityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   package<T extends Prisma.Booking$packageArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Booking$packageArgs<ExtArgs>>): Prisma.Prisma__PackageClient<runtime.Types.Result.GetResult<Prisma.$PackagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  writingQuestion<T extends Prisma.Booking$writingQuestionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Booking$writingQuestionArgs<ExtArgs>>): Prisma.Prisma__WritingQuestionClient<runtime.Types.Result.GetResult<Prisma.$WritingQuestionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   evaluation<T extends Prisma.Booking$evaluationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Booking$evaluationArgs<ExtArgs>>): Prisma.Prisma__EvaluationClient<runtime.Types.Result.GetResult<Prisma.$EvaluationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   writingSubmission<T extends Prisma.Booking$writingSubmissionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Booking$writingSubmissionArgs<ExtArgs>>): Prisma.Prisma__WritingSubmissionClient<runtime.Types.Result.GetResult<Prisma.$WritingSubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -2206,6 +2470,7 @@ export interface BookingFieldRefs {
   readonly transactionId: Prisma.FieldRef<"Booking", 'String'>
   readonly submissionStart: Prisma.FieldRef<"Booking", 'DateTime'>
   readonly submissionEnd: Prisma.FieldRef<"Booking", 'DateTime'>
+  readonly writingQuestionId: Prisma.FieldRef<"Booking", 'String'>
   readonly createdAt: Prisma.FieldRef<"Booking", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Booking", 'DateTime'>
 }
@@ -2620,6 +2885,25 @@ export type Booking$packageArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   include?: Prisma.PackageInclude<ExtArgs> | null
   where?: Prisma.PackageWhereInput
+}
+
+/**
+ * Booking.writingQuestion
+ */
+export type Booking$writingQuestionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WritingQuestion
+   */
+  select?: Prisma.WritingQuestionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WritingQuestion
+   */
+  omit?: Prisma.WritingQuestionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WritingQuestionInclude<ExtArgs> | null
+  where?: Prisma.WritingQuestionWhereInput
 }
 
 /**

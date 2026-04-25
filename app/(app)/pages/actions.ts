@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -19,11 +18,13 @@ function slugify(title: string): string {
         .replace(/^-|-$/g, "");
 }
 
-export async function createStaticPage(formData: FormData) {
+type ActionResult = { success: true } | { success: false; error: string };
+
+export async function createStaticPage(formData: FormData): Promise<ActionResult> {
     const session = await auth();
     const role = (session?.user as { role?: string } | undefined)?.role as Role | undefined;
     if (!canAccess(role, ["ADMIN"])) {
-        redirect("/dashboard");
+        return { success: false, error: "Forbidden." };
     }
 
     const raw = {
@@ -34,7 +35,7 @@ export async function createStaticPage(formData: FormData) {
 
     const parsed = createStaticPageSchema.safeParse(raw);
     if (!parsed.success) {
-        redirect("/pages/new?error=" + encodeURIComponent(firstError(parsed.error)));
+        return { success: false, error: firstError(parsed.error) };
     }
 
     const data = parsed.data;
@@ -45,10 +46,7 @@ export async function createStaticPage(formData: FormData) {
         select: { id: true },
     });
     if (existing) {
-        redirect(
-            "/pages/new?error=" +
-                encodeURIComponent("A page with this title already exists."),
-        );
+        return { success: false, error: "A page with this title already exists." };
     }
 
     await prisma.staticPage.create({
@@ -61,15 +59,15 @@ export async function createStaticPage(formData: FormData) {
     });
 
     revalidatePath("/pages");
-    redirect("/pages");
+    return { success: true };
 }
 
-export async function updateStaticPage(formData: FormData) {
+export async function updateStaticPage(formData: FormData): Promise<ActionResult> {
     const session = await auth();
     const adminRole = (session?.user as { role?: string } | undefined)
         ?.role as Role | undefined;
     if (!canAccess(adminRole, ["ADMIN"])) {
-        redirect("/dashboard");
+        return { success: false, error: "Forbidden." };
     }
 
     const raw = {
@@ -81,13 +79,7 @@ export async function updateStaticPage(formData: FormData) {
 
     const parsed = updateStaticPageSchema.safeParse(raw);
     if (!parsed.success) {
-        const id = typeof raw.id === "string" ? raw.id : "";
-        redirect(
-            "/pages/" +
-                id +
-                "/edit?error=" +
-                encodeURIComponent(firstError(parsed.error)),
-        );
+        return { success: false, error: firstError(parsed.error) };
     }
 
     const data = parsed.data;
@@ -98,12 +90,7 @@ export async function updateStaticPage(formData: FormData) {
         select: { id: true },
     });
     if (slugTaken) {
-        redirect(
-            "/pages/" +
-                data.id +
-                "/edit?error=" +
-                encodeURIComponent("A page with this title already exists."),
-        );
+        return { success: false, error: "A page with this title already exists." };
     }
 
     const target = await prisma.staticPage.findUnique({
@@ -111,7 +98,7 @@ export async function updateStaticPage(formData: FormData) {
         select: { id: true },
     });
     if (!target) {
-        redirect("/pages?error=page_not_found");
+        return { success: false, error: "Page not found." };
     }
 
     await prisma.staticPage.update({
@@ -125,7 +112,7 @@ export async function updateStaticPage(formData: FormData) {
     });
 
     revalidatePath("/pages");
-    redirect("/pages");
+    return { success: true };
 }
 
 export async function deleteStaticPage(

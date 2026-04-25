@@ -353,3 +353,10 @@ Internet
 - PostgreSQL is not exposed to the host or internet.
 - Both containers auto-restart unless explicitly stopped.
 - Database data persists in the `pgdata` Docker volume.
+
+## Google key
+
+sudo mkdir -p /etc/scoremirror/secrets
+sudo cp google-meet-key.json /etc/scoremirror/secrets/google-meet-key.json
+sudo chmod 600 /etc/scoremirror/secrets/google-meet-key.json
+echo 'GOOGLE_MEET_HOST_EMAIL="info@scoremirror.com.np"' >> .env

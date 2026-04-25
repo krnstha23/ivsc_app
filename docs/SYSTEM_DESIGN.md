@@ -51,7 +51,9 @@ This section records the **intended end-state** for IVCS as an IELTS-oriented mo
 
 #### Google Meet
 
-- Speaking is conducted by a **human examiner**; the product mainly needs **Meet setup / link handoff** (exact API and lifecycle TBD).
+- Speaking is conducted by a **human examiner**. The platform auto-generates a Google Meet link via the **Google Meet REST API v2** when the session room is first opened by any authorized user (student or teacher).
+- **Implementation (Apr 2026):** `lib/google-meet.ts` uses a Google Workspace **service account with domain-wide delegation** to call `spaces.create`. The returned `meetingUri` is stored on `Booking.meetLink`. Recording is enabled automatically (`RECORD_ON_START`) — recordings land in the host's Google Drive.
+- Required env vars: `GOOGLE_SERVICE_ACCOUNT_KEY` (service account JSON), `GOOGLE_MEET_HOST_EMAIL` (Workspace user to impersonate).
 
 #### Teacher evaluation and notifications
 
@@ -155,12 +157,23 @@ A dedicated **session room** page is the hub for a **confirmed** speaking bookin
 
 #### Step 1 — Google Meet (speaking)
 
-- Show the **Google Meet link** (and short instructions) to **both** student and teacher.
-- Meet URL source **TBD** in **§11** / implementation: manual entry, teacher/admin paste, or **Google Calendar / Meet API** later. Persist on `Booking` or a related record: e.g. `meetLink`, optional `meetCreatedAt`.
+- Show the **Google Meet link** to **both** student and teacher.
+- **Implementation (Apr 2026):** The link is **auto-generated server-side** when the room page is first loaded by any authorized user. `lib/google-meet.ts` calls the **Google Meet REST API v2** (`spaces.create`) using a service account with domain-wide delegation, then saves `meetingUri` to `Booking.meetLink`. No manual paste is required.
+- Recording is enabled by default (`RECORD_ON_START`); recordings are stored in the host Workspace account's Google Drive.
+- If the API call fails (misconfigured env vars, quota), the room still renders and shows an error notice in Step 1. `Booking.meetLink` remains null until the issue is resolved.
+
+#### Step 1b — Writing Prompt (for bundles with `hasEvaluation`)
+
+- The session room shows a **Writing Prompt** card before the upload step.
+- **Students**: the card is **locked** (PDF hidden) until `scheduledAt ≤ now`. After the session starts, a "View Question PDF" button appears.
+- **Teachers and admins**: always see the question immediately.
+- The question is served via `/api/questions/[questionId]/view` which enforces role + session-started checks server-side.
+- If no question was assigned (question bank was empty at booking time), a notice is shown.
 
 #### Step 2 — Student writing PDF upload
 
-- After speaking, the **student** uploads the **writing PDF** in the room (aligned with **§1.4** near-term PDF-only policy and **~1 hour** deadline assumption).
+- After speaking (or from session start for writing-only), the **student** uploads the **writing PDF** in the room (aligned with **§1.4** near-term PDF-only policy and **~1 hour** deadline assumption).
+- Student can delete and re-upload until teacher evaluation is submitted.
 - **Teacher** may see upload status / file access per implementation; gating (e.g. upload required before teacher evaluation) follows this step order.
 
 #### Step 3 — Teacher evaluation (form)
@@ -381,6 +394,7 @@ User (Student)
 | Auth     | NextAuth.js v5 (Auth.js)            | Free, flexible, native Next.js support            |
 | Icons    | **@solar-icons/react** (Solar icon set) | Static, clean, consistent; imported as named React components |
 | Validation | **Zod v4**                            | Schema-based validation on all server actions; type-safe parsed output |
+| Meet API | **googleapis** (Google Meet REST v2)  | Auto-generates Meet spaces with recording; server-side via service account + domain-wide delegation |
 
 **Icons (standard):** The project uses **@solar-icons/react** as the single source for UI icons. Icons are imported directly as named components: `import { Widget4 } from '@solar-icons/react'` and rendered with `<Widget4 size={16} />`. The `weight` prop controls style variant (e.g. `weight="Bold"`). No wrapper files — import from `@solar-icons/react` directly in each consumer. **Do not introduce Tabler Icons or Lucide for new UI icons.**
 
@@ -434,6 +448,7 @@ ivcs-app/
 │   ├── passwords.ts                 # hashPassword, verifyPassword
 │   ├── permissions.ts               # Role, canAccess, filterByRole
 │   ├── validations.ts               # Zod schemas for all server actions
+│   ├── google-meet.ts               # Google Meet REST API v2: createMeetSpace (recording enabled)
 │   └── utils.ts                     # cn()
 ├── prisma/schema.prisma, migrations/
 ├── proxy.ts                         # Route protection (Next.js 16)
@@ -490,6 +505,7 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 | `StudentEnrollment` | `student_enrollments` | Junction: Student ↔ Package with enrollment tracking |
 | `Evaluation` | `evaluations` | Teacher evaluation per booking: integer `score` + free-text `feedback` |
 | `WritingSubmission` | `writing_submissions` | Student PDF uploads linked to bookings |
+| `WritingQuestion` | `writing_questions` | IELTS writing question PDFs uploaded by teachers/admins; auto-assigned to eligible bookings |
 
 #### Enums
 
@@ -566,6 +582,8 @@ See `prisma/schema.prisma` for full implementation.
 | camelCase for DB column names        | All table columns in camelCase (e.g. userName, passwordHash); use same field name in Prisma so generated client queries match | 2026-02-21 |
 | Explicit junction tables             | All M:M relations use explicit junctions for metadata & control      | 2026-02-04 |
 | PackageBundle for marketing          | Group packages into purchasable bundles; **three prices** per bundle (**Standard / Priority / Instant**) | 2026-02-04; tier columns 2026-04-02 |
+| Writing Question Bank auto-assignment | Questions assigned at booking creation via `lib/writing-question-assigner.ts`; prioritises unseen questions then least-used fallback to avoid repeats per student | 2026-04-25 |
+| Writing prompt locked until session starts | Students cannot see the question PDF until `scheduledAt ≤ now`; enforced both in UI and API route | 2026-04-25 |
 | Teacher assignment for offered slot  | **Lowest** confirmed-session count in the **current Bikram Sambat (Nepali) week**; **round-robin** tie-break | 2026-04-02 |
 | Admin operational authority          | **Full control**: scheduling overrides, teacher assign/reassign, acting on behalf of teachers where implemented | 2026-04-02 |
 | Package-centric relationships        | Teachers/Students link to Packages, not free-text subjects           | 2026-02-04 |
@@ -576,6 +594,7 @@ See `prisma/schema.prisma` for full implementation.
 | Next.js 16 proxy convention           | Use `proxy.ts` instead of deprecated `middleware.ts` for route protection | 2026-02-08 |
 | Single dashboard, role-based nav only | One dashboard at `/dashboard` for all roles; admins see all sidebar pages, teachers only teacher-related, users only user-related (lib/permissions.ts); no separate /admin, /teacher, /student pages | 2026-02-20 |
 | Use @solar-icons/react for all UI icons | Replaced the previous icon wrapper approach with static Solar icons. Named imports directly in consumers (`import { Widget4 } from '@solar-icons/react'`). No wrapper files, no animation overhead. | 2026-03-04 |
+| Google Meet auto-generation on room load | Meet link created server-side in `room/page.tsx` on first load (student or teacher). Uses `lib/google-meet.ts` → Meet REST API v2 with domain-wide delegation. No manual paste; recording enabled by default. Graceful fallback if API unavailable. | 2026-04-25 |
 | Package-first booking flow              | Students select packages (not teachers) → view teacher availability → book. Package-based bookings can be linked to StudentEnrollment to deduct remaining classes. | 2026-03-04 |
 | Zod validation on all server actions    | Server actions are public endpoints; manual string checks are fragile. Zod schemas provide format validation, type safety, and composable error reporting. | 2026-03-04 |
 | Role guards on server actions           | Page-level guards protect UI, but actions are callable directly. `createUser` now checks ADMIN role; `createAvailability` checks TEACHER role. | 2026-03-04 |
@@ -1145,6 +1164,8 @@ Until this section is filled in, engineers should treat **§1.4**–**§1.6** as
 | 2026-04-01 | **§1.6 Student booking UX:** **Date → preferred time → single offered slot** with **server-assigned teacher** (students **never** see teacher names). **Nearest** alternative(s) if preference unavailable; **hold** on accept until payment; assignment policy TBD. §1.5 retitled “generated slots (server-side)” and references §1.6 for presentation. Target journey in §1.4 updated. Optional note on ~6pm booking cutoff. | -      |
 | 2026-04-02 | **Stakeholder + doc alignment:** Rewrote **§1.1–§1.3** (IELTS/speaking/writing/session-room). **§1.7 Option A:** (1) Meet, (2) **student PDF**, (3) teacher eval, (4) final eval + student **24h** download. **Payment** via **`Booking` status / `paymentStatus`**; mechanics **deferred to §11**. **Instant** = **same civil calendar day** in **UTC+5:45**. **§1.6:** **Bikram Sambat week** load + **round-robin** tie-break; status-based blocking (no primary “hold” table). **§2:** **admin full control**. **§4.2** / **§5.3:** shipped vs target booking; **`PackageBundle`** tier columns **`priceStandard` / `pricePriority` / `priceInstant`**. New **§11** deferred finance; **§12** changelog. | -      |
 | 2026-04-10 | **Phase 2-3 complete.** Schema: `duration` + `hasEvaluation` on `PackageBundle`; `isApproved` on `TeacherProfile`; `meetLink`, `bundleId`, `submissionStart/End` on `Booking`; `Evaluation` + `WritingSubmission` models. Bundle form (duration, eval toggle, 3 prices). Teacher self-reg approval. Slot generation (`lib/slot-generator.ts`). Student single-offered-slot UX. Session room (4-step). Writing-only bundles. Student bookings + enrollments. Teacher sessions. Admin: manage teachers, enrollments, timetable, reports. Open questions resolved. | -      |
+| 2026-04-25 | **Google Meet API integration:** `lib/google-meet.ts` — Meet REST API v2 via `googleapis`; service account + domain-wide delegation; `RECORD_ON_START` enabled. `room/page.tsx` auto-generates link on first load for speaking sessions; stores to `Booking.meetLink`. `session-room.tsx` `MeetLinkStep` simplified to display-only; shows error notice if generation failed. `googleapis` added to dependencies. Env vars: `GOOGLE_SERVICE_ACCOUNT_KEY`, `GOOGLE_MEET_HOST_EMAIL`. | -      |
+| 2026-04-25 | **Writing Question Bank:** New `WritingQuestion` model (`writing_questions` table). `lib/writing-question-assigner.ts` — unseen-first, least-used fallback assignment logic. Questions auto-assigned in `createBookingForSlot` + `createWritingOnlyBooking` for bundles with `hasEvaluation`. `/question-bank` page (admin + teacher) for uploading/managing questions. `/api/questions/[questionId]/view` for secure PDF serving. Session room gains `WritingPromptStep` — locked to students until `scheduledAt ≤ now`. `Booking` gains `writingQuestionId` FK. | -      |
 | 2026-04-20 | **Public landing (`app/page.tsx`):** Rebuilt to match `Frame.png` rhythm (hero, three cards, experience band, three-tier pricing, FAQ accordions, multi-column footer). **`ListeningMock`** is the only large UI mock, right column of `#experience`; hero stays **`/hero.png`**. **Pricing:** static NPR tier amounts per `public/price.png` (**1400 / 1680 / 1820**), cards use same system as feature band (light section, white `rounded-2xl` cards, accent **Select**). Inline writing/report mocks removed; messaging folded into cards. **`components/landing-header.tsx`:** center nav (md+) to `#features`, `#experience`, `#pricing`, `/packages`. | -      |
 
 ---

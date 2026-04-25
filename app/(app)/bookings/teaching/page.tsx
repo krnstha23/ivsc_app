@@ -35,15 +35,6 @@ function formatTime(date: Date) {
     }).format(date);
 }
 
-function studentName(user: {
-    firstName: string;
-    middleName: string | null;
-    lastName: string;
-}) {
-    return [user.firstName, user.middleName, user.lastName]
-        .filter(Boolean)
-        .join(" ");
-}
 
 function statusVariant(status: string) {
     switch (status) {
@@ -63,14 +54,6 @@ const bookingSelect = {
     scheduledAt: true,
     duration: true,
     status: true,
-    user: {
-        select: {
-            firstName: true,
-            middleName: true,
-            lastName: true,
-        },
-    },
-    package: { select: { name: true } },
 } as const;
 
 type BookingRow = Awaited<
@@ -161,25 +144,20 @@ function Section({
                     {/* Desktop */}
                     <div className="hidden md:block">
                         <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Student</TableHead>
-                                    <TableHead>Date &amp; Time</TableHead>
-                                    <TableHead>Duration</TableHead>
-                                    <TableHead>Package</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">
-                                        Action
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {bookings.map((b) => (
-                                    <TableRow key={b.id}>
-                                        <TableCell className="font-medium">
-                                            {studentName(b.user)}
-                                        </TableCell>
-                                        <TableCell>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Date &amp; Time</TableHead>
+                                        <TableHead>Duration</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">
+                                            Action
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {bookings.map((b) => (
+                                        <TableRow key={b.id}>
+                                            <TableCell>
                                             {formatDate(b.scheduledAt)}
                                             <br />
                                             <span className="text-muted-foreground">
@@ -188,9 +166,6 @@ function Section({
                                         </TableCell>
                                         <TableCell>
                                             {b.duration} min
-                                        </TableCell>
-                                        <TableCell>
-                                            {b.package?.name ?? "—"}
                                         </TableCell>
                                         <TableCell>
                                             <Badge
@@ -233,9 +208,6 @@ function Section({
                             <Card key={b.id}>
                                 <CardContent className="flex flex-col gap-2 p-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="font-medium">
-                                            {studentName(b.user)}
-                                        </span>
                                         <Badge
                                             variant={statusVariant(b.status)}
                                         >
@@ -248,9 +220,6 @@ function Section({
                                     </p>
                                     <div className="flex items-center justify-between text-sm">
                                         <span>{b.duration} min</span>
-                                        {b.package?.name && (
-                                            <span>{b.package.name}</span>
-                                        )}
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Button

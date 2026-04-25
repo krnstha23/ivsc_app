@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@/app/generated/prisma/enums";
 import { SessionRoom } from "@/components/session-room";
+import { createMeetSpace } from "@/lib/google-meet";
 
 export default async function SessionRoomPage({
     params,
@@ -43,6 +44,14 @@ export default async function SessionRoomPage({
                     uploadedAt: true,
                 },
             },
+            writingQuestion: {
+                select: {
+                    id: true,
+                    title: true,
+                    description: true,
+                    fileName: true,
+                },
+            },
         },
     });
 
@@ -73,14 +82,31 @@ export default async function SessionRoomPage({
         });
     }
 
+    // Auto-generate Meet link on first load for speaking sessions.
+    // Writing-only bundles (duration === 0) never need a Meet link.
+    if (!booking.meetLink && bundle && bundle.duration > 0) {
+        try {
+            const { meetingUri } = await createMeetSpace();
+            await prisma.booking.update({
+                where: { id: booking.id },
+                data: { meetLink: meetingUri },
+            });
+            booking.meetLink = meetingUri;
+        } catch (err) {
+            // Non-fatal: page still renders; MeetLinkStep shows an error notice.
+            console.error("[SessionRoom] Failed to auto-generate Meet link:", err);
+        }
+    }
+
     const hasEvaluation = bundle?.hasEvaluation ?? false;
     const isWritingOnly = bundle?.duration === 0;
+    const sessionStarted = new Date() >= new Date(booking.scheduledAt);
 
     const stepLabels: string[] = [];
     if (!isWritingOnly) {
-        stepLabels.push("Google Meet");
+        stepLabels.push("Speaking Session");
     }
-    stepLabels.push("Writing Submission");
+    stepLabels.push("Writing");
     if (hasEvaluation) {
         stepLabels.push("Evaluation");
         stepLabels.push("Results");
@@ -88,7 +114,7 @@ export default async function SessionRoomPage({
 
     let currentStep = 1;
     if (!isWritingOnly && booking.meetLink) {
-        currentStep = stepLabels.indexOf("Writing Submission") + 1;
+        currentStep = stepLabels.indexOf("Writing") + 1;
     }
     if (booking.writingSubmission) {
         currentStep = hasEvaluation
@@ -124,7 +150,7 @@ export default async function SessionRoomPage({
                 <p className="mt-1 text-sm text-muted-foreground">
                     {viewRole === "admin"
                         ? `Viewing session between ${studentName} and ${teacherName} (read-only).`
-                        : `Session with ${viewRole === "student" ? teacherName : studentName}.`}
+                        : "Your session room."}
                 </p>
             </div>
             <div className="px-4 lg:px-6">
@@ -159,6 +185,8 @@ export default async function SessionRoomPage({
                         role: viewRole,
                         submissionStart: booking.submissionStart?.toISOString() ?? null,
                         submissionEnd: booking.submissionEnd?.toISOString() ?? null,
+                        writingQuestion: booking.writingQuestion ?? null,
+                        sessionStarted,
                     }}
                 />
             </div>

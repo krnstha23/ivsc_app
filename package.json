@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "NODE_OPTIONS=--max-old-space-size=4096 next dev",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
+    "typecheck": "NODE_OPTIONS=--max-old-space-size=4096 tsc --noEmit",
     "lint": "eslint",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset"
@@ -27,6 +28,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
+    "googleapis": "^171.4.0",
     "lucide-react": "^0.563.0",
     "motion": "^12.34.3",
     "next": "16.1.6",

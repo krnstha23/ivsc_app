@@ -10,13 +10,26 @@ import {
     Link as LinkIcon,
     Upload,
     ClockCircle,
+    TrashBinTrash,
+    Eye,
+    LockPassword,
 } from "@solar-icons/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { setMeetLink, uploadWriting, submitEvaluation } from "@/app/(app)/sessions/actions";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { uploadWriting, deleteWriting, submitEvaluation } from "@/app/(app)/sessions/actions";
 
 type SessionData = {
     bookingId: string;
@@ -44,6 +57,13 @@ type SessionData = {
     role: "student" | "teacher" | "admin";
     submissionStart: string | null;
     submissionEnd: string | null;
+    writingQuestion: {
+        id: string;
+        title: string;
+        description: string | null;
+        fileName: string;
+    } | null;
+    sessionStarted: boolean;
 };
 
 function formatFileSize(bytes: number): string {
@@ -115,25 +135,19 @@ function StepIndicator({ stepLabels, currentStep }: { stepLabels: string[]; curr
 }
 
 function MeetLinkStep({ data }: { data: SessionData }) {
-    const [link, setLink] = useState("");
-    const [error, setError] = useState("");
-    const [pending, startTransition] = useTransition();
-
-    const hasMeetLink = !!data.meetLink;
-
-    if (hasMeetLink) {
+    if (data.meetLink) {
         return (
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Videocamera size={20} />
-                        Google Meet
+                        Speaking Session
                     </CardTitle>
-                    <CardDescription>Meeting link is ready</CardDescription>
+                    <CardDescription>Your meeting link is ready</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <a
-                        href={data.meetLink!}
+                        href={data.meetLink}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -147,97 +161,155 @@ function MeetLinkStep({ data }: { data: SessionData }) {
         );
     }
 
-    if (data.role === "teacher") {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Videocamera size={20} />
-                        Google Meet
-                    </CardTitle>
-                    <CardDescription>Paste a Google Meet link for this session</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            setError("");
-                            startTransition(async () => {
-                                const result = await setMeetLink(data.bookingId, link);
-                                if (!result.success) setError(result.error);
-                            });
-                        }}
-                        className="flex flex-col gap-3"
-                    >
-                        <div className="space-y-1.5">
-                            <Label htmlFor="meetLink">Meeting Link</Label>
-                            <Input
-                                id="meetLink"
-                                type="url"
-                                placeholder="https://meet.google.com/..."
-                                value={link}
-                                onChange={(e) => setLink(e.target.value)}
-                                required
-                            />
-                        </div>
-                        {error && <p className="text-sm text-destructive">{error}</p>}
-                        <Button type="submit" disabled={pending || !link.trim()} className="w-fit">
-                            {pending ? "Saving..." : "Set Meeting Link"}
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
-        );
-    }
-
+    // Link generation failed server-side (API not configured or network error).
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Videocamera size={20} />
-                    Google Meet
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-center gap-2 text-muted-foreground">
+                    <CardTitle className="flex items-center gap-2">
+                        <Videocamera size={20} />
+                        Speaking Session
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center gap-2 text-destructive">
                     <ClockCircle size={16} />
-                    <p className="text-sm">Waiting for teacher to set up the meeting link.</p>
+                    <p className="text-sm">
+                        Meeting link could not be generated automatically. Please contact support.
+                    </p>
                 </div>
             </CardContent>
         </Card>
     );
 }
 
+function WritingPromptSection({ data }: { data: SessionData }) {
+    if (!data.writingQuestion && data.role !== "student") return null;
+    const canView = data.role !== "student" || data.sessionStarted;
+    const hasQuestion = !!data.writingQuestion;
+
+    return (
+        <div className="flex flex-col gap-2 pb-2 border-b">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Writing Prompt
+            </p>
+            {!canView ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <LockPassword size={15} />
+                    <p className="text-sm">
+                        Locked until session start:{" "}
+                        <span className="font-medium text-foreground">
+                            {new Date(data.scheduledAt).toLocaleString()}
+                        </span>
+                    </p>
+                </div>
+            ) : !hasQuestion ? (
+                <p className="text-sm text-muted-foreground">No question assigned.</p>
+            ) : (
+                <div className="flex items-start justify-between gap-3">
+                    <div>
+                        <p className="text-sm font-medium">{data.writingQuestion!.title}</p>
+                        {data.writingQuestion!.description && (
+                            <p className="text-xs text-muted-foreground">{data.writingQuestion!.description}</p>
+                        )}
+                    </div>
+                    <a
+                        href={`/api/questions/${data.writingQuestion!.id}/view`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0"
+                    >
+                        <Button variant="outline" size="sm" className="gap-1.5">
+                            <Eye size={14} />
+                            View PDF
+                        </Button>
+                    </a>
+                </div>
+            )}
+        </div>
+    );
+}
+
 function WritingUploadStep({ data }: { data: SessionData }) {
     const [error, setError] = useState("");
-    const [pending, startTransition] = useTransition();
+    const [uploadPending, startUploadTransition] = useTransition();
+    const [deletePending, startDeleteTransition] = useTransition();
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     const isWritingOnly = data.duration === 0;
     const windowOpen = data.submissionStart ? new Date(data.submissionStart) : null;
     const windowClose = data.submissionEnd ? new Date(data.submissionEnd) : null;
+    const showPrompt = data.stepLabels.includes("Writing");
 
+    // Submitted state — student can delete & replace as long as no evaluation yet
     if (data.writingSubmission) {
+        const canReplace = data.role === "student" && !data.evaluation;
+
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <DocumentText size={20} />
-                        Writing Submission
-                    </CardTitle>
-                    <CardDescription>File uploaded successfully</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center gap-3 rounded-md border p-3">
-                        <DocumentText size={24} className="shrink-0 text-primary" />
-                        <div className="min-w-0">
-                            <p className="truncate text-sm font-medium">{data.writingSubmission.fileName}</p>
-                            <p className="text-xs text-muted-foreground">
-                                {formatFileSize(data.writingSubmission.fileSize)}
-                            </p>
+            <>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <DocumentText size={20} />
+                            Writing
+                        </CardTitle>
+                        <CardDescription>
+                            {canReplace ? "File uploaded — you can replace it before evaluation." : "File uploaded successfully"}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4">
+                        {showPrompt && <WritingPromptSection data={data} />}
+                        <div className="flex items-center gap-3 rounded-md border p-3">
+                            <DocumentText size={24} className="shrink-0 text-primary" />
+                            <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium">{data.writingSubmission.fileName}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    {formatFileSize(data.writingSubmission.fileSize)}
+                                </p>
+                            </div>
+                            {canReplace && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                    onClick={() => setConfirmDelete(true)}
+                                >
+                                    <TrashBinTrash size={18} />
+                                </Button>
+                            )}
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
+                        {error && <p className="text-sm text-destructive">{error}</p>}
+                    </CardContent>
+                </Card>
+
+                <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Delete writing submission?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete <span className="font-medium text-foreground">{data.writingSubmission.fileName}</span> and allow you to upload a replacement. This cannot be undone.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={deletePending}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                disabled={deletePending}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setError("");
+                                    startDeleteTransition(async () => {
+                                        const result = await deleteWriting(data.bookingId);
+                                        setConfirmDelete(false);
+                                        if (!result.success) setError(result.error);
+                                    });
+                                }}
+                            >
+                                {deletePending ? "Deleting..." : "Yes, delete"}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </>
         );
     }
 
@@ -249,7 +321,7 @@ function WritingUploadStep({ data }: { data: SessionData }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <DocumentText size={20} />
-                            Writing Submission
+                            Writing
                         </CardTitle>
                         <CardDescription>
                             Submission window opens on{" "}
@@ -260,7 +332,8 @@ function WritingUploadStep({ data }: { data: SessionData }) {
                             })}
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col gap-4">
+                        {showPrompt && <WritingPromptSection data={data} />}
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <ClockCircle size={16} />
                             <p className="text-sm">
@@ -277,11 +350,12 @@ function WritingUploadStep({ data }: { data: SessionData }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <DocumentText size={20} />
-                            Writing Submission
+                            Writing
                         </CardTitle>
                         <CardDescription>Submission window has closed</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col gap-4">
+                        {showPrompt && <WritingPromptSection data={data} />}
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <ClockCircle size={16} />
                             <p className="text-sm">
@@ -316,40 +390,49 @@ function WritingUploadStep({ data }: { data: SessionData }) {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <DocumentText size={20} />
-                        Writing Submission
+                        Writing
                     </CardTitle>
                     <CardDescription>{windowDescription}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            setError("");
-                            const fd = new FormData(e.currentTarget);
-                            fd.set("bookingId", data.bookingId);
-                            startTransition(async () => {
-                                const result = await uploadWriting(fd);
-                                if (!result.success) setError(result.error);
-                            });
-                        }}
-                        className="flex flex-col gap-3"
+                <CardContent className="flex flex-col gap-4">
+                    {showPrompt && <WritingPromptSection data={data} />}
+                    <Label
+                        htmlFor="file"
+                        className={`flex cursor-pointer items-center gap-3 rounded-md border border-dashed p-4 transition-colors ${
+                            uploadPending
+                                ? "cursor-not-allowed opacity-50"
+                                : "hover:bg-muted/50"
+                        }`}
                     >
-                        <div className="space-y-1.5">
-                            <Label htmlFor="file">PDF File</Label>
-                            <Input
-                                id="file"
-                                name="file"
-                                type="file"
-                                accept="application/pdf"
-                                required
-                            />
+                        <Upload size={20} className="shrink-0 text-muted-foreground" />
+                        <div className="min-w-0">
+                            <p className="text-sm font-medium">
+                                {uploadPending ? "Uploading…" : "Click to select a PDF"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">PDF only · max 10 MB</p>
                         </div>
-                        {error && <p className="text-sm text-destructive">{error}</p>}
-                        <Button type="submit" disabled={pending} className="w-fit">
-                            <Upload size={16} />
-                            {pending ? "Uploading..." : "Upload"}
-                        </Button>
-                    </form>
+                        <Input
+                            id="file"
+                            name="file"
+                            type="file"
+                            accept="application/pdf"
+                            className="hidden"
+                            disabled={uploadPending}
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setError("");
+                                const fd = new FormData();
+                                fd.set("bookingId", data.bookingId);
+                                fd.set("file", file);
+                                startUploadTransition(async () => {
+                                    const result = await uploadWriting(fd);
+                                    if (!result.success) setError(result.error);
+                                });
+                            }}
+                        />
+                    </Label>
+                    {error && <p className="text-sm text-destructive">{error}</p>}
                 </CardContent>
             </Card>
         );
@@ -360,10 +443,11 @@ function WritingUploadStep({ data }: { data: SessionData }) {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <DocumentText size={20} />
-                    Writing Submission
+                    Writing
                 </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-4">
+                {showPrompt && <WritingPromptSection data={data} />}
                 <div className="flex items-center gap-2 text-muted-foreground">
                     <ClockCircle size={16} />
                     <p className="text-sm">Waiting for student to upload their writing.</p>
@@ -563,13 +647,7 @@ export function SessionRoom({ data }: { data: SessionData }) {
                             </div>
                         </>
                     )}
-                    {data.bundleName && (
-                        <div>
-                            <span className="text-xs text-muted-foreground">Bundle</span>
-                            <p className="text-sm font-medium">{data.bundleName}</p>
-                        </div>
-                    )}
-                    {data.role === "admin" ? (
+                    {data.role === "admin" && (
                         <>
                             <div>
                                 <span className="text-xs text-muted-foreground">Student</span>
@@ -580,15 +658,6 @@ export function SessionRoom({ data }: { data: SessionData }) {
                                 <p className="text-sm font-medium">{data.teacherName}</p>
                             </div>
                         </>
-                    ) : (
-                        <div>
-                            <span className="text-xs text-muted-foreground">
-                                {data.role === "student" ? "Teacher" : "Student"}
-                            </span>
-                            <p className="text-sm font-medium">
-                                {data.role === "student" ? data.teacherName : data.studentName}
-                            </p>
-                        </div>
                     )}
                 </CardContent>
             </Card>
@@ -609,12 +678,12 @@ export function SessionRoom({ data }: { data: SessionData }) {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    {data.stepLabels.includes("Google Meet") && (
+                    {data.stepLabels.includes("Speaking Session") && (
                         <MeetLinkStep data={data} />
                     )}
 
-                    {data.stepLabels.includes("Writing Submission") &&
-                        data.currentStep >= data.stepLabels.indexOf("Writing Submission") + 1 && (
+                    {data.stepLabels.includes("Writing") &&
+                        data.currentStep >= data.stepLabels.indexOf("Writing") + 1 && (
                             <WritingUploadStep data={data} />
                         )}
 

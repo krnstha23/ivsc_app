@@ -71,10 +71,11 @@ model User {
   updatedAt    DateTime @updatedAt
 
   // Relations
-  teacherProfile TeacherProfile?
-  studentProfile StudentProfile?
-  bookings       Booking[]
-  classHistory   ClassMetadata[]
+  teacherProfile    TeacherProfile?
+  studentProfile    StudentProfile?
+  bookings          Booking[]
+  classHistory      ClassMetadata[]
+  writingQuestions  WritingQuestion[]
 
   @@map("users")
 }
@@ -222,8 +223,9 @@ model Booking {
   paymentStatus  PaymentStatus @default(PENDING)
   transactionId  String?
   // Writing-only bookings: student-chosen submission window
-  submissionStart DateTime?
-  submissionEnd   DateTime?
+  submissionStart   DateTime?
+  submissionEnd     DateTime?
+  writingQuestionId String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -232,6 +234,7 @@ model Booking {
   teacher            TeacherProfile      @relation(fields: [teacherId], references: [id])
   availability       Availability        @relation(fields: [availabilityId], references: [id])
   package            Package?            @relation(fields: [packageId], references: [id])
+  writingQuestion    WritingQuestion?    @relation(fields: [writingQuestionId], references: [id])
   evaluation         Evaluation?
   writingSubmission  WritingSubmission?
 
@@ -239,6 +242,28 @@ model Booking {
   @@index([teacherId])
   @@index([scheduledAt])
   @@map("bookings")
+}
+
+// =============================================================================
+// WRITING QUESTION BANK
+// =============================================================================
+
+model WritingQuestion {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  filePath    String
+  fileName    String
+  fileSize    Int
+  uploadedBy  String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  uploader User      @relation(fields: [uploadedBy], references: [id])
+  bookings  Booking[]
+
+  @@map("writing_questions")
 }
 
 // =============================================================================

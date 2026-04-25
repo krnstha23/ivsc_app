@@ -392,6 +392,7 @@ export const ModelName = {
   StudentEnrollment: 'StudentEnrollment',
   Availability: 'Availability',
   Booking: 'Booking',
+  WritingQuestion: 'WritingQuestion',
   Evaluation: 'Evaluation',
   WritingSubmission: 'WritingSubmission',
   ClassMetadata: 'ClassMetadata',
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "studentProfile" | "teacherProfile" | "package" | "packageBundle" | "studentEnrollment" | "availability" | "booking" | "evaluation" | "writingSubmission" | "classMetadata" | "staticPage"
+    modelProps: "user" | "studentProfile" | "teacherProfile" | "package" | "packageBundle" | "studentEnrollment" | "availability" | "booking" | "writingQuestion" | "evaluation" | "writingSubmission" | "classMetadata" | "staticPage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1007,6 +1008,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    WritingQuestion: {
+      payload: Prisma.$WritingQuestionPayload<ExtArgs>
+      fields: Prisma.WritingQuestionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WritingQuestionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WritingQuestionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>
+        }
+        findFirst: {
+          args: Prisma.WritingQuestionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WritingQuestionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>
+        }
+        findMany: {
+          args: Prisma.WritingQuestionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>[]
+        }
+        create: {
+          args: Prisma.WritingQuestionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>
+        }
+        createMany: {
+          args: Prisma.WritingQuestionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WritingQuestionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>[]
+        }
+        delete: {
+          args: Prisma.WritingQuestionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>
+        }
+        update: {
+          args: Prisma.WritingQuestionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>
+        }
+        deleteMany: {
+          args: Prisma.WritingQuestionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WritingQuestionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WritingQuestionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>[]
+        }
+        upsert: {
+          args: Prisma.WritingQuestionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WritingQuestionPayload>
+        }
+        aggregate: {
+          args: Prisma.WritingQuestionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWritingQuestion>
+        }
+        groupBy: {
+          args: Prisma.WritingQuestionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WritingQuestionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WritingQuestionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WritingQuestionCountAggregateOutputType> | number
+        }
+      }
+    }
     Evaluation: {
       payload: Prisma.$EvaluationPayload<ExtArgs>
       fields: Prisma.EvaluationFieldRefs
@@ -1464,11 +1539,28 @@ export const BookingScalarFieldEnum = {
   transactionId: 'transactionId',
   submissionStart: 'submissionStart',
   submissionEnd: 'submissionEnd',
+  writingQuestionId: 'writingQuestionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const WritingQuestionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  filePath: 'filePath',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  uploadedBy: 'uploadedBy',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WritingQuestionScalarFieldEnum = (typeof WritingQuestionScalarFieldEnum)[keyof typeof WritingQuestionScalarFieldEnum]
 
 
 export const EvaluationScalarFieldEnum = {
@@ -1791,6 +1883,7 @@ export type GlobalOmitConfig = {
   studentEnrollment?: Prisma.StudentEnrollmentOmit
   availability?: Prisma.AvailabilityOmit
   booking?: Prisma.BookingOmit
+  writingQuestion?: Prisma.WritingQuestionOmit
   evaluation?: Prisma.EvaluationOmit
   writingSubmission?: Prisma.WritingSubmissionOmit
   classMetadata?: Prisma.ClassMetadataOmit

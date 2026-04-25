@@ -17,6 +17,7 @@ import {
     CalendarDate,
     Chart,
     Document,
+    DocumentText,
 } from "@solar-icons/react";
 
 import { NavMain } from "@/components/nav-main";
@@ -102,6 +103,12 @@ const NAV_MAIN = [
         url: "/enrollments",
         icon: ClipboardList,
         allowedRoles: ["ADMIN"] as Role[],
+    },
+    {
+        title: "Question Bank",
+        url: "/question-bank",
+        icon: DocumentText,
+        allowedRoles: ["ADMIN", "TEACHER"] as Role[],
     },
     {
         title: "Timetable",

@@ -58,6 +58,11 @@ export type Availability = Prisma.AvailabilityModel
  */
 export type Booking = Prisma.BookingModel
 /**
+ * Model WritingQuestion
+ * 
+ */
+export type WritingQuestion = Prisma.WritingQuestionModel
+/**
  * Model Evaluation
  * 
  */

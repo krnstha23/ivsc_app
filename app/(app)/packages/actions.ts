@@ -22,6 +22,7 @@ import {
     timeToMinutes,
     type LeadTimeCategory,
 } from "@/lib/slot-generator";
+import { assignWritingQuestion } from "@/lib/writing-question-assigner";
 
 function toUtcDateOnly(d: Date): Date {
     return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -811,7 +812,7 @@ export async function createWritingOnlyBooking(payload: {
 
     const bundle = await prisma.packageBundle.findUnique({
         where: { id: bundleId },
-        select: { id: true, isActive: true, duration: true },
+        select: { id: true, isActive: true, duration: true, hasEvaluation: true },
     });
     if (!bundle) return { success: false, error: "Bundle not found." };
     if (!bundle.isActive) return { success: false, error: "This bundle is not active." };
@@ -870,6 +871,10 @@ export async function createWritingOnlyBooking(payload: {
             },
         });
 
+        const writingQuestionId = bundle.hasEvaluation
+            ? await assignWritingQuestion(userId, tx)
+            : null;
+
         return tx.booking.create({
             data: {
                 userId,
@@ -881,6 +886,7 @@ export async function createWritingOnlyBooking(payload: {
                 status: "CONFIRMED",
                 submissionStart,
                 submissionEnd,
+                writingQuestionId,
             },
         });
     });
@@ -1117,7 +1123,7 @@ export async function createBookingForSlot(payload: {
 
     const bundle = await prisma.packageBundle.findUnique({
         where: { id: bundleId },
-        select: { duration: true, isActive: true },
+        select: { duration: true, isActive: true, hasEvaluation: true },
     });
     if (!bundle?.isActive) {
         return { success: false, error: "Bundle not found or inactive." };
@@ -1218,6 +1224,10 @@ export async function createBookingForSlot(payload: {
                 },
             });
 
+            const writingQuestionId = bundle.hasEvaluation
+                ? await assignWritingQuestion(userId, tx)
+                : null;
+
             await tx.booking.create({
                 data: {
                     userId,
@@ -1228,6 +1238,7 @@ export async function createBookingForSlot(payload: {
                     scheduledAt,
                     duration: bundle.duration,
                     status: "CONFIRMED",
+                    writingQuestionId,
                 },
             });
 

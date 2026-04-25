@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 
 import { auth } from "@/lib/auth";
@@ -119,6 +119,49 @@ export async function uploadWriting(formData: FormData): Promise<ActionResult> {
             fileName: file.name,
             fileSize: file.size,
         },
+    });
+
+    revalidatePath(`/sessions/${idParsed.data}/room`);
+    return { success: true };
+}
+
+export async function deleteWriting(bookingId: string): Promise<ActionResult> {
+    const session = await auth();
+    const userId = (session?.user as { id?: string })?.id;
+    const role = (session?.user as { role?: string })?.role;
+    if (!userId) return { success: false, error: "You must be signed in." };
+    if (role !== Role.USER) {
+        return { success: false, error: "Only students can delete their writing." };
+    }
+
+    const idParsed = z.string().uuid().safeParse(bookingId);
+    if (!idParsed.success) return { success: false, error: "Invalid booking ID." };
+
+    const booking = await prisma.booking.findUnique({
+        where: { id: idParsed.data },
+        select: {
+            id: true,
+            userId: true,
+            evaluation: { select: { id: true } },
+            writingSubmission: { select: { id: true, filePath: true } },
+        },
+    });
+    if (!booking) return { success: false, error: "Booking not found." };
+    if (booking.userId !== userId) return { success: false, error: "Not your booking." };
+    if (!booking.writingSubmission) return { success: false, error: "No submission to delete." };
+    if (booking.evaluation) {
+        return { success: false, error: "Cannot delete submission after evaluation has been submitted." };
+    }
+
+    // Delete the file from disk (non-fatal if already missing)
+    try {
+        await unlink(join(process.cwd(), booking.writingSubmission.filePath));
+    } catch {
+        // file may already be gone — continue
+    }
+
+    await prisma.writingSubmission.delete({
+        where: { bookingId: idParsed.data },
     });
 
     revalidatePath(`/sessions/${idParsed.data}/room`);
