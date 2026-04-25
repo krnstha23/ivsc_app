@@ -2,8 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  experimental: {
-    typedRoutes: false,
+  typescript: {
+    // Type-checking runs separately via `npm run typecheck`.
+    // Skipping here keeps Docker build RAM usage under control.
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 
