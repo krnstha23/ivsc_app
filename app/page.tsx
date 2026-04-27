@@ -316,9 +316,11 @@ export default async function HomePage() {
                 style={{ backgroundColor: light }}
             >
                 <div className="mx-auto max-w-6xl">
-                    <h2 className="mx-auto max-w-3xl text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
+                    <h2 className="mx-auto flex max-w-3xl flex-col items-center justify-center text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
                         <Display>
                             Not a coaching institute. Not a mock test platform.{" "}
+                        </Display>
+                        <Display>
                             <em
                                 className="font-semibold italic"
                                 style={{ color: accent }}
@@ -333,10 +335,10 @@ export default async function HomePage() {
                                 {
                                     title: "Live Speaking Evaluation (VCS)",
                                     bullets: [
-                                        "12–14 minute video call on Google Meet",
-                                        "Real-time human evaluation",
-                                        "Recording + diagnostic report",
-                                        "Brief verbal Q&A after session",
+                                        "12–14 min live examiner format",
+                                        "Real-time scoring with human judgment",
+                                        "Recorded session + diagnostic notes",
+                                        "Brief verbal debrief after completion",
                                     ],
                                     href: "/speaking-evaluation",
                                     cta: "Learn More",
@@ -344,10 +346,10 @@ export default async function HomePage() {
                                 {
                                     title: "Writing Evaluation (Async)",
                                     bullets: [
-                                        "Submit Task 1 + Task 2",
-                                        "Word-level feedback",
-                                        "Detailed rubric analysis",
-                                        "No automated scoring",
+                                        "Submit Task 1 + Task 2 essays",
+                                        "Band-linked written correction",
+                                        "Feedback mapped to rubric criteria",
+                                        "No auto-generated scoring",
                                     ],
                                     href: "/writing-evaluation",
                                     cta: "Learn More",
@@ -355,9 +357,9 @@ export default async function HomePage() {
                                 {
                                     title: "What makes us different",
                                     bullets: [
-                                        "We don't teach. We evaluate.",
-                                        "No batch classes. No group pressure.",
-                                        "Just your performance. Diagnosed.",
+                                        "We don't coach. We diagnose performance.",
+                                        "No crowded batches or noisy classes.",
+                                        "Only your real level, clearly reflected.",
                                     ],
                                     href: "/why-us",
                                     cta: "Learn More",
@@ -399,46 +401,43 @@ export default async function HomePage() {
                     <div className="min-w-0">
                         <h2 className="text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
                             <Display>
-                                Computer-delivered IELTS is not harder.{" "}
+                                Video Call Speaking is not harder.{" "}
                                 <em
                                     className="font-semibold italic"
                                     style={{ color: accent }}
                                 >
-                                    It is just different.
+                                    It's just different.
                                 </em>
                             </Display>
                         </h2>
                         <div className="mt-6 space-y-5 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
                             <p>
-                                The official test rewards familiarity with
-                                on-screen timing, question layouts, and
-                                navigation. Paper habits do not transfer
-                                automatically — you need reps in the same
-                                medium.
+                                In real IELTS, power doesn't come from grammar
+                                alone. It comes from confidence and speaking
+                                flow in a face-to-face test format.
                             </p>
                             <p>
-                                ScoreMirror keeps you inside a coherent,
-                                distraction-minimised flow so you learn where
-                                controls live before it counts.
+                                ScoreMirror helps you build that comfort using
+                                practical sessions that feel close to the
+                                speaking test environment.
                             </p>
                         </div>
                         <ul className="mt-8 space-y-4">
                             <CheckLi>
-                                Same section timing and progression as exam day
+                                Structured one-to-one video call format
                             </CheckLi>
                             <CheckLi>
-                                Practice from anywhere — no travel for the
-                                mock interface
+                                No travel, no waiting room pressure
                             </CheckLi>
                             <CheckLi>
-                                A recorded trail of attempts via your reports
+                                Recorded session for your review
                             </CheckLi>
                         </ul>
                         <p
                             className="mt-8 text-[0.9375rem] font-semibold"
                             style={{ color: accent }}
                         >
-                            No guesswork. Just the rhythm of the real test.
+                            No fear. Just the future of IELTS testing.
                         </p>
                     </div>
                     <div className="flex min-w-0 justify-center lg:justify-end">

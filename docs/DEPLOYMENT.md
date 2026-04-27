@@ -263,10 +263,10 @@ mkdir -p ~/backups
 crontab -e
 ```
 
-Add a daily backup at 3 AM:
+Add a backup every 4 hours and keep only the newest 3 files:
 
 ```
-0 3 * * * docker compose -f ~/ivcs-app/docker-compose.yml exec -T db pg_dump -U ivcs ivcs_db | gzip > ~/backups/ivcs_$(date +\%Y\%m\%d).sql.gz
+0 */4 * * * sh -c 'docker compose -f ~/ivcs-app/docker-compose.yml exec -T db pg_dump -U "${POSTGRES_USER:-ivcs}" "${POSTGRES_DB:-ivcs_db}" | gzip > ~/backups/ivcs_$(date +\%Y\%m\%d_\%H\%M\%S).sql.gz && ls -1t ~/backups/ivcs_*.sql.gz | tail -n +4 | xargs -r rm -f'
 ```
 
 To restore a backup:
