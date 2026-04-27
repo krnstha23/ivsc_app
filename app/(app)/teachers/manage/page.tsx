@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 import { TeachersManageFilter } from "@/components/teachers-manage-filter";
 import {
     TeacherApproveButton,
@@ -199,14 +200,15 @@ export default async function ManageTeachersPage({
                                                     isActive={t.isActive}
                                                 />
                                                 <Button
-                                                    variant="link"
-                                                    className="h-auto p-0"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    aria-label="Edit user"
                                                     asChild
                                                 >
                                                     <Link
                                                         href={`/users/${t.user.id}/edit`}
                                                     >
-                                                        Edit
+                                                        <Pencil size={16} />
                                                     </Link>
                                                 </Button>
                                             </div>

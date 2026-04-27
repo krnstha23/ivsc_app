@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { CheckCircle, CloseCircle, TrashBinTrash } from "@solar-icons/react";
 import { Button } from "@/components/ui/button";
 import {
     AlertDialog,
@@ -26,8 +27,13 @@ export function DeletePageButton({ id }: { id: string }) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" disabled={pending}>
-                    Delete
+                <Button
+                    variant="destructive"
+                    size="icon"
+                    disabled={pending}
+                    aria-label="Delete page"
+                >
+                    <TrashBinTrash size={16} />
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -72,11 +78,13 @@ export function ToggleActiveButton({
 }) {
     const router = useRouter();
     const [pending, startTransition] = useTransition();
+    const actionLabel = isActive ? "Deactivate" : "Activate";
     return (
         <Button
             variant="outline"
             size="sm"
             disabled={pending}
+            aria-label={`${actionLabel} page`}
             onClick={() => {
                 startTransition(async () => {
                     const res = await toggleStaticPageActive(id);
@@ -93,7 +101,19 @@ export function ToggleActiveButton({
                 });
             }}
         >
-            {pending ? "…" : isActive ? "Deactivate" : "Activate"}
+            {pending ? (
+                <span className="text-xs">...</span>
+            ) : isActive ? (
+                <span className="inline-flex items-center gap-1.5">
+                    <CloseCircle size={16} />
+                    {actionLabel}
+                </span>
+            ) : (
+                <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle size={16} />
+                    {actionLabel}
+                </span>
+            )}
         </Button>
     );
 }

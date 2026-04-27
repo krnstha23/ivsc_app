@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { TrashBinTrash } from "@solar-icons/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -100,9 +101,10 @@ function BundleRow({
                         <Button
                             type="submit"
                             variant="destructive"
-                            size="xs"
+                            size="icon"
+                            aria-label="Delete bundle"
                         >
-                            Delete
+                            <TrashBinTrash size={16} />
                         </Button>
                     </form>
                 </TableCell>

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccess, type Role } from "@/lib/permissions";
+import sanitizeHtml from "sanitize-html";
 import {
     createStaticPageSchema,
     updateStaticPageSchema,
@@ -19,6 +20,38 @@ function slugify(title: string): string {
 }
 
 type ActionResult = { success: true } | { success: false; error: string };
+
+const STATIC_PAGE_ALLOWED_TAGS = [
+    "p",
+    "br",
+    "strong",
+    "em",
+    "u",
+    "s",
+    "h2",
+    "h3",
+    "ul",
+    "ol",
+    "li",
+    "a",
+    "blockquote",
+];
+
+function sanitizeStaticPageHtml(input: string): string {
+    return sanitizeHtml(input, {
+        allowedTags: STATIC_PAGE_ALLOWED_TAGS,
+        allowedAttributes: {
+            a: ["href", "target", "rel"],
+        },
+        allowedSchemes: ["http", "https", "mailto"],
+        transformTags: {
+            a: sanitizeHtml.simpleTransform("a", {
+                rel: "noopener noreferrer",
+                target: "_blank",
+            }),
+        },
+    }).trim();
+}
 
 export async function createStaticPage(formData: FormData): Promise<ActionResult> {
     const session = await auth();
@@ -39,6 +72,10 @@ export async function createStaticPage(formData: FormData): Promise<ActionResult
     }
 
     const data = parsed.data;
+    const safeContent = sanitizeStaticPageHtml(data.content);
+    if (!safeContent) {
+        return { success: false, error: "Content is required." };
+    }
     const slug = slugify(data.title);
 
     const existing = await prisma.staticPage.findUnique({
@@ -53,7 +90,7 @@ export async function createStaticPage(formData: FormData): Promise<ActionResult
         data: {
             title: data.title,
             slug,
-            content: data.content,
+            content: safeContent,
             isActive: data.isActive,
         },
     });
@@ -83,6 +120,10 @@ export async function updateStaticPage(formData: FormData): Promise<ActionResult
     }
 
     const data = parsed.data;
+    const safeContent = sanitizeStaticPageHtml(data.content);
+    if (!safeContent) {
+        return { success: false, error: "Content is required." };
+    }
     const slug = slugify(data.title);
 
     const slugTaken = await prisma.staticPage.findFirst({
@@ -106,7 +147,7 @@ export async function updateStaticPage(formData: FormData): Promise<ActionResult
         data: {
             title: data.title,
             slug,
-            content: data.content,
+            content: safeContent,
             isActive: data.isActive,
         },
     });

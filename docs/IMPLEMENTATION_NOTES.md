@@ -67,3 +67,36 @@
 
 ### User feedback incorporation
 - This change was implemented after a user-requested security review for broken JWT token behavior.
+
+## 2026-04-27 - Static page rich text editor (Tiptap)
+
+### Design decisions made during development
+- Replaced plain textarea content editing with a Tiptap-based editor in `components/static-page-form.tsx`.
+- Added a dedicated reusable editor component `components/tiptap-editor.tsx` with a minimal toolbar (bold, italic, bullet list, ordered list).
+- Kept `content` persisted as HTML so existing static-page workflows continue to use a single field.
+
+### Discovered edge cases
+- Existing static pages stored as plain text need normalization when loaded into Tiptap; the editor now converts legacy plain text into paragraph HTML.
+- Empty rich-text documents can still emit structural HTML; submit flow validates non-empty plain-text content before sending.
+
+### Performance optimizations
+- Editor feature set is intentionally minimal (StarterKit + Link only) to avoid unnecessary payload and complexity.
+- Sanitization uses allow-list rules and trims output before persistence.
+
+### User feedback incorporation
+- Rich text editing was added directly in response to user request for better static page content authoring.
+
+## 2026-04-27 - Table action buttons switched to icon-only UI
+
+### Design decisions made during development
+- Updated table/list action cells to use icon-only buttons for compact layout and visual consistency.
+- Added explicit `aria-label` attributes to preserve accessibility when text labels are removed.
+
+### Discovered edge cases
+- Action buttons inside clickable table rows require stop-propagation handling to avoid unintended row navigation.
+
+### Performance optimizations
+- No runtime performance impact; this is a presentational UI refinement.
+
+### User feedback incorporation
+- Implemented directly per user request to replace table action text buttons with icons.

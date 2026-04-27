@@ -53,7 +53,11 @@ export default async function EnrollmentsPage() {
         },
         package: { select: { id: true, name: true } },
       },
-      orderBy: { enrolledAt: "desc" },
+      orderBy: [
+        { student: { user: { firstName: "asc" } } },
+        { student: { user: { lastName: "asc" } } },
+        { package: { name: "asc" } },
+      ],
     });
 
     return (

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { canAccess, type Role } from "@/lib/permissions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Check, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
     Table,
@@ -180,13 +181,14 @@ function Section({
                                             <div className="flex items-center justify-end gap-2">
                                                 <Button
                                                     variant="outline"
-                                                    size="sm"
+                                                    size="icon"
+                                                    aria-label="Enter session room"
                                                     asChild
                                                 >
                                                     <Link
                                                         href={`/sessions/${b.id}/room`}
                                                     >
-                                                        Enter Room
+                                                        <Eye size={16} />
                                                     </Link>
                                                 </Button>
                                                 {showComplete && (
@@ -256,7 +258,7 @@ function CompleteForm({ bookingId }: { bookingId: string }) {
     return (
         <form action={action}>
             <Button type="submit" size="sm" variant="outline">
-                Complete
+                <Check size={16} />
             </Button>
         </form>
     );

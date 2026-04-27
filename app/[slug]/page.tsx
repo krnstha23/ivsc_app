@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import sanitizeHtml from "sanitize-html";
 import { prisma } from "@/lib/prisma";
 import { LandingHeader } from "@/components/landing-header";
 
@@ -52,6 +53,33 @@ export default async function PublicStaticPage({
     });
 
     if (!page) notFound();
+    const safeContent = sanitizeHtml(page.content, {
+        allowedTags: [
+            "p",
+            "br",
+            "strong",
+            "em",
+            "u",
+            "s",
+            "h2",
+            "h3",
+            "ul",
+            "ol",
+            "li",
+            "a",
+            "blockquote",
+        ],
+        allowedAttributes: {
+            a: ["href", "target", "rel"],
+        },
+        allowedSchemes: ["http", "https", "mailto"],
+        transformTags: {
+            a: sanitizeHtml.simpleTransform("a", {
+                rel: "noopener noreferrer",
+                target: "_blank",
+            }),
+        },
+    });
 
     return (
         <div className="flex min-h-svh flex-col bg-[#F7F7F7]">
@@ -86,9 +114,10 @@ export default async function PublicStaticPage({
                         </time>
                     </p>
 
-                    <div className="prose prose-neutral mt-8 max-w-none text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
-                        <p className="whitespace-pre-wrap">{page.content}</p>
-                    </div>
+                    <div
+                        className="prose prose-neutral mt-8 max-w-none text-[0.9375rem] leading-relaxed text-[#3d3d4a]"
+                        dangerouslySetInnerHTML={{ __html: safeContent }}
+                    />
                 </article>
             </main>
         </div>

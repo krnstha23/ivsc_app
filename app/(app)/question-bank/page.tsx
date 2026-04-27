@@ -23,7 +23,7 @@ export default async function QuestionBankPage() {
 
     try {
         questions = await prisma.writingQuestion.findMany({
-            orderBy: { createdAt: "desc" },
+            orderBy: [{ title: "asc" }],
             select: {
                 id: true,
                 title: true,

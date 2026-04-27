@@ -5,6 +5,7 @@ import { canAccess } from "@/lib/permissions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "lucide-react";
 import {
     Table,
     TableBody,
@@ -67,7 +68,10 @@ export default async function PackageDetailPage({
                       },
                   },
               },
-              orderBy: { enrolledAt: "desc" },
+              orderBy: [
+                  { student: { user: { firstName: "asc" } } },
+                  { student: { user: { lastName: "asc" } } },
+              ],
           })
         : [];
 
@@ -136,7 +140,7 @@ export default async function PackageDetailPage({
                         </div>
                     ) : (
                         <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-                            <span aria-hidden>📅</span>
+                            <Calendar size={16} aria-hidden />
                             <span>
                                 You need to be enrolled in this package to book
                                 sessions. Contact your administrator.

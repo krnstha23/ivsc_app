@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { CheckCircle, CloseCircle } from "@solar-icons/react";
 import { Button } from "@/components/ui/button";
 import {
     toggleTeacherActive,
@@ -19,15 +20,22 @@ export function TeacherToggleActiveButton({
     return (
         <Button
             variant={isActive ? "outline" : "default"}
-            size="xs"
+            size="icon"
             disabled={isPending}
+            aria-label={isActive ? "Deactivate teacher" : "Activate teacher"}
             onClick={() => {
                 startTransition(async () => {
                     await toggleTeacherActive(teacherId);
                 });
             }}
         >
-            {isPending ? "..." : isActive ? "Deactivate" : "Activate"}
+            {isPending ? (
+                <span className="text-xs">...</span>
+            ) : isActive ? (
+                <CloseCircle size={16} />
+            ) : (
+                <CheckCircle size={16} />
+            )}
         </Button>
     );
 }
@@ -38,15 +46,16 @@ export function TeacherApproveButton({ userId }: { userId: string }) {
     return (
         <Button
             variant="default"
-            size="xs"
+            size="icon"
             disabled={isPending}
+            aria-label="Approve teacher"
             onClick={() => {
                 startTransition(async () => {
                     await approveTeacherFromManage(userId);
                 });
             }}
         >
-            {isPending ? "..." : "Approve"}
+            {isPending ? <span className="text-xs">...</span> : <CheckCircle size={16} />}
         </Button>
     );
 }

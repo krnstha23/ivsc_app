@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Pen, TrashBinTrash } from "@solar-icons/react";
 
 import { deletePackage } from "@/app/(app)/packages/actions";
 import { Button } from "@/components/ui/button";
@@ -102,11 +103,12 @@ export function PackagesTable({
                                         <div className="flex gap-2">
                                             <Button
                                                 variant="outline"
-                                                size="xs"
+                                                size="icon"
+                                                aria-label="Edit package"
                                                 asChild
                                             >
                                                 <Link href={`/packages/${pkg.id}/edit`}>
-                                                    Edit
+                                                    <Pen size={16} />
                                                 </Link>
                                             </Button>
                                             <form
@@ -121,9 +123,10 @@ export function PackagesTable({
                                                 <Button
                                                     type="submit"
                                                     variant="destructive"
-                                                    size="xs"
+                                                    size="icon"
+                                                    aria-label="Delete package"
                                                 >
-                                                    Delete
+                                                    <TrashBinTrash size={16} />
                                                 </Button>
                                             </form>
                                         </div>

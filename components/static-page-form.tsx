@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTransition } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -15,6 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+
+const TiptapEditor = dynamic(
+    () => import("@/components/tiptap-editor").then((mod) => mod.TiptapEditor),
+    { ssr: false },
+);
 
 function slugify(title: string): string {
     return title
@@ -42,14 +48,27 @@ export function StaticPageForm({ initial, formAction }: StaticPageFormProps) {
     const [pending, startTransition] = useTransition();
     const [title, setTitle] = React.useState(initial?.title ?? "");
     const [isActive, setIsActive] = React.useState(initial?.isActive ?? true);
+    const [contentHtml, setContentHtml] = React.useState(initial?.content ?? "");
+    const [contentText, setContentText] = React.useState("");
     const formRef = React.useRef<HTMLFormElement>(null);
 
     const slugPreview = slugify(title);
     const isEdit = !!initial;
 
+    React.useEffect(() => {
+        const source = initial?.content ?? "";
+        const plain = source.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        setContentText(plain);
+    }, [initial?.content]);
+
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        if (!contentText.trim()) {
+            toast.error("Content is required.");
+            return;
+        }
         const fd = new FormData(e.currentTarget);
+        fd.set("content", contentHtml);
         startTransition(async () => {
             const result = await formAction(fd);
             if (result.success) {
@@ -94,21 +113,34 @@ export function StaticPageForm({ initial, formAction }: StaticPageFormProps) {
                             required
                             disabled={pending}
                         />
-                        <p className="text-sm text-muted-foreground">
-                            URL: /{slugPreview || "…"}
-                        </p>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="slugPreview">URL</Label>
+                        <Input
+                            id="slugPreview"
+                            value={`/${slugPreview || "..."}`}
+                            disabled
+                            readOnly
+                        />
                     </div>
 
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="content">Content</Label>
-                        <textarea
+                        <input
+                            type="hidden"
                             id="content"
                             name="content"
-                            rows={12}
-                            defaultValue={initial?.content ?? ""}
-                            required
+                            value={contentHtml}
+                            readOnly
+                        />
+                        <TiptapEditor
+                            initialContent={initial?.content ?? ""}
                             disabled={pending}
-                            className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            onChange={(html, plainText) => {
+                                setContentHtml(html);
+                                setContentText(plainText);
+                            }}
                         />
                     </div>
 

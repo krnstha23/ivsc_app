@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { Pen } from "@solar-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,8 +62,8 @@ export function EnrollmentActions({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          Edit
+        <Button variant="outline" size="icon" aria-label="Edit enrollment">
+          <Pen size={16} />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

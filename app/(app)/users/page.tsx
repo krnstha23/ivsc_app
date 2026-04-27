@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Check, Pencil } from "lucide-react";
 import { approveTeacher } from "@/app/(app)/users/actions";
 
 type SearchParams = {
@@ -188,19 +189,21 @@ export default async function UsersPage({
                                                             <Button
                                                                 type="submit"
                                                                 variant="default"
-                                                                size="xs"
+                                                                size="icon"
+                                                                aria-label="Approve teacher"
                                                             >
-                                                                Approve
+                                                                <Check size={16} />
                                                             </Button>
                                                         </form>
                                                     )}
                                                 <Button
-                                                    variant="link"
-                                                    className="h-auto p-0"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    aria-label="Edit user"
                                                     asChild
                                                 >
                                                     <Link href={`/users/${u.id}/edit`}>
-                                                        Edit
+                                                        <Pencil size={16} />
                                                     </Link>
                                                 </Button>
                                             </div>

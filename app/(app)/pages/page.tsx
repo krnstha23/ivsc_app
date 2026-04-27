@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 import {
     DeletePageButton,
     ToggleActiveButton,
@@ -34,7 +35,7 @@ export default async function StaticPagesListPage() {
     if (!canAccess(role, ["ADMIN"])) redirect("/dashboard");
 
     const pages = await prisma.staticPage.findMany({
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ title: "asc" }],
     });
 
     return (
@@ -116,14 +117,15 @@ export default async function StaticPagesListPage() {
                                         <TableCell>
                                             <div className="flex flex-wrap items-center justify-end gap-2">
                                                 <Button
-                                                    variant="link"
-                                                    className="h-auto p-0"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    aria-label="Edit page"
                                                     asChild
                                                 >
                                                     <Link
                                                         href={`/pages/${page.id}/edit`}
                                                     >
-                                                        Edit
+                                                        <Pencil size={16} />
                                                     </Link>
                                                 </Button>
                                                 <ToggleActiveButton
