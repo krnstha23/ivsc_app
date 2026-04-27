@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing-header";
 import { prisma } from "@/lib/prisma";
+import { serializeJsonForHtmlScript } from "@/lib/security";
 
 export const metadata: Metadata = {
     title: "ScoreMirror – Computer-Based IELTS Mock Tests",
@@ -231,7 +232,9 @@ export default async function HomePage() {
         <div className="flex min-h-svh flex-col">
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                dangerouslySetInnerHTML={{
+                    __html: serializeJsonForHtmlScript(jsonLd),
+                }}
             />
             {/* Hero */}
             <section

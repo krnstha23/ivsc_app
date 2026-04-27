@@ -78,7 +78,7 @@ const NAV_MAIN = [
         title: "Teachers",
         url: "/teachers",
         icon: UsersGroupRounded,
-        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
+        allowedRoles: ["ADMIN"] as Role[],
     },
     {
         title: "Manage Teachers",
@@ -87,16 +87,16 @@ const NAV_MAIN = [
         allowedRoles: ["ADMIN"] as Role[],
     },
     {
-        title: "Students",
+        title: "Book a Session",
         url: "/students",
         icon: CartLarge2,
-        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
+        allowedRoles: ["USER"] as Role[],
     },
     {
         title: "Packages",
         url: "/packages",
         icon: CartLarge2,
-        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
+        allowedRoles: ["ADMIN", "TEACHER"] as Role[],
     },
     {
         title: "Enrollments",

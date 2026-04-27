@@ -100,6 +100,10 @@ cd ~/ivcs-app
 
 echo "AUTH_SECRET=\"$(openssl rand -base64 32)\"" > .env
 echo 'AUTH_URL="https://app.yourdomain.com"' >> .env
+echo 'POSTGRES_USER="ivcs"' >> .env
+echo 'POSTGRES_PASSWORD="replace-with-strong-password"' >> .env
+echo 'POSTGRES_DB="ivcs_db"' >> .env
+echo 'DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"' >> .env
 ```
 
 Verify:
@@ -108,16 +112,7 @@ Verify:
 cat .env
 ```
 
-You should see two lines: `AUTH_SECRET` with a random string and `AUTH_URL` with your domain.
-
-### Change the default database password
-
-Edit `docker-compose.yml` and replace `ivcs_secret` with a strong password in **all four** places:
-
-- `db` service → `POSTGRES_PASSWORD`
-- `app` service → `DATABASE_URL`
-- `migrate` service → `DATABASE_URL`
-- `seed` service → `DATABASE_URL`
+You should see `AUTH_SECRET`, `AUTH_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `DATABASE_URL`.
 
 ### Remove external Postgres port
 
@@ -135,6 +130,12 @@ Build one service at a time to avoid OOM on low-memory servers:
 
 ```bash
 docker compose build app
+```
+
+Validate your final environment interpolation before starting containers:
+
+```bash
+docker compose config >/dev/null
 ```
 
 Run database migrations:
@@ -285,6 +286,28 @@ docker compose build app
 docker compose run --rm migrate
 docker compose up -d
 ```
+
+## Db migrate status
+
+To check which migrations have been applied on your production database, run:
+docker compose run --rm migrate npx prisma migrate status --config prisma.config.ts
+
+If your migrate service just runs prisma migrate deploy, you can instead exec into the running app container:
+docker compose exec app npx prisma migrate status --config prisma.config.ts
+
+Or if you want to run it as a one-off against the DB:
+docker compose run --rm migrate sh -c "npx prisma migrate status --config prisma.config.ts"
+
+The output will show something like:
+
+3 migrations found in prisma/migrations
+Status
+✔ 20260410000000_init
+✔ 20260412000000_add_static_pages
+✗ 20260425033913_add_writing_question_bank ← not yet applied
+
+If the third migration shows ✗ (not applied), run:
+docker compose run --rm migrate
 
 ## Troubleshooting
 

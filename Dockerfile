@@ -1,5 +1,8 @@
 FROM node:22-alpine AS base
 
+RUN npm install -g npm@11.13.0
+RUN apk add --no-cache libc6-compat openssl
+
 # --- Dependencies ---
 FROM base AS deps
 WORKDIR /app
@@ -21,7 +24,7 @@ COPY . .
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV DATABASE_URL="postgresql://build:build@invalid:5432/build?schema=public"
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 RUN npm run build

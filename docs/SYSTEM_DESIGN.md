@@ -1,6 +1,6 @@
 # IVCS - System Design Document
 
-> **Last Updated**: April 10, 2026  
+> **Last Updated**: April 27, 2026  
 > **Status**: Phase 1–3 Complete (except payment); Phase 4 pending  
 > **Branch**: `main`
 
@@ -598,6 +598,10 @@ See `prisma/schema.prisma` for full implementation.
 | Package-first booking flow              | Students select packages (not teachers) → view teacher availability → book. Package-based bookings can be linked to StudentEnrollment to deduct remaining classes. | 2026-03-04 |
 | Zod validation on all server actions    | Server actions are public endpoints; manual string checks are fragile. Zod schemas provide format validation, type safety, and composable error reporting. | 2026-03-04 |
 | Role guards on server actions           | Page-level guards protect UI, but actions are callable directly. `createUser` now checks ADMIN role; `createAvailability` checks TEACHER role. | 2026-03-04 |
+| Reschedule slot lookup authorization hardening | `findSlotsForReschedule` now enforces object-level access (`canManageBooking`) and returns the same empty shape for invalid/not-found/unauthorized to reduce IDOR enumeration risk | 2026-04-27 |
+| Inline script/style XSS hardening | Added `lib/security.ts` helpers; JSON-LD serialization escapes script-breaking chars and chart CSS injection now sanitizes token names/colors before `dangerouslySetInnerHTML` | 2026-04-27 |
+| JWT claim freshness + soft revocation checks | JWT callback now re-checks user state from DB (`isActive`, role, username) on token reuse; inactive/missing users are treated as unauthenticated sessions | 2026-04-27 |
+| Docker secret hygiene + server runtime reliability | Compose uses env-substituted DB credentials (no hardcoded secrets), DB host port exposure removed, and container base includes compatibility packages for Alpine runtime | 2026-04-27 |
 
 ### 6.2 Pending Decisions
 
@@ -799,9 +803,13 @@ See `prisma/schema.prisma` for full implementation.
 
 **4.4 Performance & Security**
 - [ ] API rate limiting
-- [ ] Input validation (Zod schemas)
+- [x] Input validation (Zod schemas)
 - [ ] SQL injection protection (Prisma handles this)
-- [ ] XSS protection
+- [x] XSS protection (inline script/style sinks hardened)
+- [x] IDOR mitigation for booking reschedule slot lookup
+- [x] JWT/session revocation hardening (inactive user claim refresh)
+- [x] Restrictive default CORS posture (no wildcard CORS headers configured)
+- [x] Secrets-in-source hardening for deployment config (compose env interpolation, no hardcoded DB passwords)
 - [ ] Database query optimization
 - [ ] Image optimization (if teacher photos)
 - [ ] Caching strategy (React Query / SWR)
@@ -1167,6 +1175,7 @@ Until this section is filled in, engineers should treat **§1.4**–**§1.6** as
 | 2026-04-25 | **Google Meet API integration:** `lib/google-meet.ts` — Meet REST API v2 via `googleapis`; service account + domain-wide delegation; `RECORD_ON_START` enabled. `room/page.tsx` auto-generates link on first load for speaking sessions; stores to `Booking.meetLink`. `session-room.tsx` `MeetLinkStep` simplified to display-only; shows error notice if generation failed. `googleapis` added to dependencies. Env vars: `GOOGLE_SERVICE_ACCOUNT_KEY`, `GOOGLE_MEET_HOST_EMAIL`. | -      |
 | 2026-04-25 | **Writing Question Bank:** New `WritingQuestion` model (`writing_questions` table). `lib/writing-question-assigner.ts` — unseen-first, least-used fallback assignment logic. Questions auto-assigned in `createBookingForSlot` + `createWritingOnlyBooking` for bundles with `hasEvaluation`. `/question-bank` page (admin + teacher) for uploading/managing questions. `/api/questions/[questionId]/view` for secure PDF serving. Session room gains `WritingPromptStep` — locked to students until `scheduledAt ≤ now`. `Booking` gains `writingQuestionId` FK. | -      |
 | 2026-04-20 | **Public landing (`app/page.tsx`):** Rebuilt to match `Frame.png` rhythm (hero, three cards, experience band, three-tier pricing, FAQ accordions, multi-column footer). **`ListeningMock`** is the only large UI mock, right column of `#experience`; hero stays **`/hero.png`**. **Pricing:** static NPR tier amounts per `public/price.png` (**1400 / 1680 / 1820**), cards use same system as feature band (light section, white `rounded-2xl` cards, accent **Select**). Inline writing/report mocks removed; messaging folded into cards. **`components/landing-header.tsx`:** center nav (md+) to `#features`, `#experience`, `#pricing`, `/packages`. | -      |
+| 2026-04-27 | **Security hardening pass (5 issues):** IDOR fix for `findSlotsForReschedule` with object-level auth parity; XSS hardening for inline JSON-LD/style sinks via `lib/security.ts`; JWT claim refresh + deactivation handling in auth callbacks; restrictive CORS posture verified (no permissive headers); secrets-in-source reduction in Docker/Compose + deployment docs updates. | -      |
 
 ---
 

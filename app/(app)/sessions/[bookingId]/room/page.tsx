@@ -21,7 +21,15 @@ export default async function SessionRoomPage({
 
     const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
-        include: {
+        select: {
+            id: true,
+            userId: true,
+            bundleId: true,
+            scheduledAt: true,
+            duration: true,
+            meetLink: true,
+            submissionStart: true,
+            submissionEnd: true,
             user: {
                 select: { firstName: true, middleName: true, lastName: true },
             },
@@ -44,18 +52,27 @@ export default async function SessionRoomPage({
                     uploadedAt: true,
                 },
             },
-            writingQuestion: {
-                select: {
-                    id: true,
-                    title: true,
-                    description: true,
-                    fileName: true,
-                },
-            },
         },
     });
 
     if (!booking) notFound();
+
+    // Fetch writing question separately so a missing migration never crashes the page.
+    let writingQuestion: { id: string; title: string; description: string | null; fileName: string } | null = null;
+    try {
+        const bq = await prisma.booking.findUnique({
+            where: { id: bookingId },
+            select: { writingQuestionId: true },
+        });
+        if (bq?.writingQuestionId) {
+            writingQuestion = await prisma.writingQuestion.findUnique({
+                where: { id: bq.writingQuestionId },
+                select: { id: true, title: true, description: true, fileName: true },
+            });
+        }
+    } catch {
+        // writing_questions table may not exist yet — gracefully degrade
+    }
 
     const teacherUserId = booking.teacher.userId;
 
@@ -185,7 +202,7 @@ export default async function SessionRoomPage({
                         role: viewRole,
                         submissionStart: booking.submissionStart?.toISOString() ?? null,
                         submissionEnd: booking.submissionEnd?.toISOString() ?? null,
-                        writingQuestion: booking.writingQuestion ?? null,
+                        writingQuestion: writingQuestion ?? null,
                         sessionStarted,
                     }}
                 />

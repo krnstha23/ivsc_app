@@ -9,22 +9,38 @@ export default async function QuestionBankPage() {
     const role = (session?.user as { role?: string })?.role as Role | undefined;
     if (!canAccess(role, ["ADMIN", "TEACHER"])) redirect("/dashboard");
 
-    const questions = await prisma.writingQuestion.findMany({
-        orderBy: { createdAt: "desc" },
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            fileName: true,
-            fileSize: true,
-            isActive: true,
-            createdAt: true,
-            uploader: {
-                select: { firstName: true, lastName: true, role: true },
+    let questions: {
+        id: string;
+        title: string;
+        description: string | null;
+        fileName: string;
+        fileSize: number;
+        isActive: boolean;
+        createdAt: Date;
+        uploader: { firstName: string; lastName: string; role: string };
+        _count: { bookings: number };
+    }[] = [];
+
+    try {
+        questions = await prisma.writingQuestion.findMany({
+            orderBy: { createdAt: "desc" },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                fileName: true,
+                fileSize: true,
+                isActive: true,
+                createdAt: true,
+                uploader: {
+                    select: { firstName: true, lastName: true, role: true },
+                },
+                _count: { select: { bookings: true } },
             },
-            _count: { select: { bookings: true } },
-        },
-    });
+        });
+    } catch {
+        // writing_questions table may not exist yet — show empty state
+    }
 
     return (
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

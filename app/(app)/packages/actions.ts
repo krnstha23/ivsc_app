@@ -546,13 +546,43 @@ export async function findSlotsForReschedule(
     dateStr: string,
 ): Promise<RescheduleSlotResult> {
     const session = await auth();
-    if (!session?.user) return { slots: [] };
+    const userId = (session?.user as { id?: string })?.id;
+    const role = (session?.user as { role?: string })?.role;
+    if (!userId) return { slots: [] };
+
+    const parsed = cancelBookingSchema.safeParse({ bookingId });
+    if (!parsed.success) return { slots: [] };
 
     const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
-        select: { bundleId: true, duration: true, id: true },
+        where: { id: parsed.data.bookingId },
+        select: {
+            id: true,
+            userId: true,
+            teacherId: true,
+            bundleId: true,
+            duration: true,
+        },
     });
     if (!booking) return { slots: [] };
+
+    const teacherProfile =
+        role === AuthRole.TEACHER || role === AuthRole.ADMIN
+            ? await prisma.teacherProfile.findUnique({
+                  where: { userId },
+                  select: { id: true },
+              })
+            : null;
+    if (
+        !canManageBooking(
+            role,
+            userId,
+            booking.userId,
+            teacherProfile?.id ?? null,
+            booking.teacherId,
+        )
+    ) {
+        return { slots: [] };
+    }
 
     const date = new Date(dateStr + "T00:00:00Z");
     const now = new Date();

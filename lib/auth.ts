@@ -10,6 +10,53 @@ const nextAuth = NextAuth({
     session: {
         strategy: "jwt",
     },
+    callbacks: {
+        ...authConfig.callbacks,
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+                token.role = (user as { role?: string }).role;
+                token.username = (user as { username?: string }).username;
+                return token;
+            }
+
+            const userId = token.id as string | undefined;
+            if (!userId) return token;
+
+            const dbUser = await prisma.user.findUnique({
+                where: { id: userId },
+                select: {
+                    id: true,
+                    userName: true,
+                    role: true,
+                    isActive: true,
+                },
+            });
+
+            if (!dbUser || !dbUser.isActive) {
+                token.id = undefined;
+                token.role = undefined;
+                token.username = undefined;
+                return token;
+            }
+
+            token.role = dbUser.role;
+            token.username = dbUser.userName;
+            return token;
+        },
+        session({ session, token }) {
+            if (!session.user) return session;
+
+            const userId = token.id as string | undefined;
+            if (!userId) return { ...session, user: undefined };
+
+            (session.user as { id?: string }).id = userId;
+            (session.user as { role?: string }).role = token.role as string;
+            (session.user as { username?: string }).username =
+                token.username as string;
+            return session;
+        },
+    },
     providers: [
         Credentials({
             credentials: {
@@ -69,6 +116,11 @@ const nextAuth = NextAuth({
 });
 
 /** Cached auth: multiple calls in the same request (layout + pages) only run once. */
-export const auth = cache(nextAuth.auth);
+export const auth = cache(async () => {
+    const session = await nextAuth.auth();
+    const userId = (session?.user as { id?: string } | undefined)?.id;
+    if (!userId) return null;
+    return session;
+});
 
 export const { handlers, signIn, signOut } = nextAuth;

@@ -7,9 +7,6 @@ const nextConfig: NextConfig = {
     // Skipping here keeps Docker build RAM usage under control.
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;

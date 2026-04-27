@@ -77,7 +77,7 @@ export default async function EnrollmentsPage() {
                 <TableRow>
                   <TableHead>Student</TableHead>
                   <TableHead>Package</TableHead>
-                  <TableHead className="text-center">Progress</TableHead>
+                  <TableHead className="text-center">Classes Joined</TableHead>
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead>Enrolled</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -95,11 +95,6 @@ export default async function EnrollmentsPage() {
                   </TableRow>
                 ) : (
                   enrollments.map((e) => {
-                    const remaining = e.classesTotal - e.classesUsed;
-                    const pct =
-                      e.classesTotal > 0
-                        ? Math.round((e.classesUsed / e.classesTotal) * 100)
-                        : 0;
                     return (
                       <TableRow key={e.id}>
                         <TableCell>
@@ -121,19 +116,10 @@ export default async function EnrollmentsPage() {
                             {e.package.name}
                           </Link>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-xs text-muted-foreground">
-                              {e.classesUsed} / {e.classesTotal} used
-                              &middot; {remaining} left
-                            </span>
-                            <div className="h-2 w-full max-w-24 rounded-full bg-muted">
-                              <div
-                                className="h-full rounded-full bg-primary transition-all"
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                          </div>
+                        <TableCell className="text-center">
+                          <span className="text-sm">
+                            {e.classesUsed} joined
+                          </span>
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant={statusVariant(e.status)}>
@@ -211,53 +197,32 @@ export default async function EnrollmentsPage() {
           </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {enrollments.map((e) => {
-              const remaining = e.classesTotal - e.classesUsed;
-              const pct =
-                e.classesTotal > 0
-                  ? Math.round((e.classesUsed / e.classesTotal) * 100)
-                  : 0;
-              return (
-                <div
-                  key={e.id}
-                  className="rounded-lg border bg-card p-4 flex flex-col gap-3"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <Link
-                      href={`/packages/${e.package.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {e.package.name}
-                    </Link>
-                    <Badge variant={statusVariant(e.status)}>
-                      {e.status}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span>
-                        {e.classesUsed} / {e.classesTotal}
-                      </span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-muted">
-                      <div
-                        className="h-full rounded-full bg-primary transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {remaining} class{remaining !== 1 ? "es" : ""} remaining
-                    </p>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground mt-auto">
-                    Enrolled {e.enrolledAt.toLocaleDateString()}
-                  </p>
+            {enrollments.map((e) => (
+              <div
+                key={e.id}
+                className="rounded-lg border bg-card p-4 flex flex-col gap-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <Link
+                    href={`/packages/${e.package.id}`}
+                    className="font-medium hover:underline"
+                  >
+                    {e.package.name}
+                  </Link>
+                  <Badge variant={statusVariant(e.status)}>
+                    {e.status}
+                  </Badge>
                 </div>
-              );
-            })}
+
+                <p className="text-sm text-muted-foreground">
+                  {e.classesUsed} class{e.classesUsed !== 1 ? "es" : ""} joined
+                </p>
+
+                <p className="text-xs text-muted-foreground mt-auto">
+                  Enrolled {e.enrolledAt.toLocaleDateString()}
+                </p>
+              </div>
+            ))}
           </div>
         )}
       </div>
