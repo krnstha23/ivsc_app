@@ -1,6 +1,5 @@
 FROM node:22-alpine AS base
 
-RUN npm install -g npm@11.13.0
 RUN apk add --no-cache libc6-compat openssl
 
 # --- Dependencies ---
