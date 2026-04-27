@@ -100,3 +100,19 @@
 
 ### User feedback incorporation
 - Implemented directly per user request to replace table action text buttons with icons.
+
+## 2026-04-27 - Docker build OOM mitigation for Next.js production build
+
+### Design decisions made during development
+- Updated Docker builder command to invoke Next.js directly with a constrained heap (`--max-old-space-size=1536`) and explicit `--webpack` build mode.
+- Kept the runtime image flow unchanged (standalone output copied into runner stage) to avoid deployment behavior changes.
+
+### Discovered edge cases
+- The `npm run build` script hardcodes `NODE_OPTIONS=--max-old-space-size=4096`, which can trigger OOM kills on lower-memory hosts when combined with Turbopack.
+- Build-time static generation still logs a Prisma connection warning against the intentionally invalid build DB URL, but build output remains successful.
+
+### Performance optimizations
+- Switching Docker production builds to webpack reduced peak memory pressure enough for successful builds in constrained container environments.
+
+### User feedback incorporation
+- This mitigation was added immediately after user-reported `SIGKILL` failures during Docker image builds on server infrastructure.

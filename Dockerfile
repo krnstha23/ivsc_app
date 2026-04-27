@@ -24,9 +24,8 @@ RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL="postgresql://build:build@invalid:5432/build?schema=public"
-ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-RUN npm run build
+RUN node --max-old-space-size=1536 ./node_modules/next/dist/bin/next build --webpack
 
 # --- Runner ---
 FROM base AS runner
