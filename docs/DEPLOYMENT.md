@@ -282,6 +282,7 @@ Optionally sync backups off-server with `rsync` or `rclone` to S3/B2.
 ```bash
 cd ~/ivcs-app
 git pull
+docker system prune -a -f
 docker compose build app
 docker compose run --rm migrate
 docker compose up -d
