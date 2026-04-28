@@ -17,6 +17,7 @@ import {
 import {
     getEnrollmentForPackage,
 } from "@/app/(app)/packages/actions";
+import { formatRs } from "@/lib/format-rs";
 
 export default async function PackageDetailPage({
     params,
@@ -94,10 +95,7 @@ export default async function PackageDetailPage({
                     <p className="text-muted-foreground">{pkg.description}</p>
                 )}
                 <p className="text-lg font-medium">
-                    $
-                    {Number(pkg.price).toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                    })}
+                    {formatRs(Number(pkg.price))}
                 </p>
                 {!pkg.isActive && (
                     <p className="text-sm text-amber-600 dark:text-amber-400">
@@ -267,7 +265,13 @@ export default async function PackageDetailPage({
 
             <div className="px-4 lg:px-6">
                 <Button variant="ghost" size="sm" asChild>
-                    <Link href="/packages">← Back to packages</Link>
+                    <Link
+                        href={isAdmin ? "/packages" : "/dashboard"}
+                    >
+                        {isAdmin
+                            ? "← Back to packages"
+                            : "← Back to dashboard"}
+                    </Link>
                 </Button>
             </div>
         </div>

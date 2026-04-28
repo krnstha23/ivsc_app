@@ -17,7 +17,8 @@ export default async function PackagesPage({
   const session = await auth()
   if (!session?.user) redirect("/login")
   const role = (session.user as { role?: string }).role
-  const canManage = role === "ADMIN"
+  if (role !== "ADMIN") redirect("/dashboard")
+  const canManage = true
 
   const { bundleName, bundleIsActive } = await searchParams
 
@@ -48,7 +49,6 @@ export default async function PackagesPage({
     select: {
       id: true,
       name: true,
-      description: true,
       priceStandard: true,
       pricePriority: true,
       priceInstant: true,

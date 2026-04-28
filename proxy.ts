@@ -1,6 +1,16 @@
+import { NextResponse } from 'next/server'
+import type { NextFetchEvent, NextRequest, NextMiddleware } from 'next/server'
 import { auth } from '@/lib/auth-edge'
 
-export default auth
+const authMiddleware = auth as NextMiddleware
+
+export default function proxy(request: NextRequest, event: NextFetchEvent) {
+  const p = request.nextUrl.pathname
+  if (p === '/pricing' || p === '/pricing/') {
+    return NextResponse.redirect(new URL('/#pricing', request.url))
+  }
+  return authMiddleware(request, event)
+}
 
 export const config = {
   matcher: [

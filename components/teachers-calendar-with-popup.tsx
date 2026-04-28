@@ -7,8 +7,10 @@ import { getTeacherAvailabilityForMonth } from "@/app/(app)/teachers/actions";
 
 export function TeachersCalendarWithPopup({
   canCreate = false,
+  isAdmin = false,
 }: {
   canCreate?: boolean;
+  isAdmin?: boolean;
 }) {
   const [viewDialogDate, setViewDialogDate] = React.useState<Date | null>(null);
   const [availabilityByDay, setAvailabilityByDay] = React.useState<
@@ -51,6 +53,7 @@ export function TeachersCalendarWithPopup({
         onOpenChange={(open) => !open && setViewDialogDate(null)}
         date={viewDialogDate}
         canManageSlots={canCreate}
+        isAdmin={isAdmin}
         onSlotsChanged={() => fetchAvailability(viewYear, viewMonth)}
       />
     </>

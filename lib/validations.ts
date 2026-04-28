@@ -86,6 +86,7 @@ export const createBundleSchema = z.object({
     .nullable()
     .optional(),
   isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
   packageIds: z.array(z.string().uuid()).min(1, "Select at least one package"),
 });
 

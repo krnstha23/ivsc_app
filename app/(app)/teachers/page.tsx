@@ -10,6 +10,7 @@ export default async function TeachersPage() {
 
     const role = (session.user as { role?: string }).role;
     const canCreate = role === "TEACHER" || role === "ADMIN";
+    const isAdmin = role === "ADMIN";
 
     return (
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -22,7 +23,7 @@ export default async function TeachersPage() {
                 </p>
             </div>
             <div className="px-4 lg:px-6">
-                <TeachersCalendarWithPopup canCreate={canCreate} />
+                <TeachersCalendarWithPopup canCreate={canCreate} isAdmin={isAdmin} />
             </div>
         </div>
     );

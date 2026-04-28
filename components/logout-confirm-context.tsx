@@ -7,7 +7,6 @@ import {
   useState,
 } from "react"
 import { signOut } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import {
   Dialog,
   DialogContent,
@@ -39,7 +38,6 @@ export function LogoutConfirmProvider({
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
 
   const openLogoutConfirm = useCallback(() => {
@@ -48,10 +46,10 @@ export function LogoutConfirmProvider({
 
   const handleLogout = useCallback(async () => {
     setOpen(false)
-    await signOut({ redirect: false })
-    router.push("/login")
-    router.refresh()
-  }, [router])
+    // Clears the session cookie via POST /api/auth/signout, then full-page
+    // navigation to /login so client state (SessionProvider) cannot hold stale data.
+    await signOut({ redirect: true, redirectTo: "/login" })
+  }, [])
 
   return (
     <LogoutConfirmContext.Provider value={{ openLogoutConfirm }}>

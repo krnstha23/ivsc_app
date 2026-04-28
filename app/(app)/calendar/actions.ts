@@ -17,10 +17,7 @@ function dateKeyUtc(d: Date): string {
 }
 
 /**
- * Returns booking count per day for the current user for the given month.
- * Students: their bookings (userId = me).
- * Teachers: bookings where they are the teacher.
- * Admins: all bookings (or could restrict; same as teachers if they have a profile).
+ * Returns booking count per day for the given month (admin-only).
  * Keys are "YYYY-MM-DD".
  */
 export async function getBookingsByMonth(
@@ -30,41 +27,17 @@ export async function getBookingsByMonth(
     const session = await auth();
     if (!session?.user) return {};
 
+    const role = (session.user as { role?: string }).role;
+    if (role !== Role.ADMIN) return {};
+
     const start = new Date(Date.UTC(year, month, 1));
     const end = new Date(Date.UTC(year, month + 1, 1));
-    const userId = (session.user as { id?: string }).id;
-    const role = (session.user as { role?: string }).role;
-
-    if (!userId) return {};
-
-    const isTeacher =
-        role === Role.TEACHER || role === Role.ADMIN;
-    const teacherProfile =
-        isTeacher
-            ? await prisma.teacherProfile.findUnique({
-                  where: { userId },
-                  select: { id: true },
-              })
-            : null;
 
     const where: {
         scheduledAt: { gte: Date; lt: Date };
-        userId?: string;
-        teacherId?: string;
     } = {
         scheduledAt: { gte: start, lt: end },
     };
-
-    if (role === Role.USER) {
-        where.userId = userId;
-    } else if (teacherProfile) {
-        where.teacherId = teacherProfile.id;
-    } else if (role === Role.ADMIN) {
-        // Admin without teacher profile: show all bookings
-        // (no extra filter)
-    } else {
-        return {};
-    }
 
     const bookings = await prisma.booking.findMany({
         where,
@@ -88,13 +61,12 @@ export type DayBookingItem = {
     studentName: string;
     status: string;
     packageId: string | null;
-    /** True when the viewer is a student (USER); used for reschedule UI. */
+    /** True when the viewer may open reschedule UI (admins on the calendar). */
     viewerMayReschedule: boolean;
 };
 
 /**
- * Returns bookings for a single day for the current user.
- * Same role logic as getBookingsByMonth.
+ * Returns bookings for a single day (admin-only, all bookings).
  */
 export async function getBookingsForDay(
     date: Date
@@ -102,35 +74,17 @@ export async function getBookingsForDay(
     const session = await auth();
     if (!session?.user) return [];
 
+    const role = (session.user as { role?: string }).role;
+    if (role !== Role.ADMIN) return [];
+
     const start = toUtcDateOnly(date);
     const end = nextUtcDateOnly(date);
-    const userId = (session.user as { id?: string }).id;
-    const role = (session.user as { role?: string }).role;
-
-    if (!userId) return [];
-
-    const isTeacher = role === Role.TEACHER || role === Role.ADMIN;
-    const teacherProfile = isTeacher
-        ? await prisma.teacherProfile.findUnique({
-              where: { userId },
-              select: { id: true },
-          })
-        : null;
 
     const where: {
         scheduledAt: { gte: Date; lt: Date };
-        userId?: string;
-        teacherId?: string;
     } = {
         scheduledAt: { gte: start, lt: end },
     };
-
-    if (role === Role.USER) {
-        where.userId = userId;
-    } else if (teacherProfile) {
-        where.teacherId = teacherProfile.id;
-    }
-    // Admin without teacher profile: no filter, get all for that day
 
     const bookings = await prisma.booking.findMany({
         where,
@@ -162,7 +116,7 @@ export async function getBookingsForDay(
         orderBy: { scheduledAt: "asc" },
     });
 
-    const viewerMayReschedule = role === Role.USER;
+    const viewerMayReschedule = role === Role.ADMIN;
 
     return bookings.map((b) => {
         const startDate = new Date(b.scheduledAt);

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Pen, TrashBinTrash } from "@solar-icons/react";
 
 import { deletePackage } from "@/app/(app)/packages/actions";
+import { formatRs } from "@/lib/format-rs";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -82,10 +83,7 @@ export function PackagesTable({
                                     {pkg.description ?? "—"}
                                 </TableCell>
                                 <TableCell>
-                                    $
-                                    {Number(pkg.price).toLocaleString("en-US", {
-                                        minimumFractionDigits: 2,
-                                    })}
+                                    {formatRs(Number(pkg.price))}
                                 </TableCell>
                                 <TableCell>
                                     <span

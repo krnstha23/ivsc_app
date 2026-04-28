@@ -37,6 +37,111 @@ function timeToMinutes(timeStr: string): number {
     return (h ?? 0) * 60 + (m ?? 0);
 }
 
+function minutesToTime(mins: number): string {
+    const h = Math.floor(mins / 60) % 24;
+    const m = mins % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/** True if [startA, endA) and [startB, endB) overlap (touching endpoints do not overlap). */
+function intervalsOverlapMinutes(
+    startA: number,
+    endA: number,
+    startB: number,
+    endB: number,
+): boolean {
+    return startA < endB && startB < endA;
+}
+
+/**
+ * When adding a new block, merge it with any same-day unbooked blocks that overlap
+ * so teachers can extend windows without hitting an implicit "no overlap" failure.
+ * If an overlapping row has a booking, returns an error instead.
+ */
+async function mergeOverlappingUnbookedBlocks(params: {
+    teacherId: string;
+    dateOnly: Date;
+    startTime: string;
+    endTime: string;
+}): Promise<
+    | { ok: true; mergedStart: string; mergedEnd: string; deleteIds: string[] }
+    | { ok: false; error: string }
+> {
+    const sNew = timeToMinutes(padTime(params.startTime));
+    const eNew = timeToMinutes(padTime(params.endTime));
+
+    const rows = await prisma.availability.findMany({
+        where: {
+            teacherId: params.teacherId,
+            date: params.dateOnly,
+        },
+        select: {
+            id: true,
+            startTime: true,
+            endTime: true,
+            booking: { select: { id: true } },
+        },
+    });
+
+    const overlapping = rows.filter((row) => {
+        const s = timeToMinutes(padTime(row.startTime));
+        const e = timeToMinutes(padTime(row.endTime));
+        return intervalsOverlapMinutes(sNew, eNew, s, e);
+    });
+
+    for (const row of overlapping) {
+        if (row.booking) {
+            return {
+                ok: false,
+                error: "This time overlaps a block that already has a booking. Cancel the booking or choose a different time.",
+            };
+        }
+    }
+
+    let minS = sNew;
+    let maxE = eNew;
+    for (const row of overlapping) {
+        const s = timeToMinutes(padTime(row.startTime));
+        const e = timeToMinutes(padTime(row.endTime));
+        minS = Math.min(minS, s);
+        maxE = Math.max(maxE, e);
+    }
+
+    return {
+        ok: true,
+        mergedStart: minutesToTime(minS),
+        mergedEnd: minutesToTime(maxE),
+        deleteIds: overlapping.map((r) => r.id),
+    };
+}
+
+async function updateWouldOverlapOtherBlock(params: {
+    teacherId: string;
+    dateOnly: Date;
+    excludeId: string;
+    startTime: string;
+    endTime: string;
+}): Promise<boolean> {
+    const sNew = timeToMinutes(padTime(params.startTime));
+    const eNew = timeToMinutes(padTime(params.endTime));
+
+    const rows = await prisma.availability.findMany({
+        where: {
+            teacherId: params.teacherId,
+            date: params.dateOnly,
+            NOT: { id: params.excludeId },
+        },
+        select: { startTime: true, endTime: true },
+    });
+
+    for (const row of rows) {
+        const s = timeToMinutes(padTime(row.startTime));
+        const e = timeToMinutes(padTime(row.endTime));
+        if (intervalsOverlapMinutes(sNew, eNew, s, e)) return true;
+    }
+    return false;
+}
+
 export type BundleAvailabilitySlot = {
     id: string;
     teacherId: string;
@@ -44,6 +149,11 @@ export type BundleAvailabilitySlot = {
     startTime: string;
     endTime: string;
     durationMinutes: number;
+};
+
+export type ApprovedTeacherOption = {
+    teacherId: string;
+    teacherName: string;
 };
 
 /** Returns bookable availability slots for a bundle on a single date. */
@@ -151,14 +261,31 @@ export async function createAvailability(payload: {
 
     const dateOnly = toUtcDateOnly(date);
 
-    await prisma.availability.create({
-        data: {
-            teacherId: teacherProfile.id,
-            date: dateOnly,
-            startTime: padTime(startTime),
-            endTime: padTime(endTime),
-            bundleIds: [],
-        },
+    const merge = await mergeOverlappingUnbookedBlocks({
+        teacherId: teacherProfile.id,
+        dateOnly,
+        startTime,
+        endTime,
+    });
+    if (!merge.ok) {
+        return { success: false, error: merge.error };
+    }
+
+    await prisma.$transaction(async (tx) => {
+        if (merge.deleteIds.length > 0) {
+            await tx.availability.deleteMany({
+                where: { id: { in: merge.deleteIds } },
+            });
+        }
+        await tx.availability.create({
+            data: {
+                teacherId: teacherProfile.id,
+                date: dateOnly,
+                startTime: padTime(merge.mergedStart),
+                endTime: padTime(merge.mergedEnd),
+                bundleIds: [],
+            },
+        });
     });
 
     revalidatePath("/teachers");
@@ -274,6 +401,44 @@ export async function getSessionTeacherProfileId(): Promise<string | null> {
     return tp?.id ?? null;
 }
 
+export async function getApprovedTeachersForAdmin(): Promise<ApprovedTeacherOption[]> {
+    const session = await auth();
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (role !== Role.ADMIN) return [];
+
+    const teachers = await prisma.teacherProfile.findMany({
+        where: { isApproved: true, isActive: true, user: { isActive: true } },
+        select: {
+            id: true,
+            user: {
+                select: {
+                    firstName: true,
+                    middleName: true,
+                    lastName: true,
+                    userName: true,
+                },
+            },
+        },
+        orderBy: [
+            { user: { firstName: "asc" } },
+            { user: { lastName: "asc" } },
+        ],
+    });
+
+    return teachers.map((teacher) => {
+        const fullName =
+            [teacher.user.firstName, teacher.user.middleName, teacher.user.lastName]
+                .filter(Boolean)
+                .join(" ")
+                .trim() || teacher.user.userName;
+
+        return {
+            teacherId: teacher.id,
+            teacherName: `${fullName} (@${teacher.user.userName})`,
+        };
+    });
+}
+
 export type MutateSlotResult =
     | { success: true }
     | { success: false; error: string };
@@ -286,12 +451,39 @@ export async function deleteAvailability(
     if (!user) {
         return { success: false, error: "You must be signed in." };
     }
-    if ((user as { role?: string }).role !== Role.TEACHER) {
-        return { success: false, error: "Only teachers can delete availability." };
-    }
+    const role = (user as { role?: string }).role;
     const userId = (user as { id?: string }).id;
     if (!userId) {
         return { success: false, error: "Invalid session." };
+    }
+
+    const slot = await prisma.availability.findUnique({
+        where: { id: availabilityId },
+        select: { id: true, teacherId: true, booking: { select: { id: true } } },
+    });
+    if (!slot) {
+        return { success: false, error: "Slot not found." };
+    }
+    if (slot.booking) {
+        return {
+            success: false,
+            error: "This slot has a booking. Cancel the booking first.",
+        };
+    }
+
+    if (role === Role.ADMIN) {
+        await prisma.availability.delete({ where: { id: availabilityId } });
+        revalidatePath("/teachers");
+        revalidatePath("/teachers/manage");
+        revalidatePath("/calendar");
+        return { success: true };
+    }
+
+    if (role !== Role.TEACHER) {
+        return {
+            success: false,
+            error: "Only teachers or admins can delete availability.",
+        };
     }
 
     const teacherProfile = await prisma.teacherProfile.findUnique({
@@ -301,19 +493,8 @@ export async function deleteAvailability(
     if (!teacherProfile) {
         return { success: false, error: "Teacher profile not found." };
     }
-
-    const slot = await prisma.availability.findUnique({
-        where: { id: availabilityId },
-        select: { id: true, teacherId: true, booking: { select: { id: true } } },
-    });
-    if (!slot || slot.teacherId !== teacherProfile.id) {
+    if (slot.teacherId !== teacherProfile.id) {
         return { success: false, error: "Slot not found or not yours." };
-    }
-    if (slot.booking) {
-        return {
-            success: false,
-            error: "This slot has a booking. Cancel the booking first.",
-        };
     }
 
     await prisma.availability.delete({ where: { id: availabilityId } });
@@ -408,21 +589,51 @@ export async function adminCreateAvailability(payload: {
 
     const teacherProfile = await prisma.teacherProfile.findUnique({
         where: { id: teacherId },
+        select: { id: true, isApproved: true, isActive: true },
     });
     if (!teacherProfile) {
         return { success: false, error: "Teacher profile not found." };
     }
+    if (!teacherProfile.isApproved) {
+        return {
+            success: false,
+            error: "Availability can only be created for approved teachers.",
+        };
+    }
+    if (!teacherProfile.isActive) {
+        return {
+            success: false,
+            error: "Availability can only be created for active teachers.",
+        };
+    }
 
     const dateOnly = toUtcDateOnly(date);
 
-    await prisma.availability.create({
-        data: {
-            teacherId,
-            date: dateOnly,
-            startTime: padTime(startTime),
-            endTime: padTime(endTime),
-            bundleIds: [],
-        },
+    const merge = await mergeOverlappingUnbookedBlocks({
+        teacherId,
+        dateOnly,
+        startTime,
+        endTime,
+    });
+    if (!merge.ok) {
+        return { success: false, error: merge.error };
+    }
+
+    await prisma.$transaction(async (tx) => {
+        if (merge.deleteIds.length > 0) {
+            await tx.availability.deleteMany({
+                where: { id: { in: merge.deleteIds } },
+            });
+        }
+        await tx.availability.create({
+            data: {
+                teacherId,
+                date: dateOnly,
+                startTime: padTime(merge.mergedStart),
+                endTime: padTime(merge.mergedEnd),
+                bundleIds: [],
+            },
+        });
     });
 
     revalidatePath("/teachers");
@@ -442,9 +653,7 @@ export async function updateAvailability(payload: {
     if (!user) {
         return { success: false, error: "You must be signed in." };
     }
-    if ((user as { role?: string }).role !== Role.TEACHER) {
-        return { success: false, error: "Only teachers can update availability." };
-    }
+    const role = (user as { role?: string }).role;
     const userId = (user as { id?: string }).id;
     if (!userId) {
         return { success: false, error: "Invalid session." };
@@ -457,14 +666,6 @@ export async function updateAvailability(payload: {
 
     const { id, date, startTime, endTime } = parsed.data;
 
-    const teacherProfile = await prisma.teacherProfile.findUnique({
-        where: { userId },
-        select: { id: true },
-    });
-    if (!teacherProfile) {
-        return { success: false, error: "Teacher profile not found." };
-    }
-
     const slot = await prisma.availability.findUnique({
         where: { id },
         select: {
@@ -473,8 +674,8 @@ export async function updateAvailability(payload: {
             booking: { select: { id: true } },
         },
     });
-    if (!slot || slot.teacherId !== teacherProfile.id) {
-        return { success: false, error: "Slot not found or not yours." };
+    if (!slot) {
+        return { success: false, error: "Slot not found." };
     }
     if (slot.booking) {
         return {
@@ -484,14 +685,59 @@ export async function updateAvailability(payload: {
     }
 
     const dateOnly = toUtcDateOnly(date);
+    if (
+        await updateWouldOverlapOtherBlock({
+            teacherId: slot.teacherId,
+            dateOnly,
+            excludeId: id,
+            startTime,
+            endTime,
+        })
+    ) {
+        return {
+            success: false,
+            error: "This range overlaps another availability block that day. Adjust the times or edit the other block.",
+        };
+    }
+
+    const updateData = {
+        date: dateOnly,
+        startTime: padTime(startTime),
+        endTime: padTime(endTime),
+    };
+
+    if (role === Role.ADMIN) {
+        await prisma.availability.update({
+            where: { id },
+            data: updateData,
+        });
+        revalidatePath("/teachers");
+        revalidatePath("/teachers/manage");
+        revalidatePath("/calendar");
+        return { success: true };
+    }
+
+    if (role !== Role.TEACHER) {
+        return {
+            success: false,
+            error: "Only teachers or admins can update availability.",
+        };
+    }
+
+    const teacherProfile = await prisma.teacherProfile.findUnique({
+        where: { userId },
+        select: { id: true },
+    });
+    if (!teacherProfile) {
+        return { success: false, error: "Teacher profile not found." };
+    }
+    if (slot.teacherId !== teacherProfile.id) {
+        return { success: false, error: "Slot not found or not yours." };
+    }
 
     await prisma.availability.update({
         where: { id },
-        data: {
-            date: dateOnly,
-            startTime: padTime(startTime),
-            endTime: padTime(endTime),
-        },
+        data: updateData,
     });
 
     revalidatePath("/teachers");

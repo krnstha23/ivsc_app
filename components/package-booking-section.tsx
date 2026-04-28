@@ -34,13 +34,10 @@ import {
     type FindSlotResult,
     type SlotOffer,
 } from "@/app/(app)/packages/actions";
+import { formatRs } from "@/lib/format-rs";
 
 function formatPrice(value: number) {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 2,
-    }).format(value);
+    return formatRs(value);
 }
 
 function formatTime(timeStr: string) {

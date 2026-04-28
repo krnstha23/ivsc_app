@@ -242,6 +242,7 @@ export async function createPackageBundle(formData: FormData) {
         hasEvaluation: formData.get("hasEvaluation") === "true",
         discountPercent: ((formData.get("discountPercent") as string) ?? "").trim() || null,
         isActive: (formData.get("isActive") as string) !== "false",
+        isFeatured: (formData.get("isFeatured") as string) === "true",
         packageIds,
     };
 
@@ -263,6 +264,7 @@ export async function createPackageBundle(formData: FormData) {
             hasEvaluation: parsed.data.hasEvaluation,
             discountPercent: parsed.data.discountPercent ?? null,
             isActive: parsed.data.isActive,
+            isFeatured: parsed.data.isFeatured,
             packageIds: Array.from(new Set(parsed.data.packageIds)),
         },
     });
@@ -302,6 +304,7 @@ export async function updatePackageBundleDetails(formData: FormData) {
         discountPercent:
             ((formData.get("discountPercent") as string) ?? "").trim() || null,
         isActive: (formData.get("isActive") as string) !== "false",
+        isFeatured: (formData.get("isFeatured") as string) === "true",
         packageIds,
     };
 
@@ -324,6 +327,7 @@ export async function updatePackageBundleDetails(formData: FormData) {
             hasEvaluation: parsed.data.hasEvaluation,
             discountPercent: parsed.data.discountPercent ?? null,
             isActive: parsed.data.isActive,
+            isFeatured: parsed.data.isFeatured,
             packageIds: Array.from(new Set(parsed.data.packageIds)),
         },
     });

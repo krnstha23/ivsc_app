@@ -2,15 +2,16 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing-header";
+import { formatRs } from "@/lib/format-rs";
 import { prisma } from "@/lib/prisma";
 import { serializeJsonForHtmlScript } from "@/lib/security";
 
 export const metadata: Metadata = {
-    title: "ScoreMirror – Computer-Based IELTS Mock Tests",
+    title: "ScoreMirror – Computer-Based IELTS Evaluations",
     description:
-        "Full computer-based IELTS mock tests with human writing review, timed sections, and performance reports — so test day feels familiar.",
+        "Full computer-based IELTS evaluations with human writing review, timed sections, and performance reports — so test day feels familiar.",
     keywords: [
-        "IELTS mock test",
+        "IELTS evaluation",
         "computer-based IELTS",
         "IELTS practice",
         "IELTS speaking",
@@ -18,12 +19,12 @@ export const metadata: Metadata = {
     ],
     alternates: { canonical: "/" },
     openGraph: {
-        title: "ScoreMirror – Computer-Based IELTS Mock Tests",
+        title: "ScoreMirror – Computer-Based IELTS Evaluations",
         description:
-            "Full computer-based IELTS mock tests with human review and performance reports.",
+            "Full computer-based IELTS evaluations with human review and performance reports.",
         url: "/",
         images: [
-            { url: "/hero.png", width: 1200, height: 630, alt: "ScoreMirror" },
+            { url: "/hero.jpg", width: 1200, height: 630, alt: "ScoreMirror" },
         ],
     },
 };
@@ -87,98 +88,6 @@ function CardBullet({ children }: { children: React.ReactNode }) {
     );
 }
 
-function ListeningMock() {
-    return (
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_25px_60px_-15px_rgba(15,15,25,0.25)]">
-            <div className="flex items-center gap-2 border-b border-black/[0.06] bg-[#f3f3f5] px-3 py-2.5">
-                <span className="size-2.5 rounded-full bg-[#ff5f57]" />
-                <span className="size-2.5 rounded-full bg-[#febc2e]" />
-                <span className="size-2.5 rounded-full bg-[#28c840]" />
-                <span
-                    className="ml-3 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white"
-                    style={{ backgroundColor: accent }}
-                >
-                    Listening
-                </span>
-                <span className="text-[10px] text-[#888]">
-                    Section 1 of 4 · Academic
-                </span>
-                <span className="ml-auto flex items-center gap-1 text-[10px] font-medium text-emerald-600">
-                    <span className="size-1.5 rounded-full bg-emerald-500" />
-                    12:04
-                </span>
-            </div>
-            <div className="grid grid-cols-[7.5rem_1fr] gap-0 max-sm:grid-cols-1">
-                <div className="border-r border-black/[0.06] bg-[#eeeff2] p-3 max-sm:border-r-0 max-sm:border-b">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#666]">
-                        Questions
-                    </p>
-                    <div className="mt-2 grid grid-cols-4 gap-1">
-                        {Array.from({ length: 8 }, (_, i) => (
-                            <span
-                                key={i}
-                                className={`flex size-7 items-center justify-center rounded-md text-[10px] font-semibold ${
-                                    i === 3
-                                        ? "text-white"
-                                        : "border border-black/[0.06] bg-white text-[#555]"
-                                }`}
-                                style={
-                                    i === 3
-                                        ? { backgroundColor: accent }
-                                        : undefined
-                                }
-                            >
-                                {i + 1}
-                            </span>
-                        ))}
-                    </div>
-                    <p className="mt-3 text-[9px] font-bold uppercase tracking-wider text-[#666]">
-                        Sections
-                    </p>
-                    <ul className="mt-1.5 space-y-1 text-[10px] text-[#444]">
-                        <li
-                            className="rounded-md px-2 py-1 font-medium"
-                            style={{
-                                backgroundColor: `${accent}18`,
-                                color: accent,
-                            }}
-                        >
-                            · Listening
-                        </li>
-                        <li className="px-2 py-1">Reading</li>
-                        <li className="px-2 py-1">Writing</li>
-                        <li className="px-2 py-1">Speaking</li>
-                    </ul>
-                </div>
-                <div className="bg-white p-4 sm:p-5">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-[#888]">
-                        Part 1 · Questions 1–10
-                    </p>
-                    <p className="mt-3 text-[11px] leading-relaxed text-[#333] sm:text-xs">
-                        You will hear a number of different recordings and you
-                        will have to answer questions on what you hear. There
-                        will be time for you to read the instructions and
-                        questions, and you will have a chance to check your
-                        work.
-                    </p>
-                    <p className="mt-4 text-[11px] font-semibold text-[#111] sm:text-sm">
-                        Question 4 · Complete the note
-                    </p>
-                    <div className="mt-2 space-y-2 rounded-xl border border-black/[0.06] bg-[#fafafa] p-3">
-                        <div className="h-2 w-3/4 rounded bg-[#e5e5ea]" />
-                        <div className="h-2 w-full max-w-[200px] rounded bg-[#e5e5ea]" />
-                    </div>
-                </div>
-            </div>
-            <div className="flex items-center justify-between border-t border-black/[0.06] bg-white px-4 py-2.5 text-[11px] font-semibold">
-                <span style={{ color: accent }}>← Previous</span>
-                <span className="text-[#888]">4 / 40</span>
-                <span style={{ color: accent }}>Next →</span>
-            </div>
-        </div>
-    );
-}
-
 /** Static landing prices (NPR) — aligned to `public/price.png`; replace with catalog data when wired. */
 const LANDING_PRICING_TIERS = [
     {
@@ -201,10 +110,6 @@ const LANDING_PRICING_TIERS = [
     },
 ] as const;
 
-function formatNpr(n: number) {
-    return n.toLocaleString("en-NP", { maximumFractionDigits: 0 });
-}
-
 export default async function HomePage() {
     const footerPages = await prisma.staticPage.findMany({
         where: { isActive: true },
@@ -218,7 +123,7 @@ export default async function HomePage() {
         name: "ScoreMirror",
         url: "https://scoremirror.test",
         description:
-            "Full computer-based IELTS mock tests with human review and performance reports.",
+            "Full computer-based IELTS evaluations with human review and performance reports.",
     };
 
     const legalPages = footerPages.filter((p) =>
@@ -252,7 +157,7 @@ export default async function HomePage() {
                                     className="font-semibold italic"
                                     style={{ color: accent }}
                                 >
-                                    real humans
+                                    humans
                                 </em>
                                 .
                             </Display>
@@ -262,16 +167,20 @@ export default async function HomePage() {
                             service for IELTS. No score guarantees. No quick
                             tricks. Just your real caliber — reflected.
                         </p>
-                        <div className="mt-8 flex flex-col flex-wrap justify-center gap-3 sm:flex-row sm:gap-4 lg:justify-start">
+                        <p className="mt-6 text-xs leading-relaxed text-white/45 lg:mx-0 mx-auto max-w-sm">
+                            Evaluators trained under real-exam standard metrics.
+                            Just honest, expert feedback.
+                        </p>
+                        <div className="mt-5 flex flex-col flex-wrap justify-center gap-3 sm:flex-row sm:gap-4 lg:justify-start">
                             <Link
-                                href="/packages"
+                                href="/login"
                                 className="inline-flex min-h-12 items-center justify-center rounded-2xl px-7 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
                                 style={{
                                     backgroundColor: accent,
                                     boxShadow: `0 12px 40px -8px ${accent}88`,
                                 }}
                             >
-                                Book Speaking Evaluation
+                                Book your evaluation
                             </Link>
                             <Link
                                 href="/how-we-evaluate"
@@ -280,10 +189,6 @@ export default async function HomePage() {
                                 How we evaluate
                             </Link>
                         </div>
-                        <p className="mt-5 text-xs leading-relaxed text-white/45 lg:mx-0 mx-auto max-w-sm">
-                            Evaluators trained under real-exam standard metrics.
-                            Just honest, expert feedback.
-                        </p>
                     </div>
 
                     <div className="relative flex min-w-0 justify-center lg:justify-end">
@@ -296,10 +201,10 @@ export default async function HomePage() {
                                 aria-hidden
                             />
                             <Image
-                                src="/hero.png"
+                                src="/hero.jpg"
                                 alt="Computer-based IELTS reading test interface preview"
-                                width={1040}
-                                height={780}
+                                width={5600}
+                                height={3733}
                                 className="h-auto w-full rounded-2xl object-contain shadow-2xl"
                                 priority
                                 sizes="(max-width: 1024px) 100vw, 520px"
@@ -318,7 +223,8 @@ export default async function HomePage() {
                 <div className="mx-auto max-w-6xl">
                     <h2 className="mx-auto flex max-w-3xl flex-col items-center justify-center text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
                         <Display>
-                            Not a coaching institute. Not a mock test platform.{" "}
+                            Not a coaching institute. An evaluation-led
+                            platform.{" "}
                         </Display>
                         <Display>
                             <em
@@ -391,7 +297,7 @@ export default async function HomePage() {
                 </div>
             </section>
 
-            {/* Exam interface — ListeningMock */}
+            {/* Experience — image */}
             <section
                 id="experience"
                 className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
@@ -441,8 +347,15 @@ export default async function HomePage() {
                         </p>
                     </div>
                     <div className="flex min-w-0 justify-center lg:justify-end">
-                        <div className="w-full max-w-[min(100%,520px)]">
-                            <ListeningMock />
+                        <div className="relative w-full max-w-[min(100%,520px)]">
+                            <Image
+                                src="/sec.jpg"
+                                alt="One-to-one evaluation and learning session"
+                                width={5471}
+                                height={3647}
+                                className="h-auto w-full rounded-2xl object-cover shadow-[0_25px_60px_-15px_rgba(15,15,25,0.25)]"
+                                sizes="(max-width: 1024px) 100vw, 520px"
+                            />
                         </div>
                     </div>
                 </div>
@@ -485,11 +398,11 @@ export default async function HomePage() {
                                     {tier.tagline}
                                 </p>
                                 <p className="mt-6 flex flex-wrap items-baseline justify-center gap-1.5">
-                                    <span className="text-sm font-medium text-[#5c5c6a]">
-                                        NPR
-                                    </span>
                                     <Display className="text-4xl font-semibold text-[#0B0B0F] sm:text-5xl">
-                                        {formatNpr(tier.amount)}
+                                        {formatRs(tier.amount, {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0,
+                                        })}
                                     </Display>
                                 </p>
                                 <div
@@ -497,7 +410,7 @@ export default async function HomePage() {
                                     aria-hidden
                                 />
                                 <Link
-                                    href="/packages"
+                                    href="/pricing"
                                     className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl px-7 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
                                     style={{
                                         backgroundColor: accent,
@@ -509,11 +422,6 @@ export default async function HomePage() {
                             </div>
                         ))}
                     </div>
-                    <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-[#7a7a8a] sm:text-sm">
-                        Shown amounts are static placeholders (NPR). Live
-                        bundle pricing is available after sign-in on the
-                        packages page.
-                    </p>
                 </div>
             </section>
 
@@ -539,8 +447,8 @@ export default async function HomePage() {
                         {(
                             [
                                 {
-                                    q: "Why might an informal mock score mislead you?",
-                                    a: "Informal mocks often skip strict timing, on-screen navigation, or consistent rubric application. A computer-delivered full mock surfaces gaps in exam mechanics — not just topic knowledge.",
+                                    q: "Why might an informal evaluation mislead you?",
+                                    a: "Informal evaluations often skip strict timing, on-screen navigation, or consistent rubric application. A structured, computer-delivered evaluation surfaces gaps in exam mechanics — not just topic knowledge.",
                                 },
                                 {
                                     q: "Computer-delivered vs paper — what actually changes?",
@@ -614,17 +522,17 @@ export default async function HomePage() {
                 </p>
                 <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
                     <Link
-                        href="/packages"
+                        href="/login"
                         className="inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
                         style={{
                             backgroundColor: accent,
                             boxShadow: `0 12px 40px -8px ${accent}88`,
                         }}
                     >
-                        Start a Mock Test
+                        Start your evaluation
                     </Link>
                     <Link
-                        href="#experience"
+                        href="/how-we-evaluate"
                         className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/40 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10 sm:min-h-0 sm:px-8 sm:py-3.5"
                     >
                         How we evaluate

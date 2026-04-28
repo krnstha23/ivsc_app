@@ -57,54 +57,152 @@ const bookingSelect = {
     status: true,
 } as const;
 
-type BookingRow = Awaited<
-    ReturnType<typeof prisma.booking.findMany<{ select: typeof bookingSelect }>>
->[number];
+const adminBookingSelect = {
+    ...bookingSelect,
+    user: {
+        select: { firstName: true, lastName: true },
+    },
+    teacher: {
+        select: {
+            user: {
+                select: { firstName: true, lastName: true },
+            },
+        },
+    },
+} as const;
+
+type BookingRow = {
+    id: string;
+    scheduledAt: Date;
+    duration: number;
+    status: string;
+    studentName: string | null;
+    teacherName: string | null;
+};
+
+function fullName(
+    user: { firstName: string | null; lastName: string | null } | null,
+) {
+    if (!user) return null;
+    const first = user.firstName?.trim() ?? "";
+    const last = user.lastName?.trim() ?? "";
+    return `${first} ${last}`.trim() || null;
+}
 
 export default async function TeachingBookingsPage() {
     const session = await auth();
     if (!session?.user) redirect("/login");
 
     const user = session.user as { id?: string; role?: string };
-    if (!canAccess(user.role as Role, ["TEACHER"])) redirect("/dashboard");
+    const role = user.role as Role | undefined;
+    if (!canAccess(role, ["TEACHER", "ADMIN"])) redirect("/dashboard");
+    const isAdmin = role === "ADMIN";
 
-    const teacherProfile = await prisma.teacherProfile.findUnique({
-        where: { userId: user.id! },
-        select: { id: true },
-    });
-    if (!teacherProfile) redirect("/dashboard");
+    let teacherProfileId: string | null = null;
+    if (!isAdmin) {
+        const teacherProfile = await prisma.teacherProfile.findUnique({
+            where: { userId: user.id! },
+            select: { id: true },
+        });
+        if (!teacherProfile) redirect("/dashboard");
+        teacherProfileId = teacherProfile.id;
+    }
 
     const now = new Date();
 
-    const [upcoming, past] = await Promise.all([
-        prisma.booking.findMany({
-            where: {
-                teacherId: teacherProfile.id,
-                status: "CONFIRMED",
-                scheduledAt: { gte: now },
-            },
-            select: bookingSelect,
-            orderBy: { scheduledAt: "asc" },
-        }),
-        prisma.booking.findMany({
-            where: {
-                teacherId: teacherProfile.id,
-                OR: [
-                    { status: "COMPLETED" },
-                    { status: "CONFIRMED", scheduledAt: { lt: now } },
-                ],
-            },
-            select: bookingSelect,
-            orderBy: { scheduledAt: "desc" },
-        }),
-    ]);
+    let upcoming: BookingRow[] = [];
+    let past: BookingRow[] = [];
+
+    if (isAdmin) {
+        const [upcomingRaw, pastRaw] = await Promise.all([
+            prisma.booking.findMany({
+                where: {
+                    status: "CONFIRMED",
+                    scheduledAt: { gte: now },
+                },
+                select: adminBookingSelect,
+                orderBy: { scheduledAt: "asc" },
+            }),
+            prisma.booking.findMany({
+                where: {
+                    OR: [
+                        { status: "COMPLETED" },
+                        { status: "CONFIRMED", scheduledAt: { lt: now } },
+                    ],
+                },
+                select: adminBookingSelect,
+                orderBy: { scheduledAt: "desc" },
+            }),
+        ]);
+
+        upcoming = upcomingRaw.map((b) => ({
+            id: b.id,
+            scheduledAt: b.scheduledAt,
+            duration: b.duration,
+            status: b.status,
+            studentName: fullName(b.user),
+            teacherName: fullName(b.teacher?.user ?? null),
+        }));
+        past = pastRaw.map((b) => ({
+            id: b.id,
+            scheduledAt: b.scheduledAt,
+            duration: b.duration,
+            status: b.status,
+            studentName: fullName(b.user),
+            teacherName: fullName(b.teacher?.user ?? null),
+        }));
+    } else {
+        const [upcomingRaw, pastRaw] = await Promise.all([
+            prisma.booking.findMany({
+                where: {
+                    teacherId: teacherProfileId!,
+                    status: "CONFIRMED",
+                    scheduledAt: { gte: now },
+                },
+                select: bookingSelect,
+                orderBy: { scheduledAt: "asc" },
+            }),
+            prisma.booking.findMany({
+                where: {
+                    teacherId: teacherProfileId!,
+                    OR: [
+                        { status: "COMPLETED" },
+                        { status: "CONFIRMED", scheduledAt: { lt: now } },
+                    ],
+                },
+                select: bookingSelect,
+                orderBy: { scheduledAt: "desc" },
+            }),
+        ]);
+
+        upcoming = upcomingRaw.map((b) => ({
+            id: b.id,
+            scheduledAt: b.scheduledAt,
+            duration: b.duration,
+            status: b.status,
+            studentName: null,
+            teacherName: null,
+        }));
+        past = pastRaw.map((b) => ({
+            id: b.id,
+            scheduledAt: b.scheduledAt,
+            duration: b.duration,
+            status: b.status,
+            studentName: null,
+            teacherName: null,
+        }));
+    }
 
     return (
         <div className="flex flex-col gap-6 py-4 md:gap-8 md:py-6">
             <div className="px-4 lg:px-6">
-                <h1 className="text-xl font-semibold">My Sessions</h1>
+                <h1 className="text-xl font-semibold">
+                    {isAdmin ? "Sessions" : "My Sessions"}
+                </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    View and manage your teaching sessions.
+                    {isAdmin
+                        ? "View all confirmed and completed sessions."
+                        : "View and manage your teaching sessions."}
                 </p>
             </div>
 
@@ -112,12 +210,14 @@ export default async function TeachingBookingsPage() {
                 title="Upcoming"
                 bookings={upcoming}
                 emptyMessage="No upcoming sessions."
-                showComplete
+                showComplete={!isAdmin}
+                showNames={isAdmin}
             />
             <Section
                 title="Past"
                 bookings={past}
                 emptyMessage="No past sessions."
+                showNames={isAdmin}
             />
         </div>
     );
@@ -128,11 +228,13 @@ function Section({
     bookings,
     emptyMessage,
     showComplete,
+    showNames = false,
 }: {
     title: string;
     bookings: BookingRow[];
     emptyMessage: string;
     showComplete?: boolean;
+    showNames?: boolean;
 }) {
     return (
         <section className="px-4 lg:px-6">
@@ -148,6 +250,12 @@ function Section({
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Date &amp; Time</TableHead>
+                                        {showNames && (
+                                            <>
+                                                <TableHead>Student</TableHead>
+                                                <TableHead>Teacher</TableHead>
+                                            </>
+                                        )}
                                         <TableHead>Duration</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead className="text-right">
@@ -159,45 +267,55 @@ function Section({
                                     {bookings.map((b) => (
                                         <TableRow key={b.id}>
                                             <TableCell>
-                                            {formatDate(b.scheduledAt)}
-                                            <br />
-                                            <span className="text-muted-foreground">
-                                                {formatTime(b.scheduledAt)}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            {b.duration} min
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                variant={statusVariant(
-                                                    b.status
-                                                )}
-                                            >
-                                                {b.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    aria-label="Enter session room"
-                                                    asChild
+                                                {formatDate(b.scheduledAt)}
+                                                <br />
+                                                <span className="text-muted-foreground">
+                                                    {formatTime(b.scheduledAt)}
+                                                </span>
+                                            </TableCell>
+                                            {showNames && (
+                                                <>
+                                                    <TableCell>
+                                                        {b.studentName ?? "—"}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {b.teacherName ?? "—"}
+                                                    </TableCell>
+                                                </>
+                                            )}
+                                            <TableCell>
+                                                {b.duration} min
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant={statusVariant(
+                                                        b.status
+                                                    )}
                                                 >
-                                                    <Link
-                                                        href={`/sessions/${b.id}/room`}
+                                                    {b.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        aria-label="Enter session room"
+                                                        asChild
                                                     >
-                                                        <Eye size={16} />
-                                                    </Link>
-                                                </Button>
-                                                {showComplete && (
-                                                    <CompleteForm
-                                                        bookingId={b.id}
-                                                    />
-                                                )}
-                                            </div>
-                                        </TableCell>
+                                                        <Link
+                                                            href={`/sessions/${b.id}/room`}
+                                                        >
+                                                            <Eye size={16} />
+                                                        </Link>
+                                                    </Button>
+                                                    {showComplete && (
+                                                        <CompleteForm
+                                                            bookingId={b.id}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -220,6 +338,12 @@ function Section({
                                         {formatDate(b.scheduledAt)} at{" "}
                                         {formatTime(b.scheduledAt)}
                                     </p>
+                                    {showNames && (
+                                        <p className="text-sm text-muted-foreground">
+                                            Student: {b.studentName ?? "—"} · Teacher:{" "}
+                                            {b.teacherName ?? "—"}
+                                        </p>
+                                    )}
                                     <div className="flex items-center justify-between text-sm">
                                         <span>{b.duration} min</span>
                                     </div>

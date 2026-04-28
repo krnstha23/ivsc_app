@@ -37,6 +37,7 @@ export default async function EditBundlePage({
                 hasEvaluation: true,
                 discountPercent: true,
                 isActive: true,
+                isFeatured: true,
                 packageIds: true,
             },
         }),
@@ -81,6 +82,7 @@ export default async function EditBundlePage({
                                 ? null
                                 : Number(bundle.discountPercent),
                         isActive: bundle.isActive,
+                        isFeatured: bundle.isFeatured,
                         packageIds: bundle.packageIds,
                     }}
                 />

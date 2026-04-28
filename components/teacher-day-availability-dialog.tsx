@@ -22,12 +22,17 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   createAvailability,
+  adminCreateAvailability,
   getTeacherAvailabilityForDay,
+  getApprovedTeachersForAdmin,
   getSessionTeacherProfileId,
   deleteAvailability,
   updateAvailability,
 } from "@/app/(app)/teachers/actions";
-import type { DaySlotWithTeacher } from "@/app/(app)/teachers/actions";
+import type {
+  DaySlotWithTeacher,
+  ApprovedTeacherOption,
+} from "@/app/(app)/teachers/actions";
 import {
   TeachersSlotFormDialog,
   type SlotFormPayload,
@@ -75,12 +80,14 @@ export function TeacherDayAvailabilityDialog({
   onOpenChange,
   date,
   canManageSlots = false,
+  isAdmin = false,
   onSlotsChanged,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   date: Date | null;
   canManageSlots?: boolean;
+  isAdmin?: boolean;
   onSlotsChanged?: () => void;
 }) {
   const [slots, setSlots] = React.useState<DaySlotWithTeacher[]>([]);
@@ -91,6 +98,9 @@ export function TeacherDayAvailabilityDialog({
   const [editPayload, setEditPayload] = React.useState<EditSlotPayload | null>(null);
   const [pending, setPending] = React.useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = React.useState<string | null>(null);
+  const [teacherOptions, setTeacherOptions] = React.useState<ApprovedTeacherOption[]>(
+    [],
+  );
 
   const loadSlots = React.useCallback(async () => {
     if (!open || !date) {
@@ -118,6 +128,14 @@ export function TeacherDayAvailabilityDialog({
     }
   }, [open, canManageSlots]);
 
+  React.useEffect(() => {
+    if (open && isAdmin) {
+      getApprovedTeachersForAdmin().then(setTeacherOptions);
+    } else {
+      setTeacherOptions([]);
+    }
+  }, [open, isAdmin]);
+
   const title =
     date != null
       ? `Availability \u2014 ${formatDateTitle(date)}`
@@ -127,6 +145,9 @@ export function TeacherDayAvailabilityDialog({
 
   const isMine = (slot: DaySlotWithTeacher) =>
     myTeacherId != null && slot.teacherId === myTeacherId;
+
+  const canManageSlot = (slot: DaySlotWithTeacher) =>
+    isAdmin || isMine(slot);
 
   const openEdit = (slot: DaySlotWithTeacher) => {
     if (!date) return;
@@ -140,8 +161,24 @@ export function TeacherDayAvailabilityDialog({
   };
 
   const handleCreate = async (payload: SlotFormPayload) => {
+    if (isAdmin && !payload.teacherId) {
+      toast.error("Please select an approved teacher.");
+      return;
+    }
     setPending(true);
-    const result = await createAvailability(payload);
+    const result =
+      isAdmin && payload.teacherId
+        ? await adminCreateAvailability({
+            teacherId: payload.teacherId,
+            date: payload.date,
+            startTime: payload.startTime,
+            endTime: payload.endTime,
+          })
+        : await createAvailability({
+            date: payload.date,
+            startTime: payload.startTime,
+            endTime: payload.endTime,
+          });
     setPending(false);
     if (result.success) {
       toast.success("Availability created.");
@@ -216,7 +253,7 @@ export function TeacherDayAvailabilityDialog({
               <>
                 <ul className="space-y-2">
                   {slots.map((slot) => {
-                    const mine = isMine(slot);
+                    const showActions = canManageSlot(slot);
                     return (
                       <li
                         key={slot.id}
@@ -242,7 +279,7 @@ export function TeacherDayAvailabilityDialog({
                           </p>
                         </div>
 
-                        {mine && (
+                        {showActions && (
                           <div className="flex shrink-0 gap-2">
                             <Button
                               type="button"
@@ -290,6 +327,8 @@ export function TeacherDayAvailabilityDialog({
         onOpenChange={setCreateOpen}
         selectedDate={date}
         onCreate={handleCreate}
+        showTeacherSelect={isAdmin}
+        teacherOptions={teacherOptions}
         pending={pending}
       />
 

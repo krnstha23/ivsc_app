@@ -12,8 +12,6 @@ import {
     CalendarMark,
     Notebook,
     UserCheck,
-    ClipboardCheck,
-    ClipboardList,
     CalendarDate,
     Chart,
     Document,
@@ -51,22 +49,16 @@ const NAV_MAIN = [
         allowedRoles: ["USER"] as Role[],
     },
     {
-        title: "My Enrollments",
-        url: "/enrollments",
-        icon: ClipboardCheck,
-        allowedRoles: ["USER"] as Role[],
-    },
-    {
         title: "My Sessions",
         url: "/bookings/teaching",
         icon: Notebook,
-        allowedRoles: ["TEACHER"] as Role[],
+        allowedRoles: ["ADMIN", "TEACHER"] as Role[],
     },
     {
         title: "Calendar",
         url: "/calendar",
         icon: AlarmAdd,
-        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
+        allowedRoles: ["ADMIN"] as Role[],
     },
     {
         title: "Users",
@@ -78,7 +70,7 @@ const NAV_MAIN = [
         title: "Teachers",
         url: "/teachers",
         icon: UsersGroupRounded,
-        allowedRoles: ["ADMIN"] as Role[],
+        allowedRoles: ["ADMIN", "TEACHER"] as Role[],
     },
     {
         title: "Manage Teachers",
@@ -96,12 +88,6 @@ const NAV_MAIN = [
         title: "Packages",
         url: "/packages",
         icon: CartLarge2,
-        allowedRoles: ["ADMIN", "TEACHER"] as Role[],
-    },
-    {
-        title: "Enrollments",
-        url: "/enrollments",
-        icon: ClipboardList,
         allowedRoles: ["ADMIN"] as Role[],
     },
     {
@@ -153,7 +139,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     className="size-5!"
                                 />
                                 <span className="text-base font-semibold">
-                                    IVCS
+                                    Admin panel
                                 </span>
                             </a>
                         </SidebarMenuButton>

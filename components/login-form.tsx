@@ -18,6 +18,9 @@ import { Eye, EyeClosed } from "@solar-icons/react";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+const TEACHER_NOT_APPROVED_TOAST =
+    "Cannot log in because the account has not been approved by the admin. Please contact the admin to approve your account.";
+
 export function LoginForm({
     className,
     ...props
@@ -39,7 +42,11 @@ export function LoginForm({
         }
     }, [searchParams, router]);
 
-        async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    useEffect(() => {
+        router.prefetch(callbackUrl);
+    }, [router, callbackUrl]);
+
+    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setPending(true);
         const form = e.currentTarget;
@@ -55,12 +62,15 @@ export function LoginForm({
 
         setPending(false);
         if (result?.error) {
-            toast.error("Invalid username or password.");
+            if (result.code === "teacher_not_approved") {
+                toast.warning(TEACHER_NOT_APPROVED_TOAST);
+            } else {
+                toast.error("Invalid username or password.");
+            }
             return;
         }
         if (result?.ok) {
             router.push(callbackUrl);
-            router.refresh();
             return;
         }
     }

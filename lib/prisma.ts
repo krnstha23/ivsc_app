@@ -18,7 +18,11 @@ function getConnectionString() {
 
 function getDevPool(): Pool {
     if (!globalForPrisma.pool) {
-        globalForPrisma.pool = new Pool({ connectionString: getConnectionString() });
+        const pool = new Pool({ connectionString: getConnectionString() });
+        // Prisma + adapter re-register `error` on the same pool across HMR; avoid
+        // Node's defaultMaxListeners (10) warning for this shared instance.
+        pool.setMaxListeners(0);
+        globalForPrisma.pool = pool;
     }
     return globalForPrisma.pool;
 }
@@ -44,6 +48,9 @@ if (process.env.NODE_ENV !== "production") {
     const needsNewClient =
         !globalForPrisma.prisma || globalForPrisma.prismaCtor !== PrismaClient;
     if (needsNewClient) {
+        if (globalForPrisma.prisma) {
+            void globalForPrisma.prisma.$disconnect();
+        }
         globalForPrisma.prisma = createClient(pool);
         globalForPrisma.prismaCtor = PrismaClient;
     }

@@ -471,7 +471,6 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 | Dashboard         | /dashboard         | ✓     | ✓       | ✓               |
 | Calendar          | /calendar          | ✓     | ✓       | ✓               |
 | My Bookings       | /bookings          | —     | —       | ✓               |
-| My Enrollments    | /enrollments       | —     | —       | ✓               |
 | My Sessions       | /bookings/teaching | —     | ✓       | —               |
 | Users             | /users             | ✓     | —       | —               |
 | Manage Teachers   | /teachers/manage   | ✓     | —       | —               |
@@ -755,7 +754,7 @@ See `prisma/schema.prisma` for full implementation.
 - [x] Package CRUD (create/edit/deactivate) – `/packages/new`, `/packages/[id]/edit`, delete in table
 - [x] Student package assignment
   - [x] Assign packages to students (`/enrollments/assign`)
-  - [x] Track package usage/remaining classes (`/enrollments`)
+  - [x] Admin enrollment list and edits (`/enrollments`)
   - [x] Admin edit enrollment (classesTotal, status)
 - [ ] Package purchase flow (student-facing — deferred to §11 with payment)
 
@@ -1065,7 +1064,7 @@ app/
 - [x] Bundle CRUD (create/edit/deactivate) with tier pricing + duration + evaluation toggle
 - [x] Teacher approval (self-registration → pending → admin approves from `/users` or `/teachers/manage`)
 - [x] Teacher management page (`/teachers/manage`): approve, toggle active, stats, admin-create-availability
-- [x] Student enrollment management (`/enrollments`): assign, edit, track
+- [x] Student enrollment management (admin `/enrollments`, `/enrollments/assign`): assign, edit, track
 - [x] Timetable (`/timetable`) + Reports (`/reports`)
 
 **Teacher:**
@@ -1082,7 +1081,7 @@ app/
 - [x] View confirmed bookings via `/calendar`
 - [x] Cancel/reschedule bookings (from calendar day view)
 - [x] Dedicated "My bookings" page (`/bookings`) with Upcoming/Past/Cancelled tabs
-- [x] My Enrollments page (`/enrollments`) with progress tracking
+- [x] Enrollment progress on package pages and booking flow (no separate student enrollments list)
 - [x] Session room: view Meet link, upload writing PDF, view evaluation + 24h download
 - [x] Writing-only bundle flow: choose submission window, upload PDF
 

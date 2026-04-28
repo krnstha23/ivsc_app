@@ -1,8 +1,5 @@
 import Link from "next/link";
 
-const navLinkClass =
-    "text-sm font-medium text-white/85 transition-colors hover:text-white";
-
 export function LandingHeader() {
     return (
         <header className="absolute inset-x-0 top-0 z-50">
@@ -13,27 +10,6 @@ export function LandingHeader() {
                 >
                     ScoreMirror
                 </Link>
-
-                <nav
-                    className="mx-4 hidden min-w-0 flex-1 items-center justify-center gap-5 lg:gap-8 md:flex"
-                    aria-label="Primary"
-                >
-                    <Link href="/" className={navLinkClass}>
-                        Home
-                    </Link>
-                    <Link href="/about-us" className={navLinkClass}>
-                        About Us
-                    </Link>
-                    <Link href="/how-we-evaluate" className={navLinkClass}>
-                        How We Evaluate
-                    </Link>
-                    <Link href="/speaking-evaluation" className={navLinkClass}>
-                        Speaking
-                    </Link>
-                    <Link href="/writing-evaluation" className={navLinkClass}>
-                        Writing
-                    </Link>
-                </nav>
 
                 <div className="flex shrink-0 items-center gap-3 sm:gap-5">
                     <Link

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { AltArrowRight, MenuDots } from "@solar-icons/react"
-import { Slot } from "radix-ui"
+import * as Slot from "@radix-ui/react-slot"
 
 import { cn } from "@/lib/utils"
 

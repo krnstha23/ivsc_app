@@ -15,6 +15,13 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function formatDateForInput(d: Date) {
   const y = d.getFullYear();
@@ -27,9 +34,11 @@ export type SlotFormPayload = {
   date: Date;
   startTime: string;
   endTime: string;
+  teacherId?: string;
 };
 
 export type EditSlotPayload = SlotFormPayload & { id: string };
+type TeacherOption = { teacherId: string; teacherName: string };
 
 export function TeachersSlotFormDialog({
   open,
@@ -38,6 +47,8 @@ export function TeachersSlotFormDialog({
   editingSlot,
   onCreate,
   onUpdate,
+  showTeacherSelect = false,
+  teacherOptions = [],
   pending = false,
 }: {
   open: boolean;
@@ -46,10 +57,13 @@ export function TeachersSlotFormDialog({
   editingSlot?: EditSlotPayload | null;
   onCreate?: (payload: SlotFormPayload) => void;
   onUpdate?: (payload: EditSlotPayload) => void;
+  showTeacherSelect?: boolean;
+  teacherOptions?: TeacherOption[];
   pending?: boolean;
 }) {
   const [startTime, setStartTime] = React.useState("09:00");
   const [endTime, setEndTime] = React.useState("17:00");
+  const [teacherId, setTeacherId] = React.useState("");
 
   const isEdit = Boolean(editingSlot);
 
@@ -61,9 +75,10 @@ export function TeachersSlotFormDialog({
       } else {
         setStartTime("09:00");
         setEndTime("17:00");
+        setTeacherId((current) => current || teacherOptions[0]?.teacherId || "");
       }
     }
-  }, [open, editingSlot]);
+  }, [open, editingSlot, teacherOptions]);
 
   const resolvedDate = editingSlot?.date ?? selectedDate;
   const dateStr = resolvedDate ? formatDateForInput(resolvedDate) : "";
@@ -74,7 +89,13 @@ export function TeachersSlotFormDialog({
     if (isEdit && editingSlot) {
       onUpdate?.({ id: editingSlot.id, date: resolvedDate, startTime, endTime });
     } else {
-      onCreate?.({ date: resolvedDate, startTime, endTime });
+      if (showTeacherSelect && !teacherId) return;
+      onCreate?.({
+        date: resolvedDate,
+        startTime,
+        endTime,
+        teacherId: showTeacherSelect ? teacherId : undefined,
+      });
     }
     onOpenChange(false);
   };
@@ -96,6 +117,36 @@ export function TeachersSlotFormDialog({
         >
           <div className="min-h-0 flex-1 overflow-y-auto">
             <FieldGroup>
+              {showTeacherSelect && !isEdit && (
+                <Field>
+                  <FieldLabel htmlFor="slot-teacher">Teacher</FieldLabel>
+                  <Select
+                    value={teacherId}
+                    onValueChange={setTeacherId}
+                    disabled={pending || teacherOptions.length === 0}
+                  >
+                    <SelectTrigger id="slot-teacher">
+                      <SelectValue placeholder="Select an approved teacher" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teacherOptions.map((teacher) => (
+                        <SelectItem
+                          key={teacher.teacherId}
+                          value={teacher.teacherId}
+                        >
+                          {teacher.teacherName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {teacherOptions.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      No approved teachers available.
+                    </p>
+                  )}
+                </Field>
+              )}
+
               <Field>
                 <FieldLabel htmlFor="slot-date">Date</FieldLabel>
                 <Input
@@ -149,7 +200,14 @@ export function TeachersSlotFormDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={pending || !resolvedDate}>
+            <Button
+              type="submit"
+              disabled={
+                pending ||
+                !resolvedDate ||
+                (showTeacherSelect && !isEdit && !teacherId)
+              }
+            >
               {pending
                 ? "Saving…"
                 : isEdit

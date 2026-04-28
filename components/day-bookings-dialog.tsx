@@ -338,24 +338,28 @@ export function DayBookingsDialog({
                                             return (
                                                 <div
                                                     key={booking.id}
-                                                    className="absolute left-3 right-3 flex flex-col justify-center gap-1 rounded-md border-2 border-primary/80 bg-primary/10 px-2 py-1 shadow-sm"
+                                                    className="absolute left-2 right-2 flex min-h-[44px] flex-row items-center justify-between gap-2 overflow-hidden rounded-md border-2 border-primary/80 bg-primary/10 px-2 py-1.5 shadow-sm"
                                                     style={{ top, height }}
                                                 >
-                                                    <div className="text-center text-xs font-medium tabular-nums leading-tight">
-                                                        {formatTime12(
-                                                            booking.startTime,
-                                                        )}{" "}
-                                                        –{" "}
-                                                        {formatTime12(
-                                                            booking.endTime,
-                                                        )}
-                                                    </div>
-                                                    <div className="text-center text-[10px] text-muted-foreground">
-                                                        {booking.teacherName} ·{" "}
-                                                        {booking.studentName}
+                                                    <div className="min-w-0 flex-1 text-left">
+                                                        <div className="text-xs font-medium tabular-nums leading-tight">
+                                                            {formatTime12(
+                                                                booking.startTime,
+                                                            )}{" "}
+                                                            –{" "}
+                                                            {formatTime12(
+                                                                booking.endTime,
+                                                            )}
+                                                        </div>
+                                                        <div className="truncate text-[10px] leading-tight text-muted-foreground">
+                                                            {booking.studentName}
+                                                        </div>
+                                                        <div className="truncate text-[10px] leading-tight text-muted-foreground">
+                                                            {booking.teacherName}
+                                                        </div>
                                                     </div>
                                                     {showActions ? (
-                                                        <div className="mt-1 flex flex-wrap justify-center gap-1">
+                                                        <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
                                                             <Button
                                                                 type="button"
                                                                 variant="destructive"

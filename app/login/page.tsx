@@ -17,7 +17,7 @@ export default function LoginPage() {
                     <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
                         <LayersMinimalistic size={16} className="size-4" />
                     </div>
-                    IVCS
+                    scoremirror
                 </Link>
                 <Suspense
                     fallback={

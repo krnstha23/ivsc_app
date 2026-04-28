@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { TrashBinTrash } from "@solar-icons/react";
+import { Pen, TrashBinTrash } from "@solar-icons/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,10 +15,10 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { deletePackageBundle } from "@/app/(app)/packages/actions";
+import { formatRs } from "@/lib/format-rs";
 type BundleRow = {
     id: string;
     name: string;
-    description: string | null;
     priceStandard: number;
     pricePriority: number;
     priceInstant: number;
@@ -30,7 +31,7 @@ type BundleRow = {
 };
 
 function formatMoney(value: number) {
-    return `$${Number(value).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+    return formatRs(value);
 }
 
 function formatPercent(value: number | null) {
@@ -61,9 +62,6 @@ function BundleRow({
                     {bundle.hasEvaluation ? " · Eval" : ""}
                 </div>
             </TableCell>
-            <TableCell className="max-w-xs truncate text-muted-foreground">
-                {bundle.description ?? "—"}
-            </TableCell>
             <TableCell className="align-top text-sm">
                 <div className="space-y-0.5 tabular-nums">
                     <div>Std {formatMoney(bundle.priceStandard)}</div>
@@ -92,21 +90,35 @@ function BundleRow({
                 </span>
             </TableCell>
             {canManage && (
-                <TableCell>
-                    <form
-                        action={deletePackageBundle}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <input type="hidden" name="bundleId" value={bundle.id} />
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2">
                         <Button
-                            type="submit"
-                            variant="destructive"
+                            variant="outline"
                             size="icon"
-                            aria-label="Delete bundle"
+                            aria-label="Edit bundle"
+                            asChild
                         >
-                            <TrashBinTrash size={16} />
+                            <Link
+                                href={`/packages/bundles/${bundle.id}/edit`}
+                            >
+                                <Pen size={16} />
+                            </Link>
                         </Button>
-                    </form>
+                        <form
+                            action={deletePackageBundle}
+                            className="inline"
+                        >
+                            <input type="hidden" name="bundleId" value={bundle.id} />
+                            <Button
+                                type="submit"
+                                variant="destructive"
+                                size="icon"
+                                aria-label="Delete bundle"
+                            >
+                                <TrashBinTrash size={16} />
+                            </Button>
+                        </form>
+                    </div>
                 </TableCell>
             )}
         </TableRow>
@@ -126,7 +138,6 @@ export function BundlesTable({
                 <TableHeader>
                     <TableRow>
                         <TableHead>Name</TableHead>
-                        <TableHead>Description</TableHead>
                         <TableHead>Prices (Std / Pri / Inst)</TableHead>
                         <TableHead>Discount</TableHead>
                         <TableHead>Packages</TableHead>
@@ -138,7 +149,7 @@ export function BundlesTable({
                     {bundles.length === 0 ? (
                         <TableRow>
                             <TableCell
-                                colSpan={canManage ? 7 : 6}
+                                colSpan={canManage ? 6 : 5}
                                 className="h-24 text-center text-muted-foreground"
                             >
                                 No bundles found.

@@ -55,11 +55,15 @@ export function CreateBundleForm({
         hasEvaluation: boolean;
         discountPercent: number | null;
         isActive: boolean;
+        isFeatured?: boolean;
         packageIds: string[];
     };
 }) {
     const [isActive, setIsActive] = React.useState<"true" | "false">(
         initial?.isActive === false ? "false" : "true",
+    );
+    const [isFeatured, setIsFeatured] = React.useState(
+        initial?.isFeatured ?? false,
     );
     const [hasEvaluation, setHasEvaluation] = React.useState(
         initial?.hasEvaluation ?? false,
@@ -91,6 +95,11 @@ export function CreateBundleForm({
                 <input type="hidden" name="bundleId" value={initial?.id ?? ""} />
             )}
             <input type="hidden" name="hasEvaluation" value={String(hasEvaluation)} />
+            <input
+                type="hidden"
+                name="isFeatured"
+                value={isFeatured ? "true" : "false"}
+            />
 
             <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2 sm:col-span-2">
@@ -245,6 +254,17 @@ export function CreateBundleForm({
                             <SelectItem value="false">Inactive</SelectItem>
                         </SelectContent>
                     </Select>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <Switch
+                        id="isFeatured"
+                        checked={isFeatured}
+                        onCheckedChange={setIsFeatured}
+                    />
+                    <Label htmlFor="isFeatured" className="cursor-pointer">
+                        Featured bundle
+                    </Label>
                 </div>
 
                 <div className="flex flex-col gap-2 sm:col-span-2">
