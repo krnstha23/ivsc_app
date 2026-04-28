@@ -1,5 +1,21 @@
 # Implementation Notes
 
+## 2026-04-28 - Docker build OOM mitigation for Next.js
+
+### Design decisions made during development
+- Updated Docker builder stage to use `NODE_OPTIONS=--max-old-space-size=4096` and call `npm run build -- --webpack` instead of hardcoding a smaller 1536MB heap.
+- Kept `next.config.ts` aligned with Next 16 supported options (no deprecated `eslint` key).
+
+### Discovered edge cases
+- Next.js build workers can be SIGKILLed by container memory limits even when app code is valid.
+- A lower heap cap in Docker can conflict with a higher local build config (`package.json` already uses 4096MB).
+
+### Performance optimizations
+- Reduced peak memory pressure in production image build path by aligning container heap configuration with project build scripts.
+
+### User feedback incorporation
+- Implemented directly from user-provided Docker build failure (`build worker ... SIGKILL`).
+
 ## 2026-04-28 - Faster post-login navigation
 
 ### Design decisions made during development
