@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing-header";
 import { formatRs } from "@/lib/format-rs";
-import { prisma } from "@/lib/prisma";
 import { serializeJsonForHtmlScript } from "@/lib/security";
 
 export const metadata: Metadata = {
@@ -111,12 +110,6 @@ const LANDING_PRICING_TIERS = [
 ] as const;
 
 export default async function HomePage() {
-    const footerPages = await prisma.staticPage.findMany({
-        where: { isActive: true },
-        select: { title: true, slug: true },
-        orderBy: { createdAt: "asc" },
-    });
-
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -125,13 +118,6 @@ export default async function HomePage() {
         description:
             "Full computer-based IELTS evaluations with human review and performance reports.",
     };
-
-    const legalPages = footerPages.filter((p) =>
-        /terms|privacy|policy|legal/i.test(p.title),
-    );
-    const otherPages = footerPages.filter(
-        (p) => !/terms|privacy|policy|legal/i.test(p.title),
-    );
 
     return (
         <div className="flex min-h-svh flex-col">
@@ -143,7 +129,7 @@ export default async function HomePage() {
             />
             {/* Hero */}
             <section
-                className="relative pt-28 sm:pb-24 sm:pt-32 lg:pb-28 lg:pt-36"
+                className="relative pb-12 pt-28 sm:pb-24 sm:pt-32 lg:pb-28 lg:pt-36"
                 style={{ backgroundColor: dark }}
             >
                 <LandingHeader />
@@ -157,15 +143,15 @@ export default async function HomePage() {
                                     className="font-semibold italic"
                                     style={{ color: accent }}
                                 >
-                                    humans
+                                    the test experts
                                 </em>
                                 .
                             </Display>
                         </h1>
                         <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/65 sm:text-base lg:mx-0 mx-auto">
-                            A premium, human-led speaking and writing evaluation
-                            service for IELTS. No score guarantees. No quick
-                            tricks. Just your real caliber — reflected.
+                            A premium, human-led IELTS speaking and writing
+                            evaluation service. Just your current standing
+                            reflected — unfiltered.
                         </p>
                         <p className="mt-6 text-xs leading-relaxed text-white/45 lg:mx-0 mx-auto max-w-sm">
                             Evaluators trained under real-exam standard metrics.
@@ -180,7 +166,7 @@ export default async function HomePage() {
                                     boxShadow: `0 12px 40px -8px ${accent}88`,
                                 }}
                             >
-                                Book your evaluation
+                                Book Speaking Evaluation
                             </Link>
                             <Link
                                 href="/how-we-evaluate"
@@ -201,7 +187,7 @@ export default async function HomePage() {
                                 aria-hidden
                             />
                             <Image
-                                src="/hero.jpg"
+                                src="/sec.jpg"
                                 alt="Computer-based IELTS reading test interface preview"
                                 width={5600}
                                 height={3733}
@@ -221,18 +207,9 @@ export default async function HomePage() {
                 style={{ backgroundColor: light }}
             >
                 <div className="mx-auto max-w-6xl">
-                    <h2 className="mx-auto flex max-w-3xl flex-col items-center justify-center text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
+                    <h2 className="mx-auto max-w-3xl text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
                         <Display>
-                            Not a coaching institute. An evaluation-led
-                            platform.{" "}
-                        </Display>
-                        <Display>
-                            <em
-                                className="font-semibold italic"
-                                style={{ color: accent }}
-                            >
-                                A caliber check.
-                            </em>
+                            A human-led IELTS evaluation service. A caliber check.
                         </Display>
                     </h2>
                     <div className="mt-12 grid gap-6 md:grid-cols-3 md:gap-8">
@@ -297,253 +274,198 @@ export default async function HomePage() {
                 </div>
             </section>
 
-            {/* Experience — image */}
+            {/* Experience — the medium */}
             <section
                 id="experience"
                 className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
                 style={{ backgroundColor: coolBand }}
             >
-                <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                    <div className="min-w-0">
-                        <h2 className="text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
-                            <Display>
-                                Video Call Speaking is not harder.{" "}
-                                <em
-                                    className="font-semibold italic"
-                                    style={{ color: accent }}
-                                >
-                                    It's just different.
-                                </em>
-                            </Display>
-                        </h2>
-                        <div className="mt-6 space-y-5 text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
-                            <p>
-                                In real IELTS, power doesn't come from grammar
-                                alone. It comes from confidence and speaking
-                                flow in a face-to-face test format.
-                            </p>
-                            <p>
-                                ScoreMirror helps you build that comfort using
-                                practical sessions that feel close to the
-                                speaking test environment.
-                            </p>
-                        </div>
-                        <ul className="mt-8 space-y-4">
-                            <CheckLi>
-                                Structured one-to-one video call format
-                            </CheckLi>
-                            <CheckLi>
-                                No travel, no waiting room pressure
-                            </CheckLi>
-                            <CheckLi>
-                                Recorded session for your review
-                            </CheckLi>
-                        </ul>
-                        <p
-                            className="mt-8 text-[0.9375rem] font-semibold"
-                            style={{ color: accent }}
+                <div className="mx-auto max-w-3xl text-center">
+                    <h2 className="text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
+                        <Display>
+                            The medium does not change what gets evaluated.
+                        </Display>
+                    </h2>
+                    <ul className="mt-10 space-y-6 text-left text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
+                        <CheckLi>
+                            The examiner evaluates your fluency, vocabulary, grammar, and pronunciation — not whether you are on a screen or physically in a room.
+                        </CheckLi>
+                        <CheckLi>
+                            In many parts of the world, test takers do not ask this question. They sit, speak, and get evaluated. The medium is invisible.
+                        </CheckLi>
+                        <CheckLi>
+                            You already use video calls every day. Taking your IELTS speaking test on one changes nothing about how you are assessed.
+                        </CheckLi>
+                    </ul>
+                    <p className="mt-8 text-[0.9375rem] font-semibold text-[#0B0B0F]">
+                        So practice the same way. On a video call. With a real human evaluator.
+                    </p>
+                    <div className="mt-8 flex justify-center">
+                        <Link
+                            href="/login"
+                            className="inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
+                            style={{
+                                backgroundColor: accent,
+                                boxShadow: `0 12px 40px -8px ${accent}88`,
+                            }}
                         >
-                            No fear. Just the future of IELTS testing.
-                        </p>
-                    </div>
-                    <div className="flex min-w-0 justify-center lg:justify-end">
-                        <div className="relative w-full max-w-[min(100%,520px)]">
-                            <Image
-                                src="/sec.jpg"
-                                alt="One-to-one evaluation and learning session"
-                                width={5471}
-                                height={3647}
-                                className="h-auto w-full rounded-2xl object-cover shadow-[0_25px_60px_-15px_rgba(15,15,25,0.25)]"
-                                sizes="(max-width: 1024px) 100vw, 520px"
-                            />
-                        </div>
+                            Book Your Speaking Evaluation
+                        </Link>
                     </div>
                 </div>
             </section>
 
-            {/* Pricing — tiers from public/price.png; cards match feature-band system */}
+            {/* Pricing */}
             <section
                 id="pricing"
                 className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
                 style={{ backgroundColor: light }}
             >
                 <div className="mx-auto max-w-6xl">
-                    <h2 className="text-center text-2xl text-[#0B0B0F] sm:text-3xl md:text-[2rem]">
-                        <Display>
-                            Pricing based on when you{" "}
-                            <em
-                                className="font-semibold italic"
-                                style={{ color: accent }}
-                            >
-                                need it
-                            </em>
-                            .
-                        </Display>
+                    <h2 className="text-center text-2xl sm:text-3xl md:text-[2rem]">
+                        <Display>Pricing based on when you need it.</Display>
                     </h2>
-                    <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5c5c6a] sm:text-base">
-                        Choose a lead time that fits your schedule. Bundles may
-                        include speaking sessions and writing review — see
-                        catalog for full detail.
-                    </p>
-                    <div className="mt-12 grid gap-6 md:grid-cols-3 md:gap-8">
+
+                    {/* All Products */}
+                    <div className="mt-10 grid gap-6 md:grid-cols-3 md:gap-8">
+                        {/* Speaking Premium */}
                         {LANDING_PRICING_TIERS.map((tier) => (
                             <div
                                 key={tier.key}
-                                className="flex h-full flex-col rounded-2xl border border-black/[0.06] bg-white p-6 text-center shadow-[0_20px_50px_-20px_rgba(15,15,25,0.18)] sm:p-8"
+                                className="flex h-full flex-col rounded-lg border border-[#E2E2E2] bg-white p-5 text-center sm:p-6"
                             >
-                                <h3 className="text-base font-semibold text-[#0B0B0F]">
+                                <h4 className="text-sm font-semibold text-[#0B0B0F]">
                                     {tier.title}
-                                </h3>
-                                <p className="mt-3 text-sm leading-normal text-[#5c5c6a]">
+                                </h4>
+                                <p className="mt-2 text-sm text-[#5c5c6a]">
                                     {tier.tagline}
                                 </p>
-                                <p className="mt-6 flex flex-wrap items-baseline justify-center gap-1.5">
-                                    <Display className="text-4xl font-semibold text-[#0B0B0F] sm:text-5xl">
+                                <p className="mt-4">
+                                    <Display className="text-2xl font-semibold">
                                         {formatRs(tier.amount, {
                                             minimumFractionDigits: 0,
                                             maximumFractionDigits: 0,
                                         })}
                                     </Display>
                                 </p>
-                                <div
-                                    className="mt-8 flex-1"
-                                    aria-hidden
-                                />
+                                <p className="mt-2 text-xs text-[#5c5c6a]">
+                                    Score + Recording + Analysis Report + Verbal Q&A
+                                </p>
+                                <div className="mt-6 flex-1" aria-hidden />
                                 <Link
-                                    href="/pricing"
-                                    className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl px-7 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
-                                    style={{
-                                        backgroundColor: accent,
-                                        boxShadow: `0 12px 40px -8px ${accent}88`,
-                                    }}
+                                    href="/login"
+                                    className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
+                                    style={{ backgroundColor: accent }}
                                 >
                                     Select
                                 </Link>
                             </div>
                         ))}
+
+                        {/* Writing + Combo centered */}
+                        <div className="col-span-full mt-4 flex flex-wrap justify-center gap-6 md:gap-8">
+                            <div
+                                className="w-full md:flex-1 md:max-w-xs flex flex-col rounded-lg border border-[#E2E2E2] bg-white p-5 text-center sm:p-6"
+                            >
+                                <h4 className="text-sm font-semibold text-[#0B0B0F]">
+                                    Writing Evaluation (Premium)
+                                </h4>
+                                <p className="mt-4">
+                                    <Display className="text-2xl font-semibold">
+                                        {formatRs(800, {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0,
+                                        })}
+                                    </Display>
+                                </p>
+                                <p className="mt-2 text-xs text-[#5c5c6a]">
+                                    Score + word-level feedback + detailed rubric analysis
+                                </p>
+                                <div className="mt-6 flex-1" aria-hidden />
+                                <Link
+                                    href="/login"
+                                    className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
+                                    style={{ backgroundColor: accent }}
+                                >
+                                    Select
+                                </Link>
+                            </div>
+
+                            <div
+                                className="w-full md:flex-1 md:max-w-xs flex flex-col rounded-lg border border-[#E2E2E2] bg-white p-5 text-center sm:p-6"
+                            >
+                                <h4 className="text-sm font-semibold text-[#0B0B0F]">
+                                    Combo Premium
+                                </h4>
+                                <p className="mt-4">
+                                    <Display className="text-2xl font-semibold">
+                                        {formatRs(2000, {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0,
+                                        })}
+                                    </Display>
+                                </p>
+                                <p className="mt-2 text-xs text-[#5c5c6a]">
+                                    Speaking Premium + Writing Premium
+                                </p>
+                                <div className="mt-6 flex-1" aria-hidden />
+                                <Link
+                                    href="/login"
+                                    className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
+                                    style={{ backgroundColor: accent }}
+                                >
+                                    Select
+                                </Link>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Note */}
+                    <p className="mt-8 text-center text-sm text-[#666666]">
+                        All prices in NPR. Fonepay payment accepted.
+                    </p>
                 </div>
             </section>
 
-            {/* FAQ */}
+            {/* Facebook CTA */}
             <section
-                id="faq"
-                className="bg-white px-4 py-16 sm:px-6 sm:py-20 md:py-24"
+                className="px-4 py-15 sm:px-6 sm:py-20"
+                style={{ backgroundColor: light }}
             >
-                <div className="mx-auto max-w-3xl">
-                    <h2 className="text-center text-2xl text-[#0B0B0F] sm:text-3xl md:text-[2rem]">
-                        <Display>
-                            Read this before you book another{" "}
-                            <em
-                                className="font-semibold italic"
-                                style={{ color: accent }}
-                            >
-                                loose practice session
-                            </em>
-                            .
-                        </Display>
+                <div className="mx-auto max-w-6xl text-center">
+                    <h2 className="text-xl font-semibold sm:text-2xl">
+                        <Display>Read this before you book another mock test.</Display>
                     </h2>
-                    <div className="mt-10 space-y-3">
-                        {(
-                            [
-                                {
-                                    q: "Why might an informal evaluation mislead you?",
-                                    a: "Informal evaluations often skip strict timing, on-screen navigation, or consistent rubric application. A structured, computer-delivered evaluation surfaces gaps in exam mechanics — not just topic knowledge.",
-                                },
-                                {
-                                    q: "Computer-delivered vs paper — what actually changes?",
-                                    a: "You interact with timers, scrolling, highlighting, and section transitions differently. Rehearsing in a browser-like flow reduces cognitive load on test day.",
-                                },
-                                {
-                                    q: "Automated feedback vs human review on writing?",
-                                    a: "Automated tools can miss nuance in task achievement and tone. Human reviewers align comments with band descriptors so you know what to fix next.",
-                                },
-                            ] as const
-                        ).map((item) => (
-                            <details
-                                key={item.q}
-                                className="group rounded-2xl border border-black/[0.06] bg-[#fafafa] transition-colors open:bg-white open:shadow-sm"
-                            >
-                                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-left text-sm font-semibold text-[#0B0B0F] sm:px-5 sm:text-base [&::-webkit-details-marker]:hidden">
-                                    <span className="min-w-0 pr-2">
-                                        {item.q}
-                                    </span>
-                                    <svg
-                                        className="size-5 shrink-0 text-[#888] transition-transform duration-200 group-open:rotate-180"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        aria-hidden
-                                    >
-                                        <path d="M6 9l6 6 6-6" />
-                                    </svg>
-                                </summary>
-                                <div className="border-t border-black/[0.06] px-4 pb-4 pt-3 text-sm leading-relaxed text-[#3d3d4a] sm:px-5">
-                                    {item.a}
-                                </div>
-                            </details>
-                        ))}
-                    </div>
-                    <div className="mt-8 text-center">
-                        <Link
-                            href="#faq"
-                            className="text-sm font-semibold transition hover:opacity-80"
-                            style={{ color: accent }}
-                        >
-                            View all articles →
-                        </Link>
-                    </div>
+                    <Link
+                        href="https://www.facebook.com/profile.php?id=61570760185512"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-6 inline-block text-base transition hover:underline"
+                        style={{ color: accent }}
+                    >
+                        Follow us on Facebook →
+                    </Link>
                 </div>
             </section>
 
-            {/* Final CTA */}
-            <section
-                className="px-4 py-16 text-center sm:px-6 sm:py-24 md:py-28"
-                style={{ backgroundColor: dark }}
-            >
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/70">
-                    Ready when you are
-                </p>
-                <h2 className="mx-auto mt-4 max-w-3xl text-2xl text-white sm:text-3xl md:text-[2.5rem] md:leading-tight">
-                    <Display>
-                        Start before{" "}
-                        <em
-                            className="font-semibold italic"
-                            style={{ color: accent }}
-                        >
-                            you feel ready
-                        </em>
-                        .
-                    </Display>
-                </h2>
-                <p className="mx-auto mt-5 max-w-lg text-sm text-white/65 sm:text-base">
-                    Experience the exam once — everything changes after that.
-                </p>
-                <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
-                    <Link
-                        href="/login"
-                        className="inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
-                        style={{
-                            backgroundColor: accent,
-                            boxShadow: `0 12px 40px -8px ${accent}88`,
-                        }}
-                    >
-                        Start your evaluation
-                    </Link>
-                    <Link
-                        href="/how-we-evaluate"
-                        className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/40 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10 sm:min-h-0 sm:px-8 sm:py-3.5"
-                    >
-                        How we evaluate
-                    </Link>
+            {/* Testimonials — hidden for now, ready for future content */}
+            {/*
+            <section className="bg-white px-4 py-15 sm:px-6 sm:py-20">
+                <div className="mx-auto max-w-6xl text-center">
+                    <h2 className="text-xl font-semibold sm:text-2xl">
+                        <Display>What students say</Display>
+                    </h2>
+                    <p className="mt-6 text-base italic text-[#999999]">
+                        (Testimonials coming soon...)
+                    </p>
                 </div>
             </section>
+            */}
 
             {/* Footer */}
-            <footer className="border-t border-black/[0.06] bg-white px-4 py-12 sm:px-6 sm:py-14">
+            <footer className="bg-white px-4 py-12 sm:px-6 sm:py-14">
                 <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-                    <div className="lg:col-span-1">
+                    <div>
                         <Link
                             href="/"
                             className="text-lg font-semibold"
@@ -553,7 +475,7 @@ export default async function HomePage() {
                         </Link>
                         <p className="mt-3 max-w-xs text-sm leading-relaxed text-[#5c5c6a]">
                             Human-led speaking and writing evaluation for IELTS.
-                            Honest feedback. Real caliber.
+                            Honest feedback. Unfiltered.
                         </p>
                     </div>
                     <div>
@@ -573,75 +495,54 @@ export default async function HomePage() {
                             <Link href="/how-we-evaluate" className="hover:opacity-80">
                                 How We Evaluate
                             </Link>
-                            <Link href="#pricing" className="hover:opacity-80">
-                                Pricing
-                            </Link>
-                            <Link href="/login" className="hover:opacity-80">
-                                Log in
-                            </Link>
-                            <Link href="/register" className="hover:opacity-80">
-                                Get started
-                            </Link>
-                        </nav>
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-[#888]">
-                            Services
-                        </p>
-                        <nav
-                            className="mt-4 flex flex-col gap-2 text-sm text-[#3d3d4a]"
-                            aria-label="Services"
-                        >
                             <Link href="/speaking-evaluation" className="hover:opacity-80">
                                 Speaking Evaluation
                             </Link>
                             <Link href="/writing-evaluation" className="hover:opacity-80">
                                 Writing Evaluation
                             </Link>
-                            <Link href="/why-us" className="hover:opacity-80">
-                                Why Us
-                            </Link>
-                            <Link href="#faq" className="hover:opacity-80">
-                                FAQs
-                            </Link>
                         </nav>
                     </div>
                     <div>
                         <p className="text-xs font-bold uppercase tracking-wider text-[#888]">
-                            Legal &amp; pages
+                            Legal
                         </p>
                         <nav
                             className="mt-4 flex flex-col gap-2 text-sm text-[#3d3d4a]"
                             aria-label="Legal"
                         >
-                            {legalPages.map((page) => (
-                                <Link
-                                    key={page.slug}
-                                    href={`/${page.slug}`}
-                                    className="hover:opacity-80"
-                                >
-                                    {page.title}
-                                </Link>
-                            ))}
-                            {otherPages.map((page) => (
-                                <Link
-                                    key={page.slug}
-                                    href={`/${page.slug}`}
-                                    className="hover:opacity-80"
-                                >
-                                    {page.title}
-                                </Link>
-                            ))}
-                            {footerPages.length === 0 && (
-                                <span className="text-[#9a9aaa]">
-                                    No pages yet
-                                </span>
-                            )}
+                            <Link href="/terms-conditions" className="hover:opacity-80">
+                                Terms &amp; Conditions
+                            </Link>
+                            <Link href="/privacy-policy" className="hover:opacity-80">
+                                Privacy Policy
+                            </Link>
+                        </nav>
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#888]">
+                            Socials
+                        </p>
+                        <nav
+                            className="mt-4 flex flex-col gap-2 text-sm text-[#3d3d4a]"
+                            aria-label="Socials"
+                        >
+                            <Link
+                                href="https://www.facebook.com/profile.php?id=61570760185512"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 hover:opacity-80"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
+                                </svg>
+                                Facebook
+                            </Link>
                         </nav>
                     </div>
                 </div>
-                <p className="mx-auto mt-12 max-w-6xl border-t border-black/[0.06] pt-8 text-center text-xs text-[#9a9aaa] sm:text-left">
-                    © {new Date().getFullYear()} ScoreMirror
+                <p className="mx-auto mt-10 max-w-6xl border-t border-black/[0.06] pt-8 text-center text-sm text-[#9a9aaa]">
+                    © 2026 ScoreMirror. All rights reserved.
                 </p>
             </footer>
         </div>
