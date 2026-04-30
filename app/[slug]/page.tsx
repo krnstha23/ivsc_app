@@ -23,12 +23,12 @@ export async function generateMetadata({
     const { slug } = await params;
     const page = await prisma.staticPage.findFirst({
         where: { slug, isActive: true },
-        select: { title: true, content: true, slug: true },
+        select: { title: true, content: true, slug: true, metaDescription: true },
     });
     if (!page) {
         return { title: "Page" };
     }
-    const description = page.content.slice(0, 160).replace(/\n/g, " ");
+    const description = page.metaDescription || page.content.slice(0, 160).replace(/\n/g, " ");
     return {
         title: page.title,
         description,
@@ -53,6 +53,17 @@ export default async function PublicStaticPage({
     });
 
     if (!page) notFound();
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: page.title,
+        description: page.metaDescription || page.content.slice(0, 160).replace(/\n/g, " "),
+        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://scoremirror.com"}/${page.slug}`,
+        datePublished: page.createdAt.toISOString(),
+        dateModified: page.updatedAt.toISOString(),
+    };
+
     const safeContent = sanitizeHtml(page.content, {
         allowedTags: [
             "p",
@@ -83,6 +94,11 @@ export default async function PublicStaticPage({
 
     return (
         <div className="flex min-h-svh flex-col bg-[#F7F7F7]">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+
             <section
                 className="relative pb-10 pt-28 sm:pt-32"
                 style={{ backgroundColor: dark }}

@@ -8,7 +8,7 @@ import { serializeJsonForHtmlScript } from "@/lib/security";
 export const metadata: Metadata = {
     title: "ScoreMirror – Computer-Based IELTS Evaluations",
     description:
-        "Full computer-based IELTS evaluations with human writing review, timed sections, and performance reports — so test day feels familiar.",
+        "IELTS Speaking and Writing Evaluation Service by Test Expert",
     keywords: [
         "IELTS evaluation",
         "computer-based IELTS",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "ScoreMirror – Computer-Based IELTS Evaluations",
         description:
-            "Full computer-based IELTS evaluations with human review and performance reports.",
+            "A Premium Human-led IELTS Speaking and Writing Evaluation Service.",
         url: "/",
         images: [
             { url: "/hero.jpg", width: 1200, height: 630, alt: "ScoreMirror" },
@@ -214,40 +214,40 @@ export default async function HomePage() {
                     </h2>
                     <div className="mt-12 grid gap-6 md:grid-cols-3 md:gap-8">
                         {(
-                            [
-                                {
-                                    title: "Live Speaking Evaluation (VCS)",
-                                    bullets: [
-                                        "12–14 min live examiner format",
-                                        "Real-time scoring with human judgment",
-                                        "Recorded session + diagnostic notes",
-                                        "Brief verbal debrief after completion",
-                                    ],
-                                    href: "/speaking-evaluation",
-                                    cta: "Learn More",
-                                },
-                                {
-                                    title: "Writing Evaluation (Async)",
-                                    bullets: [
-                                        "Submit Task 1 + Task 2 essays",
-                                        "Band-linked written correction",
-                                        "Feedback mapped to rubric criteria",
-                                        "No auto-generated scoring",
-                                    ],
-                                    href: "/writing-evaluation",
-                                    cta: "Learn More",
-                                },
-                                {
-                                    title: "What makes us different",
-                                    bullets: [
-                                        "We don't coach. We diagnose performance.",
-                                        "No crowded batches or noisy classes.",
-                                        "Only your real level, clearly reflected.",
-                                    ],
-                                    href: "/why-us",
-                                    cta: "Learn More",
-                                },
-                            ] as const
+                             [
+                                 {
+                                     title: "Video Call Speaking (VCS) Live",
+                                     bullets: [
+                                         "12–14 min live examiner format",
+                                         "Real-time scoring with human judgment",
+                                         "Recorded session + diagnostic notes",
+                                         "Brief verbal debrief after completion",
+                                     ],
+                                     href: "/speaking-evaluation",
+                                     cta: "Learn More",
+                                 },
+                                 {
+                                     title: "Writing Evaluation (Async)",
+                                     bullets: [
+                                         "Submit Task 1 + Task 2 essays",
+                                         "Band-linked written correction",
+                                         "Feedback mapped to rubric criteria",
+                                         "No auto-generated scoring",
+                                     ],
+                                     href: "/writing-evaluation",
+                                     cta: "Learn More",
+                                 },
+                                 {
+                                     title: "What makes us different",
+                                     bullets: [
+                                         "We don't coach. We diagnose performance.",
+                                         "No crowded batches or noisy classes.",
+                                         "Only your real level, clearly reflected.",
+                                     ],
+                                     href: "/why-us",
+                                     cta: "Learn More",
+                                 },
+                             ] as const
                         ).map((card) => (
                             <div
                                 key={card.title}
@@ -280,37 +280,50 @@ export default async function HomePage() {
                 className="px-4 py-16 sm:px-6 sm:py-20 md:py-24"
                 style={{ backgroundColor: coolBand }}
             >
-                <div className="mx-auto max-w-3xl text-center">
-                    <h2 className="text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
-                        <Display>
-                            The medium does not change what gets evaluated.
-                        </Display>
-                    </h2>
-                    <ul className="mt-10 space-y-6 text-left text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
-                        <CheckLi>
-                            The examiner evaluates your fluency, vocabulary, grammar, and pronunciation — not whether you are on a screen or physically in a room.
-                        </CheckLi>
-                        <CheckLi>
-                            In many parts of the world, test takers do not ask this question. They sit, speak, and get evaluated. The medium is invisible.
-                        </CheckLi>
-                        <CheckLi>
-                            You already use video calls every day. Taking your IELTS speaking test on one changes nothing about how you are assessed.
-                        </CheckLi>
-                    </ul>
-                    <p className="mt-8 text-[0.9375rem] font-semibold text-[#0B0B0F]">
-                        So practice the same way. On a video call. With a real human evaluator.
-                    </p>
-                    <div className="mt-8 flex justify-center">
-                        <Link
-                            href="/login"
-                            className="inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
-                            style={{
-                                backgroundColor: accent,
-                                boxShadow: `0 12px 40px -8px ${accent}88`,
-                            }}
-                        >
-                            Book Your Speaking Evaluation
-                        </Link>
+                <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 md:flex-row md:gap-16">
+                    <div className="w-full text-center md:w-1/2 md:text-left">
+                        <h2 className="text-2xl leading-tight text-[#0B0B0F] sm:text-3xl md:text-[2rem] md:leading-tight">
+                            <Display>
+                                The medium does not change what gets evaluated.
+                            </Display>
+                        </h2>
+                         <ul className="mt-10 space-y-6 text-left text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
+                              <CheckLi>
+                                  You already use video calls every day. Taking your IELTS speaking test on one changes nothing about how you are assessed.
+                              </CheckLi>
+                              <CheckLi>
+                                  In many parts of the world, test takers do not ask this question. They sit, speak, and get evaluated. The medium is invisible.
+                              </CheckLi>
+                              <CheckLi>
+                                  The examiner evaluates your fluency, vocabulary, grammar, and pronunciation — not whether you are on a screen or physically in a room.
+                              </CheckLi>
+                          </ul>
+                        <p className="mt-8 text-[0.9375rem] font-semibold text-[#0B0B0F]">
+                            So practice the same way. On a video call. With a real human evaluator.
+                        </p>
+                        <div className="mt-8 flex justify-center md:justify-start">
+                            <Link
+                                href="/login"
+                                className="inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:min-h-0 sm:px-8 sm:py-3.5"
+                                style={{
+                                    backgroundColor: accent,
+                                    boxShadow: `0 12px 40px -8px ${accent}88`,
+                                }}
+                            >
+                                Book Your Speaking Evaluation
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="w-full md:w-1/2">
+                        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
+                            <Image
+                                src="/hero.jpg"
+                                alt="Hero"
+                                fill
+                                className="object-cover"
+                                priority
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
@@ -427,27 +440,6 @@ export default async function HomePage() {
                 </div>
             </section>
 
-            {/* Facebook CTA */}
-            <section
-                className="px-4 py-15 sm:px-6 sm:py-20"
-                style={{ backgroundColor: light }}
-            >
-                <div className="mx-auto max-w-6xl text-center">
-                    <h2 className="text-xl font-semibold sm:text-2xl">
-                        <Display>Read this before you book another mock test.</Display>
-                    </h2>
-                    <Link
-                        href="https://www.facebook.com/profile.php?id=61570760185512"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-6 inline-block text-base transition hover:underline"
-                        style={{ color: accent }}
-                    >
-                        Follow us on Facebook →
-                    </Link>
-                </div>
-            </section>
-
             {/* Testimonials — hidden for now, ready for future content */}
             {/*
             <section className="bg-white px-4 py-15 sm:px-6 sm:py-20">
@@ -537,6 +529,38 @@ export default async function HomePage() {
                                     <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
                                 </svg>
                                 Facebook
+                            </Link>
+                            <Link
+                                href="https://www.instagram.com/score.mirror"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 hover:opacity-80"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 3.838a8.162 8.162 0 100 16.324 8.162 8.162 0 000-16.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                                </svg>
+                                Instagram
+                            </Link>
+                            <Link
+                                href="https://wa.me/9779712052360"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 hover:opacity-80"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12.046 21.794c-1.808 0-3.584-.481-5.14-1.396l-.369-.22-3.797 1.153 1.148-3.627-.241-.38A9.84 9.84 0 012.1 12.046C2.1 6.574 6.574 2.1 12.046 2.1c2.734 0 5.305 1.072 7.23 3.017a9.82 9.82 0 012.716 7.23c0 5.472-4.474 9.917-9.984 9.917zm8.476-18.332C18.267.236 15.217-.2 12.2.088 6.078.697.697 6.078.088 12.2-.537 18.688 5.412 24.3 11.997 24.3c2.66 0 5.292-.88 7.434-2.582l3.442 1.044a.86.86 0 00.273-.017.86.86 0 00.52-.58l1.156-3.654a9.78 9.78 0 011.44-7.618c-1.93-4.38-5.868-7.676-10.736-8.596z"/>
+                                </svg>
+                                WhatsApp
+                            </Link>
+                            <Link
+                                href="mailto:info@scoremirror.com.np"
+                                className="flex items-center gap-2 hover:opacity-80"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                                </svg>
+                                Email
                             </Link>
                         </nav>
                     </div>

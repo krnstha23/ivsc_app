@@ -12,12 +12,17 @@ export default function RegisterPage() {
             <div className="flex w-full max-w-sm flex-col gap-6">
                 <Link
                     href="/"
-                    className="flex items-center gap-2 self-center font-medium"
+                    className="flex flex-col items-center gap-2 self-center font-medium"
                 >
-                    <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-                        <LayersMinimalistic size={16} className="size-4" />
+                    <div className="flex items-center gap-2">
+                        <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+                            <LayersMinimalistic size={16} className="size-4" />
+                        </div>
+                        ScoreMirror
                     </div>
-                    IVCS
+                    <p className="text-center text-sm text-gray-500 italic">
+                        Create an account to book your evaluation. No spam. No hidden fees. Your feedback will be securely stored in your dashboard - not lost in an email inbox.*
+                    </p>
                 </Link>
                 <Suspense
                     fallback={

@@ -327,13 +327,14 @@ model ClassMetadata {
 }
 
 model StaticPage {
-  id        String   @id @default(uuid())
-  title     String
-  slug      String   @unique
-  content   String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  content         String
+  metaDescription String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("static_pages")
 }
