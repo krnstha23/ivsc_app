@@ -1,6 +1,6 @@
 # IVCS - System Design Document
 
-> **Last Updated**: April 27, 2026  
+> **Last Updated**: April 30, 2026 (updated lead-time definitions)
 > **Status**: Phase 1–3 Complete (except payment); Phase 4 pending  
 > **Branch**: `main`
 
@@ -99,9 +99,9 @@ This section refines **§1.4** for how teachers publish availability, how studen
 - Categories apply when the **bundle/session is booked before the class start** (i.e. they are determined from **lead time** and/or **calendar-date rules** between **booking confirmation** and **session start**).
 - **Timezone for boundary math:** use **UTC+5:45** (e.g. **Asia/Kathmandu**). Stakeholders deferred broader timezone policy; all comparisons below are in this offset unless extended later.
 - **Definitions** (interpreted in **UTC+5:45**):
-  - **Standard:** **≥ 48 hours** before session start (lead time from **confirmation** to **session start**).
-  - **Priority:** **≥ 24 hours** and **< 48 hours** before session start (same lead-time definition).
-  - **Instant:** **Same civil calendar day:** the **booking confirmation** timestamp and the **session start** fall on the **same calendar date** in **UTC+5:45** (e.g. if the student confirms on **Monday**, any session that **Monday** in that timezone is eligible for **Instant** pricing for that booking—not “until midnight Nepali” as a separate rule; the **date** match is the product rule). Sessions on a **different** calendar date use **Priority** or **Standard** by the **24h / 48h** cutoffs above.
+  - **Standard:** **Days after tomorrow** (calendar days after tomorrow in UTC+5:45 as measured from booking confirmation date).
+  - **Priority:** **Tomorrow** (calendar day after confirmation date in UTC+5:45).
+  - **Instant:** **Current day** (same calendar date as booking confirmation in UTC+5:45).
 - **Clarification (bundle vs category):** the **three names** are **booking-time categories**; **each bundle** has its own **fixed session duration** and **three list prices** (**Standard / Priority / Instant**) configured in admin (**§5.3**). Category affects **price and eligibility**, not session length.
 
 #### Payment and minimum notice
@@ -308,9 +308,9 @@ User (Student)
 | id               | UUID     | Primary key |
 | name             | String   | Bundle display name |
 | description      | String?  | Optional marketing copy |
-| priceStandard    | Decimal  | Price for **Standard** lead-time tier (≥48h before session, **UTC+5:45**) |
-| pricePriority    | Decimal  | Price for **Priority** tier (24–48h before session) |
-| priceInstant     | Decimal  | Price for **Instant** tier (**same civil calendar day** as session in **UTC+5:45**) |
+| priceStandard    | Decimal  | Price for **Standard** lead-time tier (days after tomorrow, **UTC+5:45**) |
+| pricePriority    | Decimal  | Price for **Priority** tier (tomorrow, **UTC+5:45**) |
+| priceInstant     | Decimal  | Price for **Instant** tier (**current calendar day** as session in **UTC+5:45**) |
 | discountPercent  | Decimal? | Optional bundle-level discount display |
 | isActive         | Boolean  | Whether the bundle is offered |
 | isFeatured       | Boolean  | Featured placement (e.g. Students page) |
@@ -330,6 +330,8 @@ User (Student)
 | duration    | Int      | Duration in minutes                      |
 | status      | Enum     | PENDING, CONFIRMED, CANCELLED, COMPLETED |
 | notes       | String?  | Optional notes from user                 |
+| studentPhone | String? | Student mobile number at booking time    |
+| studentEmail | String? | Student email at booking time (editable) |
 | packageId   | UUID?    | Optional linked package (when booking is package-based) |
 | paymentStatus | Enum   | PENDING, PAID, REFUNDED, FAILED         |
 | transactionId | String? | Optional payment transaction identifier |
@@ -354,7 +356,7 @@ User (Student)
 
 ### 4.2 User Booking Flow (Package-First)
 
-**Current implementation (shipped today):**
+**Current implementation (Apr 2026):**
 
 ```
 1. User (student) logs in
@@ -362,12 +364,19 @@ User (Student)
    - Creates a Booking tied to the Availability; `packageId` is optional (no enrollment required).
 3. Option B (package booking): Browse packages, open package detail, and use the "Book a session" flow
    - Requires an ACTIVE StudentEnrollment with remaining classes.
-4. Select an available slot and confirm
-5. The server creates the Booking with status `CONFIRMED` immediately; payment checkout is not enforced yet.
-6. If `packageId` is provided, the system increments `StudentEnrollment.classesUsed` in the same transaction as the booking.
+4. Select an available slot → Click "Confirm & book" → Confirmation dialog (slot details)
+   5. Click "Next" → Phone/Email modal:
+   - Mobile number (required, validated)
+   - Email (pre-filled from account but editable, validated)
+   - Both `studentPhone` and `studentEmail` stored on `Booking` record
+6. Click "Next" → QR Code modal (scan to pay)
+7. Click "Confirm & book" → Booking created with status `CONFIRMED`
+8. Redirects to `/dashboard` on success
+9. If `packageId` is provided, increments `StudentEnrollment.classesUsed`
+10. **Nearest slot message**: When searched time doesn't match exactly, shows "The searched time is not available, here is the nearest slot from the searched time and date" above the slot card
 ```
 
-**Target (per §1.4, §1.5, §1.6, §11):** introduce **payment-gated** confirmation so the slot is only **fully booked** after **successful payment**; represent checkout and timeouts via **`Booking.status`** and **`paymentStatus`**. Student flow becomes **date → preferred time → single offered slot → pay → confirmed**. Bundle **tier price** at checkout comes from **Standard / Priority / Instant** fields on **`PackageBundle`**.
+**Target (per §1.4, §1.5, §1.6, §11):** introduce **payment-gated** confirmation so the slot is only **fully booked** after **successful payment**; represent checkout and timeouts via **`Booking.status`** and **`paymentStatus`**. Student flow becomes **date → preferred time → single offered slot → phone/email → QR payment → confirmed**. Bundle **tier price** at checkout comes from **Standard (2+ days) / Priority (tomorrow) / Instant (today)** fields on **`PackageBundle`**.
 
 ### 4.3 Admin Timetable Management
 
@@ -601,6 +610,11 @@ See `prisma/schema.prisma` for full implementation.
 | Inline script/style XSS hardening | Added `lib/security.ts` helpers; JSON-LD serialization escapes script-breaking chars and chart CSS injection now sanitizes token names/colors before `dangerouslySetInnerHTML` | 2026-04-27 |
 | JWT claim freshness + soft revocation checks | JWT callback now re-checks user state from DB (`isActive`, role, username) on token reuse; inactive/missing users are treated as unauthenticated sessions | 2026-04-27 |
 | Docker secret hygiene + server runtime reliability | Compose uses env-substituted DB credentials (no hardcoded secrets), DB host port exposure removed, and container base includes compatibility packages for Alpine runtime | 2026-04-27 |
+| Student phone + email capture on booking | Added `studentPhone` and `studentEmail` fields to `Booking` model; editable email (pre-filled from session) + validation in phone/email modal | 2026-04-30 |
+| QR code payment flow | Added QR code modal between phone/email entry and booking confirmation; uses extracted QR image (`/qr-code.png`) displayed via `next/image` | 2026-04-30 |
+| Multi-step booking modals | Flow: Confirm slot → Phone/Email modal → QR code modal → Confirm & book → Dashboard; validation on each step with toast notifications | 2026-04-30 |
+| Nearest slot message | When searched time isn't available, shows "The searched time is not available, here is the nearest slot from the searched time and date" above the slot card; uses `isExactMatch` field in `FindSlotResult` | 2026-04-30 |
+| Calendar-day lead-time categories | Updated **§1.5** lead-time definitions: **Standard** = days after tomorrow, **Priority** = tomorrow, **Instant** = current day (all in UTC+5:45). Replaced time-based cutoffs (48h/24h) with calendar-date rules matching `computeLeadTimeCategory()` in `lib/slot-generator.ts` | 2026-04-30 |
 
 ### 6.2 Pending Decisions
 

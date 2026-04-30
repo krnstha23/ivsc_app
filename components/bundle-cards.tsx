@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { toast } from "sonner";
 import { CheckCircle } from "@solar-icons/react";
 import { cn } from "@/lib/utils";
@@ -183,13 +186,33 @@ function BundleCard({
 // ---------------------------------------------------------------------------
 
 function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
+    const router = useRouter();
+    const { data: session } = useSession();
     const [date, setDate] = useState("");
     const [preferredTime, setPreferredTime] = useState("10:00");
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<FindSlotResult | null>(null);
+    const [phoneOpen, setPhoneOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [qrOpen, setQrOpen] = useState(false);
     const [bookingPending, setBookingPending] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<SlotOffer | null>(null);
+    const [studentPhone, setStudentPhone] = useState("");
+    const [studentEmail, setStudentEmail] = useState(session?.user?.email ?? "");
+
+    const validatePhone = (phone: string) => {
+        const phoneRegex = /^\+?[\d\s-]{7,15}$/;
+        if (!phone.trim()) return "Mobile number is required.";
+        if (!phoneRegex.test(phone.trim())) return "Please enter a valid mobile number.";
+        return "";
+    };
+
+    const validateEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email.trim()) return "Email is required.";
+        if (!emailRegex.test(email.trim())) return "Please enter a valid email.";
+        return "";
+    };
 
     const handleFindSlot = async () => {
         if (!date || !preferredTime) return;
@@ -225,21 +248,28 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
                 bundleId: bundle.id,
                 date: selectedSlot.date,
                 startTime: selectedSlot.startTime,
+                studentPhone,
+                studentEmail,
             });
-            if (res.success) {
-                toast.success(
-                    "Session booked successfully! A teacher has been assigned.",
-                );
-                setConfirmOpen(false);
-                setSelectedSlot(null);
-                setResult(null);
-                setDate("");
-            } else {
-                toast.error(res.error);
+            if (!res.success) {
+                toast.error(res.error ?? "Booking failed. Please try again.");
+                setBookingPending(false);
+                return;
             }
+            toast.success(
+                "Session booked successfully! A teacher has been assigned.",
+            );
+            setPhoneOpen(false);
+            setConfirmOpen(false);
+            setSelectedSlot(null);
+            setResult(null);
+            setDate("");
+            setStudentPhone("");
+            setStudentEmail("");
+            setBookingPending(false);
+                 router.push("/dashboard");
         } catch {
             toast.error("Booking failed. Please try again.");
-        } finally {
             setBookingPending(false);
         }
     };
@@ -298,12 +328,18 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
             )}
 
             {result?.found && result.slot && (
-                <Card className="mx-auto max-w-sm">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-base">
-                            Your offered slot
-                        </CardTitle>
-                    </CardHeader>
+                <>
+                    {!result.isExactMatch && (
+                        <p className="text-center text-sm text-muted-foreground">
+                            The searched time is not available, here is the nearest slot from the searched time and date
+                        </p>
+                    )}
+                    <Card className="mx-auto max-w-sm">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-base">
+                                Your offered slot
+                            </CardTitle>
+                        </CardHeader>
                     <CardContent className="space-y-3">
                         <div className="flex items-baseline justify-between">
                             <p className="text-lg font-semibold">
@@ -339,6 +375,7 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
                         </Button>
                     </CardFooter>
                 </Card>
+                </>
             )}
 
             {result && !result.found && (
@@ -399,6 +436,83 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
             )}
 
             <Dialog
+                open={phoneOpen}
+                onOpenChange={(open) => {
+                    if (!open && !bookingPending) setPhoneOpen(false);
+                }}
+            >
+                <DialogContent
+                    showCloseButton
+                    className="sm:max-w-md"
+                    onPointerDownOutside={(e) =>
+                        bookingPending && e.preventDefault()
+                    }
+                >
+                    <DialogHeader className="gap-1">
+                        <DialogTitle>Enter your details</DialogTitle>
+                        <p className="text-sm text-muted-foreground">
+                            Confirm the email to get the booking confirmation and enter the phone number that will be used to make the payment.
+                        </p>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="student-phone">Mobile Number</Label>
+                            <Input
+                                id="student-phone"
+                                type="tel"
+                                placeholder="e.g. +977 9712052360"
+                                value={studentPhone}
+                                onChange={(e) => setStudentPhone(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="student-email">Email</Label>
+                            <Input
+                                id="student-email"
+                                type="email"
+                                placeholder="e.g. student@example.com"
+                                value={studentEmail}
+                                onChange={(e) => setStudentEmail(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setPhoneOpen(false);
+                                setConfirmOpen(true);
+                            }}
+                            disabled={bookingPending}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                const phoneError = validatePhone(studentPhone);
+                                if (phoneError) {
+                                    toast.error(phoneError);
+                                    return;
+                                }
+                                const emailError = validateEmail(studentEmail);
+                                if (emailError) {
+                                    toast.error(emailError);
+                                    return;
+                                }
+                                setPhoneOpen(false);
+                                setQrOpen(true);
+                            }}
+                            disabled={bookingPending || !studentPhone || !studentEmail}
+                        >
+                            Next
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
                 open={confirmOpen}
                 onOpenChange={(open) => {
                     if (!open && !bookingPending) setConfirmOpen(false);
@@ -454,7 +568,7 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
                             </p>
                         </div>
                     )}
-                    <DialogFooter className="gap-2 sm:gap-0">
+                    <DialogFooter className="gap-2 sm:gap-2">
                         <Button
                             type="button"
                             variant="outline"
@@ -467,8 +581,65 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
                         </Button>
                         <Button
                             type="button"
-                            onClick={handleConfirmBooking}
+                            onClick={() => {
+                                setConfirmOpen(false);
+                                setPhoneOpen(true);
+                            }}
                             disabled={bookingPending || !selectedSlot}
+                        >
+                            Next
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={qrOpen}
+                onOpenChange={(open) => {
+                    if (!open && !bookingPending) setQrOpen(false);
+                }}
+            >
+                <DialogContent
+                    showCloseButton
+                    className="sm:max-w-md"
+                    onPointerDownOutside={(e) =>
+                        bookingPending && e.preventDefault()
+                    }
+                >
+                    <DialogHeader>
+                        <DialogTitle>Scan QR Code</DialogTitle>
+                        <p className="text-sm text-muted-foreground">
+                            Scan the qr below to pay and click Confirm button to book the package.
+                        </p>
+                    </DialogHeader>
+                    <div className="flex justify-center">
+                        <Image
+                            src="/qr-code.png"
+                            alt="QR Code"
+                            width={250}
+                            height={250}
+                            className="object-contain"
+                        />
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setQrOpen(false);
+                                setPhoneOpen(true);
+                            }}
+                            disabled={bookingPending}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                setQrOpen(false);
+                                handleConfirmBooking();
+                            }}
+                            disabled={bookingPending}
                         >
                             {bookingPending ? "Booking…" : "Confirm & book"}
                         </Button>

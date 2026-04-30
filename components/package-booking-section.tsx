@@ -124,7 +124,7 @@ export function PackageBookingSection({
     const handleSelectAlternative = (alt: SlotOffer) => {
         setDate(alt.date);
         setSelectedSlot(alt);
-        setResult({ found: true, slot: alt });
+        setResult({ found: true, slot: alt, isExactMatch: false });
     };
 
     const handleConfirmBooking = async () => {

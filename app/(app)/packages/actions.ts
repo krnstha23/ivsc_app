@@ -944,8 +944,8 @@ export type SlotOffer = {
 };
 
 export type FindSlotResult =
-    | { found: true; slot: SlotOffer }
-    | { found: false; alternatives: SlotOffer[]; message: string };
+    | { found: true; slot: SlotOffer; isExactMatch?: boolean }
+    | { found: false; alternatives: SlotOffer[]; message: string; isExactMatch?: never };
 
 function getCategoryPrice(
     category: LeadTimeCategory,
@@ -1072,6 +1072,7 @@ export async function findSlotForPreference(
             category,
             price,
         },
+        isExactMatch: best.startTime === preferredTime,
     };
 }
 
@@ -1139,6 +1140,8 @@ export async function createBookingForSlot(payload: {
     date: string;
     startTime: string;
     packageId?: string;
+    studentPhone?: string;
+    studentEmail?: string;
 }): Promise<CreateBookingResult> {
     const session = await auth();
     const userId = (session?.user as { id?: string })?.id;
@@ -1272,6 +1275,8 @@ export async function createBookingForSlot(payload: {
                     scheduledAt,
                     duration: bundle.duration,
                     status: "CONFIRMED",
+                    studentPhone: payload.studentPhone ?? null,
+                    studentEmail: payload.studentEmail ?? null,
                     writingQuestionId,
                 },
             });

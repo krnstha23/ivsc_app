@@ -219,6 +219,8 @@ model Booking {
   duration       Int           // minutes
   status         BookingStatus @default(PENDING)
   notes          String?
+  studentPhone   String?       // Student phone number at booking time
+  studentEmail   String?       // Student email at booking time
   meetLink       String?
   paymentStatus  PaymentStatus @default(PENDING)
   transactionId  String?

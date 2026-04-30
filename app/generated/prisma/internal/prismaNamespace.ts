@@ -1534,6 +1534,8 @@ export const BookingScalarFieldEnum = {
   duration: 'duration',
   status: 'status',
   notes: 'notes',
+  studentPhone: 'studentPhone',
+  studentEmail: 'studentEmail',
   meetLink: 'meetLink',
   paymentStatus: 'paymentStatus',
   transactionId: 'transactionId',
@@ -1610,6 +1612,7 @@ export const StaticPageScalarFieldEnum = {
   title: 'title',
   slug: 'slug',
   content: 'content',
+  metaDescription: 'metaDescription',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

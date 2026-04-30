@@ -45,6 +45,8 @@ export type BookingMinAggregateOutputType = {
   duration: number | null
   status: $Enums.BookingStatus | null
   notes: string | null
+  studentPhone: string | null
+  studentEmail: string | null
   meetLink: string | null
   paymentStatus: $Enums.PaymentStatus | null
   transactionId: string | null
@@ -66,6 +68,8 @@ export type BookingMaxAggregateOutputType = {
   duration: number | null
   status: $Enums.BookingStatus | null
   notes: string | null
+  studentPhone: string | null
+  studentEmail: string | null
   meetLink: string | null
   paymentStatus: $Enums.PaymentStatus | null
   transactionId: string | null
@@ -87,6 +91,8 @@ export type BookingCountAggregateOutputType = {
   duration: number
   status: number
   notes: number
+  studentPhone: number
+  studentEmail: number
   meetLink: number
   paymentStatus: number
   transactionId: number
@@ -118,6 +124,8 @@ export type BookingMinAggregateInputType = {
   duration?: true
   status?: true
   notes?: true
+  studentPhone?: true
+  studentEmail?: true
   meetLink?: true
   paymentStatus?: true
   transactionId?: true
@@ -139,6 +147,8 @@ export type BookingMaxAggregateInputType = {
   duration?: true
   status?: true
   notes?: true
+  studentPhone?: true
+  studentEmail?: true
   meetLink?: true
   paymentStatus?: true
   transactionId?: true
@@ -160,6 +170,8 @@ export type BookingCountAggregateInputType = {
   duration?: true
   status?: true
   notes?: true
+  studentPhone?: true
+  studentEmail?: true
   meetLink?: true
   paymentStatus?: true
   transactionId?: true
@@ -268,6 +280,8 @@ export type BookingGroupByOutputType = {
   duration: number
   status: $Enums.BookingStatus
   notes: string | null
+  studentPhone: string | null
+  studentEmail: string | null
   meetLink: string | null
   paymentStatus: $Enums.PaymentStatus
   transactionId: string | null
@@ -312,6 +326,8 @@ export type BookingWhereInput = {
   duration?: Prisma.IntFilter<"Booking"> | number
   status?: Prisma.EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
   notes?: Prisma.StringNullableFilter<"Booking"> | string | null
+  studentPhone?: Prisma.StringNullableFilter<"Booking"> | string | null
+  studentEmail?: Prisma.StringNullableFilter<"Booking"> | string | null
   meetLink?: Prisma.StringNullableFilter<"Booking"> | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Booking"> | $Enums.PaymentStatus
   transactionId?: Prisma.StringNullableFilter<"Booking"> | string | null
@@ -340,6 +356,8 @@ export type BookingOrderByWithRelationInput = {
   duration?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   meetLink?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   transactionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -371,6 +389,8 @@ export type BookingWhereUniqueInput = Prisma.AtLeast<{
   duration?: Prisma.IntFilter<"Booking"> | number
   status?: Prisma.EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
   notes?: Prisma.StringNullableFilter<"Booking"> | string | null
+  studentPhone?: Prisma.StringNullableFilter<"Booking"> | string | null
+  studentEmail?: Prisma.StringNullableFilter<"Booking"> | string | null
   meetLink?: Prisma.StringNullableFilter<"Booking"> | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Booking"> | $Enums.PaymentStatus
   transactionId?: Prisma.StringNullableFilter<"Booking"> | string | null
@@ -399,6 +419,8 @@ export type BookingOrderByWithAggregationInput = {
   duration?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   meetLink?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   transactionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -428,6 +450,8 @@ export type BookingScalarWhereWithAggregatesInput = {
   duration?: Prisma.IntWithAggregatesFilter<"Booking"> | number
   status?: Prisma.EnumBookingStatusWithAggregatesFilter<"Booking"> | $Enums.BookingStatus
   notes?: Prisma.StringNullableWithAggregatesFilter<"Booking"> | string | null
+  studentPhone?: Prisma.StringNullableWithAggregatesFilter<"Booking"> | string | null
+  studentEmail?: Prisma.StringNullableWithAggregatesFilter<"Booking"> | string | null
   meetLink?: Prisma.StringNullableWithAggregatesFilter<"Booking"> | string | null
   paymentStatus?: Prisma.EnumPaymentStatusWithAggregatesFilter<"Booking"> | $Enums.PaymentStatus
   transactionId?: Prisma.StringNullableWithAggregatesFilter<"Booking"> | string | null
@@ -445,6 +469,8 @@ export type BookingCreateInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -472,6 +498,8 @@ export type BookingUncheckedCreateInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -491,6 +519,8 @@ export type BookingUpdateInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -518,6 +548,8 @@ export type BookingUncheckedUpdateInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -541,6 +573,8 @@ export type BookingCreateManyInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -558,6 +592,8 @@ export type BookingUpdateManyMutationInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -578,6 +614,8 @@ export type BookingUncheckedUpdateManyInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -614,6 +652,8 @@ export type BookingCountOrderByAggregateInput = {
   duration?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  studentPhone?: Prisma.SortOrder
+  studentEmail?: Prisma.SortOrder
   meetLink?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   transactionId?: Prisma.SortOrder
@@ -639,6 +679,8 @@ export type BookingMaxOrderByAggregateInput = {
   duration?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  studentPhone?: Prisma.SortOrder
+  studentEmail?: Prisma.SortOrder
   meetLink?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   transactionId?: Prisma.SortOrder
@@ -660,6 +702,8 @@ export type BookingMinOrderByAggregateInput = {
   duration?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  studentPhone?: Prisma.SortOrder
+  studentEmail?: Prisma.SortOrder
   meetLink?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   transactionId?: Prisma.SortOrder
@@ -922,6 +966,8 @@ export type BookingCreateWithoutUserInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -947,6 +993,8 @@ export type BookingUncheckedCreateWithoutUserInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -999,6 +1047,8 @@ export type BookingScalarWhereInput = {
   duration?: Prisma.IntFilter<"Booking"> | number
   status?: Prisma.EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
   notes?: Prisma.StringNullableFilter<"Booking"> | string | null
+  studentPhone?: Prisma.StringNullableFilter<"Booking"> | string | null
+  studentEmail?: Prisma.StringNullableFilter<"Booking"> | string | null
   meetLink?: Prisma.StringNullableFilter<"Booking"> | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Booking"> | $Enums.PaymentStatus
   transactionId?: Prisma.StringNullableFilter<"Booking"> | string | null
@@ -1016,6 +1066,8 @@ export type BookingCreateWithoutTeacherInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1041,6 +1093,8 @@ export type BookingUncheckedCreateWithoutTeacherInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1086,6 +1140,8 @@ export type BookingCreateWithoutPackageInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1111,6 +1167,8 @@ export type BookingUncheckedCreateWithoutPackageInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1156,6 +1214,8 @@ export type BookingCreateWithoutAvailabilityInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1181,6 +1241,8 @@ export type BookingUncheckedCreateWithoutAvailabilityInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1216,6 +1278,8 @@ export type BookingUpdateWithoutAvailabilityInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1241,6 +1305,8 @@ export type BookingUncheckedUpdateWithoutAvailabilityInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1260,6 +1326,8 @@ export type BookingCreateWithoutWritingQuestionInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1286,6 +1354,8 @@ export type BookingUncheckedCreateWithoutWritingQuestionInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1330,6 +1400,8 @@ export type BookingCreateWithoutEvaluationInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1356,6 +1428,8 @@ export type BookingUncheckedCreateWithoutEvaluationInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1390,6 +1464,8 @@ export type BookingUpdateWithoutEvaluationInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1416,6 +1492,8 @@ export type BookingUncheckedUpdateWithoutEvaluationInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1434,6 +1512,8 @@ export type BookingCreateWithoutWritingSubmissionInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1460,6 +1540,8 @@ export type BookingUncheckedCreateWithoutWritingSubmissionInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1494,6 +1576,8 @@ export type BookingUpdateWithoutWritingSubmissionInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1520,6 +1604,8 @@ export type BookingUncheckedUpdateWithoutWritingSubmissionInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1541,6 +1627,8 @@ export type BookingCreateManyUserInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1558,6 +1646,8 @@ export type BookingUpdateWithoutUserInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1583,6 +1673,8 @@ export type BookingUncheckedUpdateWithoutUserInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1605,6 +1697,8 @@ export type BookingUncheckedUpdateManyWithoutUserInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1625,6 +1719,8 @@ export type BookingCreateManyTeacherInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1642,6 +1738,8 @@ export type BookingUpdateWithoutTeacherInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1667,6 +1765,8 @@ export type BookingUncheckedUpdateWithoutTeacherInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1689,6 +1789,8 @@ export type BookingUncheckedUpdateManyWithoutTeacherInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1709,6 +1811,8 @@ export type BookingCreateManyPackageInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1726,6 +1830,8 @@ export type BookingUpdateWithoutPackageInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1751,6 +1857,8 @@ export type BookingUncheckedUpdateWithoutPackageInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1773,6 +1881,8 @@ export type BookingUncheckedUpdateManyWithoutPackageInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1794,6 +1904,8 @@ export type BookingCreateManyWritingQuestionInput = {
   duration: number
   status?: $Enums.BookingStatus
   notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
   meetLink?: string | null
   paymentStatus?: $Enums.PaymentStatus
   transactionId?: string | null
@@ -1810,6 +1922,8 @@ export type BookingUpdateWithoutWritingQuestionInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1836,6 +1950,8 @@ export type BookingUncheckedUpdateWithoutWritingQuestionInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1858,6 +1974,8 @@ export type BookingUncheckedUpdateManyWithoutWritingQuestionInput = {
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1880,6 +1998,8 @@ export type BookingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   duration?: boolean
   status?: boolean
   notes?: boolean
+  studentPhone?: boolean
+  studentEmail?: boolean
   meetLink?: boolean
   paymentStatus?: boolean
   transactionId?: boolean
@@ -1908,6 +2028,8 @@ export type BookingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   duration?: boolean
   status?: boolean
   notes?: boolean
+  studentPhone?: boolean
+  studentEmail?: boolean
   meetLink?: boolean
   paymentStatus?: boolean
   transactionId?: boolean
@@ -1934,6 +2056,8 @@ export type BookingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   duration?: boolean
   status?: boolean
   notes?: boolean
+  studentPhone?: boolean
+  studentEmail?: boolean
   meetLink?: boolean
   paymentStatus?: boolean
   transactionId?: boolean
@@ -1960,6 +2084,8 @@ export type BookingSelectScalar = {
   duration?: boolean
   status?: boolean
   notes?: boolean
+  studentPhone?: boolean
+  studentEmail?: boolean
   meetLink?: boolean
   paymentStatus?: boolean
   transactionId?: boolean
@@ -1970,7 +2096,7 @@ export type BookingSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BookingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "teacherId" | "availabilityId" | "packageId" | "bundleId" | "scheduledAt" | "duration" | "status" | "notes" | "meetLink" | "paymentStatus" | "transactionId" | "submissionStart" | "submissionEnd" | "writingQuestionId" | "createdAt" | "updatedAt", ExtArgs["result"]["booking"]>
+export type BookingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "teacherId" | "availabilityId" | "packageId" | "bundleId" | "scheduledAt" | "duration" | "status" | "notes" | "studentPhone" | "studentEmail" | "meetLink" | "paymentStatus" | "transactionId" | "submissionStart" | "submissionEnd" | "writingQuestionId" | "createdAt" | "updatedAt", ExtArgs["result"]["booking"]>
 export type BookingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   teacher?: boolean | Prisma.TeacherProfileDefaultArgs<ExtArgs>
@@ -2017,6 +2143,8 @@ export type $BookingPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     duration: number
     status: $Enums.BookingStatus
     notes: string | null
+    studentPhone: string | null
+    studentEmail: string | null
     meetLink: string | null
     paymentStatus: $Enums.PaymentStatus
     transactionId: string | null
@@ -2465,6 +2593,8 @@ export interface BookingFieldRefs {
   readonly duration: Prisma.FieldRef<"Booking", 'Int'>
   readonly status: Prisma.FieldRef<"Booking", 'BookingStatus'>
   readonly notes: Prisma.FieldRef<"Booking", 'String'>
+  readonly studentPhone: Prisma.FieldRef<"Booking", 'String'>
+  readonly studentEmail: Prisma.FieldRef<"Booking", 'String'>
   readonly meetLink: Prisma.FieldRef<"Booking", 'String'>
   readonly paymentStatus: Prisma.FieldRef<"Booking", 'PaymentStatus'>
   readonly transactionId: Prisma.FieldRef<"Booking", 'String'>
