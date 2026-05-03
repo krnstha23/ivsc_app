@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
-const upcomingStudentStatuses = ["PENDING", "CONFIRMED"] as const;
+/** Students only see confirmed upcoming bookings on the dashboard (pending is hidden). */
+const upcomingStudentStatuses = ["CONFIRMED"] as const;
 
 function utcDayBounds() {
     const now = new Date();
@@ -74,7 +75,6 @@ export type StudentDashboardData = {
     firstName: string;
     upcomingCount: number;
     completedCount: number;
-    activeEnrollments: number;
     upcoming: StudentDashboardBooking[];
     next: StudentDashboardBooking | null;
 };
@@ -96,8 +96,8 @@ export async function getStudentDashboardData(
 ): Promise<StudentDashboardData> {
     const now = new Date();
 
-    const [user, upcoming, upcomingCount, completedCount, enrollmentCount] =
-        await Promise.all([
+    const [user, upcoming, upcomingCount, completedCount] = await Promise.all(
+        [
             prisma.user.findUnique({
                 where: { id: userId },
                 select: { firstName: true },
@@ -131,13 +131,8 @@ export async function getStudentDashboardData(
             prisma.booking.count({
                 where: { userId, status: "COMPLETED" },
             }),
-            prisma.studentEnrollment.count({
-                where: {
-                    status: "ACTIVE",
-                    student: { userId: userId },
-                },
-            }),
-        ]);
+        ],
+    );
 
     const mapOne = (
         b: (typeof upcoming)[number],
@@ -160,7 +155,6 @@ export async function getStudentDashboardData(
         firstName: user?.firstName ?? "there",
         upcomingCount,
         completedCount,
-        activeEnrollments: enrollmentCount,
         upcoming: list,
         next: list[0] ?? null,
     };

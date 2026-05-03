@@ -103,7 +103,7 @@ export function TeacherDashboard({ data }: { data: TeacherDashboardData }) {
                     </CardHeader>
                     <CardContent className="flex flex-col gap-2 pb-4">
                         <Button asChild size="sm">
-                            <Link href="/bookings/teaching">My sessions</Link>
+                            <Link href="/bookings">My sessions</Link>
                         </Button>
                         <Button asChild size="sm" variant="outline">
                             <Link href="/teachers">Teachers &amp; availability</Link>

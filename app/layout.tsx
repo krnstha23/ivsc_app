@@ -24,7 +24,7 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
     metadataBase: new URL("https://scoremirror.com.np"),
     title: {
-        default: "ScoreMirror – Computer-Based IELTS Mock Tests",
+        default: "ScoreMirror - A Premium Human-led IELTS Speaking and Writing Evaluation Service",
         template: "ScoreMirror",
     },
     description:

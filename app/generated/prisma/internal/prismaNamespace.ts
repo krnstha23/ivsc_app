@@ -389,7 +389,6 @@ export const ModelName = {
   TeacherProfile: 'TeacherProfile',
   Package: 'Package',
   PackageBundle: 'PackageBundle',
-  StudentEnrollment: 'StudentEnrollment',
   Availability: 'Availability',
   Booking: 'Booking',
   WritingQuestion: 'WritingQuestion',
@@ -412,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "studentProfile" | "teacherProfile" | "package" | "packageBundle" | "studentEnrollment" | "availability" | "booking" | "writingQuestion" | "evaluation" | "writingSubmission" | "classMetadata" | "staticPage"
+    modelProps: "user" | "studentProfile" | "teacherProfile" | "package" | "packageBundle" | "availability" | "booking" | "writingQuestion" | "evaluation" | "writingSubmission" | "classMetadata" | "staticPage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -783,80 +782,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PackageBundleCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PackageBundleCountAggregateOutputType> | number
-        }
-      }
-    }
-    StudentEnrollment: {
-      payload: Prisma.$StudentEnrollmentPayload<ExtArgs>
-      fields: Prisma.StudentEnrollmentFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.StudentEnrollmentFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.StudentEnrollmentFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>
-        }
-        findFirst: {
-          args: Prisma.StudentEnrollmentFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.StudentEnrollmentFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>
-        }
-        findMany: {
-          args: Prisma.StudentEnrollmentFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>[]
-        }
-        create: {
-          args: Prisma.StudentEnrollmentCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>
-        }
-        createMany: {
-          args: Prisma.StudentEnrollmentCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.StudentEnrollmentCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>[]
-        }
-        delete: {
-          args: Prisma.StudentEnrollmentDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>
-        }
-        update: {
-          args: Prisma.StudentEnrollmentUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>
-        }
-        deleteMany: {
-          args: Prisma.StudentEnrollmentDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.StudentEnrollmentUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.StudentEnrollmentUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>[]
-        }
-        upsert: {
-          args: Prisma.StudentEnrollmentUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentEnrollmentPayload>
-        }
-        aggregate: {
-          args: Prisma.StudentEnrollmentAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateStudentEnrollment>
-        }
-        groupBy: {
-          args: Prisma.StudentEnrollmentGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.StudentEnrollmentGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.StudentEnrollmentCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.StudentEnrollmentCountAggregateOutputType> | number
         }
       }
     }
@@ -1483,6 +1408,7 @@ export const PackageBundleScalarFieldEnum = {
   hasEvaluation: 'hasEvaluation',
   isActive: 'isActive',
   isFeatured: 'isFeatured',
+  showOnLanding: 'showOnLanding',
   validFrom: 'validFrom',
   validUntil: 'validUntil',
   packageIds: 'packageIds',
@@ -1491,22 +1417,6 @@ export const PackageBundleScalarFieldEnum = {
 } as const
 
 export type PackageBundleScalarFieldEnum = (typeof PackageBundleScalarFieldEnum)[keyof typeof PackageBundleScalarFieldEnum]
-
-
-export const StudentEnrollmentScalarFieldEnum = {
-  id: 'id',
-  studentId: 'studentId',
-  packageId: 'packageId',
-  enrolledAt: 'enrolledAt',
-  status: 'status',
-  classesTotal: 'classesTotal',
-  classesUsed: 'classesUsed',
-  paymentId: 'paymentId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type StudentEnrollmentScalarFieldEnum = (typeof StudentEnrollmentScalarFieldEnum)[keyof typeof StudentEnrollmentScalarFieldEnum]
 
 
 export const AvailabilityScalarFieldEnum = {
@@ -1729,20 +1639,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'EnrollmentStatus'
- */
-export type EnumEnrollmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnrollmentStatus'>
-    
-
-
-/**
- * Reference to a field of type 'EnrollmentStatus[]'
- */
-export type ListEnumEnrollmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnrollmentStatus[]'>
-    
-
-
-/**
  * Reference to a field of type 'BookingStatus'
  */
 export type EnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingStatus'>
@@ -1883,7 +1779,6 @@ export type GlobalOmitConfig = {
   teacherProfile?: Prisma.TeacherProfileOmit
   package?: Prisma.PackageOmit
   packageBundle?: Prisma.PackageBundleOmit
-  studentEnrollment?: Prisma.StudentEnrollmentOmit
   availability?: Prisma.AvailabilityOmit
   booking?: Prisma.BookingOmit
   writingQuestion?: Prisma.WritingQuestionOmit

@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+    useEffect,
+    useMemo,
+    useState,
+    type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -31,6 +36,14 @@ import {
     type FindSlotResult,
 } from "@/app/(app)/packages/actions";
 import { formatRs } from "@/lib/format-rs";
+
+/** `YYYY-MM-DD` for `d` in the browser's local timezone — matches `<input type="date">` semantics. */
+function localCalendarDateString(d = new Date()): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+}
 
 export type BundleCardItem = {
     id: string;
@@ -74,45 +87,26 @@ function categoryBadgeClass(category: string) {
 
 function BundleCard({
     bundle,
-    isCenter,
     onGetStarted,
 }: {
     bundle: BundleCardItem;
-    isCenter: boolean;
     onGetStarted: (bundle: BundleCardItem) => void;
 }) {
     return (
-        <Card
-            className={cn(
-                "flex w-full flex-col overflow-hidden transition-shadow hover:shadow-md",
-                isCenter
-                    ? "sm:min-h-[420px] sm:scale-105"
-                    : "sm:min-h-[162px]",
-            )}
-        >
-            <CardHeader className={cn("pb-2", isCenter && "pb-3")}>
-                <CardTitle
-                    className={cn(
-                        "font-medium",
-                        isCenter ? "text-lg" : "text-base",
-                    )}
-                >
+        <Card className="flex h-full w-full flex-col gap-3 overflow-hidden transition-shadow hover:shadow-md">
+            <CardHeader className="pb-2">
+                {bundle.isFeatured ? (
+                    <span className="mb-2 inline-flex w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                        Featured
+                    </span>
+                ) : null}
+                <CardTitle className="text-lg font-medium">
                     {bundle.name}
                 </CardTitle>
             </CardHeader>
-            <CardContent
-                className={cn(
-                    "flex min-h-0 flex-1 flex-col gap-4 pb-4",
-                    isCenter && "gap-5 py-6",
-                )}
-            >
+            <CardContent className="flex min-h-0 flex-1 flex-col gap-4 pb-2">
                 <div className="mt-auto shrink-0 space-y-4">
-                    <ul
-                        className={cn(
-                            "space-y-2",
-                            isCenter ? "text-base" : "text-sm",
-                        )}
-                    >
+                    <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                             <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                                 <CheckCircle
@@ -144,12 +138,7 @@ function BundleCard({
                     </ul>
                     <div className="space-y-1">
                         <div className="flex flex-wrap items-baseline gap-1.5">
-                            <span
-                                className={cn(
-                                    "font-bold tabular-nums",
-                                    isCenter ? "text-4xl" : "text-3xl",
-                                )}
-                            >
+                            <span className="text-xl font-bold tabular-nums">
                                 {formatPrice(bundle.priceStandard)}
                             </span>
                             <span className="text-muted-foreground text-sm">
@@ -160,14 +149,26 @@ function BundleCard({
                                     : ""}
                             </span>
                         </div>
-                        <p className="text-muted-foreground text-xs tabular-nums sm:text-sm">
-                            Priority {formatPrice(bundle.pricePriority)} ·
-                            Instant {formatPrice(bundle.priceInstant)}
-                        </p>
+                        <div className="flex flex-wrap items-baseline gap-1.5">
+                            <span className="text-lg font-bold tabular-nums">
+                                {formatPrice(bundle.pricePriority)}
+                            </span>
+                            <span className="text-muted-foreground text-sm">
+                                Priority
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap items-baseline gap-1.5">
+                            <span className="text-base font-bold tabular-nums">
+                                {formatPrice(bundle.priceInstant)}
+                            </span>
+                            <span className="text-muted-foreground text-sm">
+                                Instant
+                            </span>
+                        </div>
                     </div>
                 </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="mt-auto">
                 <Button
                     type="button"
                     className="w-full"
@@ -188,6 +189,7 @@ function BundleCard({
 function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
     const router = useRouter();
     const { data: session } = useSession();
+    const minBookableDate = localCalendarDateString();
     const [date, setDate] = useState("");
     const [preferredTime, setPreferredTime] = useState("10:00");
     const [loading, setLoading] = useState(false);
@@ -216,6 +218,12 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
 
     const handleFindSlot = async () => {
         if (!date || !preferredTime) return;
+        if (date < minBookableDate) {
+            toast.error("Please choose today or a future date.");
+            setDate("");
+            setResult(null);
+            return;
+        }
         setLoading(true);
         setResult(null);
         setSelectedSlot(null);
@@ -257,7 +265,7 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
                 return;
             }
             toast.success(
-                "Session booked successfully! A teacher has been assigned.",
+                "Please check your email. You will receive the confirmation once the payment is complete.",
             );
             setPhoneOpen(false);
             setConfirmOpen(false);
@@ -294,10 +302,19 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
                         type="date"
                         value={date}
                         onChange={(e) => {
-                            setDate(e.target.value);
+                            const v = e.target.value;
+                            if (v && v < minBookableDate) {
+                                toast.error(
+                                    "You cannot select a past date. Choose today or later.",
+                                );
+                                setDate("");
+                                setResult(null);
+                                return;
+                            }
+                            setDate(v);
                             setResult(null);
                         }}
-                        min={new Date().toISOString().slice(0, 10)}
+                        min={minBookableDate}
                     />
                 </div>
                 <div className="flex-1 space-y-1.5">
@@ -654,10 +671,62 @@ function BundleDateSearch({ bundle }: { bundle: BundleCardItem }) {
 // BundleCards — main export
 // ---------------------------------------------------------------------------
 
+const bundleGridClass =
+    "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3";
+
+function FeaturedTopRow({
+    count,
+    children,
+}: {
+    count: number;
+    children: ReactNode;
+}) {
+    if (count <= 0) return null;
+    if (count === 1) {
+        return (
+            <div className="flex w-full justify-center">
+                <div className="w-full max-w-md">{children}</div>
+            </div>
+        );
+    }
+    if (count === 2) {
+        return (
+            <div
+                className={cn(
+                    "mx-auto grid w-full max-w-5xl grid-cols-1 gap-6",
+                    "md:grid-cols-2",
+                )}
+            >
+                {children}
+            </div>
+        );
+    }
+    return <div className={cn("mx-auto w-full max-w-6xl", bundleGridClass)}>{children}</div>;
+}
+
 export function BundleCards({ bundles }: { bundles: BundleCardItem[] }) {
     const [view, setView] = useState<"cards" | "search">("cards");
     const [selectedBundle, setSelectedBundle] =
         useState<BundleCardItem | null>(null);
+    const [showMore, setShowMore] = useState(false);
+
+    const { featured, nonFeatured, featuredTop, featuredRest, restBundles } =
+        useMemo(() => {
+            const featuredList = bundles.filter((b) => b.isFeatured);
+            const nonFeat = bundles.filter((b) => !b.isFeatured);
+            const top = featuredList.slice(0, 3);
+            const rest = featuredList.slice(3);
+            return {
+                featured: featuredList,
+                nonFeatured: nonFeat,
+                featuredTop: top,
+                featuredRest: rest,
+                restBundles: [...rest, ...nonFeat],
+            };
+        }, [bundles]);
+
+    const hasMoreBundles =
+        featuredRest.length > 0 || nonFeatured.length > 0;
 
     useEffect(() => {
         function handlePopState() {
@@ -667,6 +736,10 @@ export function BundleCards({ bundles }: { bundles: BundleCardItem[] }) {
         window.addEventListener("popstate", handlePopState);
         return () => window.removeEventListener("popstate", handlePopState);
     }, []);
+
+    useEffect(() => {
+        setShowMore(false);
+    }, [bundles]);
 
     if (bundles.length === 0) {
         return (
@@ -680,10 +753,6 @@ export function BundleCards({ bundles }: { bundles: BundleCardItem[] }) {
         return <BundleDateSearch bundle={selectedBundle} />;
     }
 
-    const centerCard = bundles[0];
-    const leftCard = bundles[1] ?? null;
-    const rightCard = bundles[2] ?? null;
-
     const handleGetStarted = (bundle: BundleCardItem) => {
         setSelectedBundle(bundle);
         setView("search");
@@ -694,37 +763,68 @@ export function BundleCards({ bundles }: { bundles: BundleCardItem[] }) {
         );
     };
 
+    if (featured.length === 0) {
+        return (
+            <div className={cn("mx-auto w-full max-w-6xl", bundleGridClass)}>
+                {bundles.map((bundle) => (
+                    <BundleCard
+                        key={bundle.id}
+                        bundle={bundle}
+                        onGetStarted={handleGetStarted}
+                    />
+                ))}
+            </div>
+        );
+    }
+
     return (
-        <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
-            <div className="order-2 min-w-0 sm:order-1 sm:flex sm:justify-end">
-                {leftCard ? (
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+            <FeaturedTopRow count={featuredTop.length}>
+                {featuredTop.map((bundle) => (
                     <BundleCard
-                        bundle={leftCard}
-                        isCenter={false}
+                        key={bundle.id}
+                        bundle={bundle}
                         onGetStarted={handleGetStarted}
                     />
-                ) : (
-                    <div className="hidden sm:block sm:min-w-0 sm:flex-1" />
-                )}
-            </div>
-            <div className="order-1 flex min-w-0 justify-center sm:order-2">
-                <BundleCard
-                    bundle={centerCard}
-                    isCenter
-                    onGetStarted={handleGetStarted}
-                />
-            </div>
-            <div className="order-3 min-w-0 sm:flex sm:justify-start">
-                {rightCard ? (
-                    <BundleCard
-                        bundle={rightCard}
-                        isCenter={false}
-                        onGetStarted={handleGetStarted}
-                    />
-                ) : (
-                    <div className="hidden sm:block sm:min-w-0 sm:flex-1" />
-                )}
-            </div>
+                ))}
+            </FeaturedTopRow>
+
+            {hasMoreBundles && !showMore ? (
+                <div className="flex justify-center">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        aria-expanded={false}
+                        onClick={() => setShowMore(true)}
+                    >
+                        Show more bundles
+                    </Button>
+                </div>
+            ) : null}
+
+            {hasMoreBundles && showMore ? (
+                <>
+                    <div className={bundleGridClass}>
+                        {restBundles.map((bundle) => (
+                            <BundleCard
+                                key={bundle.id}
+                                bundle={bundle}
+                                onGetStarted={handleGetStarted}
+                            />
+                        ))}
+                    </div>
+                    <div className="flex justify-center">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            aria-expanded={true}
+                            onClick={() => setShowMore(false)}
+                        >
+                            Show less
+                        </Button>
+                    </div>
+                </>
+            ) : null}
         </div>
     );
 }

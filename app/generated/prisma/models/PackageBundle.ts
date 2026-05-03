@@ -54,6 +54,7 @@ export type PackageBundleMinAggregateOutputType = {
   hasEvaluation: boolean | null
   isActive: boolean | null
   isFeatured: boolean | null
+  showOnLanding: boolean | null
   validFrom: Date | null
   validUntil: Date | null
   createdAt: Date | null
@@ -72,6 +73,7 @@ export type PackageBundleMaxAggregateOutputType = {
   hasEvaluation: boolean | null
   isActive: boolean | null
   isFeatured: boolean | null
+  showOnLanding: boolean | null
   validFrom: Date | null
   validUntil: Date | null
   createdAt: Date | null
@@ -90,6 +92,7 @@ export type PackageBundleCountAggregateOutputType = {
   hasEvaluation: number
   isActive: number
   isFeatured: number
+  showOnLanding: number
   validFrom: number
   validUntil: number
   packageIds: number
@@ -127,6 +130,7 @@ export type PackageBundleMinAggregateInputType = {
   hasEvaluation?: true
   isActive?: true
   isFeatured?: true
+  showOnLanding?: true
   validFrom?: true
   validUntil?: true
   createdAt?: true
@@ -145,6 +149,7 @@ export type PackageBundleMaxAggregateInputType = {
   hasEvaluation?: true
   isActive?: true
   isFeatured?: true
+  showOnLanding?: true
   validFrom?: true
   validUntil?: true
   createdAt?: true
@@ -163,6 +168,7 @@ export type PackageBundleCountAggregateInputType = {
   hasEvaluation?: true
   isActive?: true
   isFeatured?: true
+  showOnLanding?: true
   validFrom?: true
   validUntil?: true
   packageIds?: true
@@ -269,6 +275,7 @@ export type PackageBundleGroupByOutputType = {
   hasEvaluation: boolean
   isActive: boolean
   isFeatured: boolean
+  showOnLanding: boolean
   validFrom: Date | null
   validUntil: Date | null
   packageIds: string[]
@@ -311,6 +318,7 @@ export type PackageBundleWhereInput = {
   hasEvaluation?: Prisma.BoolFilter<"PackageBundle"> | boolean
   isActive?: Prisma.BoolFilter<"PackageBundle"> | boolean
   isFeatured?: Prisma.BoolFilter<"PackageBundle"> | boolean
+  showOnLanding?: Prisma.BoolFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
   packageIds?: Prisma.StringNullableListFilter<"PackageBundle">
@@ -330,6 +338,7 @@ export type PackageBundleOrderByWithRelationInput = {
   hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
+  showOnLanding?: Prisma.SortOrder
   validFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   validUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   packageIds?: Prisma.SortOrder
@@ -352,6 +361,7 @@ export type PackageBundleWhereUniqueInput = Prisma.AtLeast<{
   hasEvaluation?: Prisma.BoolFilter<"PackageBundle"> | boolean
   isActive?: Prisma.BoolFilter<"PackageBundle"> | boolean
   isFeatured?: Prisma.BoolFilter<"PackageBundle"> | boolean
+  showOnLanding?: Prisma.BoolFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableFilter<"PackageBundle"> | Date | string | null
   packageIds?: Prisma.StringNullableListFilter<"PackageBundle">
@@ -371,6 +381,7 @@ export type PackageBundleOrderByWithAggregationInput = {
   hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
+  showOnLanding?: Prisma.SortOrder
   validFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   validUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   packageIds?: Prisma.SortOrder
@@ -398,6 +409,7 @@ export type PackageBundleScalarWhereWithAggregatesInput = {
   hasEvaluation?: Prisma.BoolWithAggregatesFilter<"PackageBundle"> | boolean
   isActive?: Prisma.BoolWithAggregatesFilter<"PackageBundle"> | boolean
   isFeatured?: Prisma.BoolWithAggregatesFilter<"PackageBundle"> | boolean
+  showOnLanding?: Prisma.BoolWithAggregatesFilter<"PackageBundle"> | boolean
   validFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"PackageBundle"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"PackageBundle"> | Date | string | null
   packageIds?: Prisma.StringNullableListFilter<"PackageBundle">
@@ -417,6 +429,7 @@ export type PackageBundleCreateInput = {
   hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
+  showOnLanding?: boolean
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   packageIds?: Prisma.PackageBundleCreatepackageIdsInput | string[]
@@ -436,6 +449,7 @@ export type PackageBundleUncheckedCreateInput = {
   hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
+  showOnLanding?: boolean
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   packageIds?: Prisma.PackageBundleCreatepackageIdsInput | string[]
@@ -455,6 +469,7 @@ export type PackageBundleUpdateInput = {
   hasEvaluation?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  showOnLanding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   packageIds?: Prisma.PackageBundleUpdatepackageIdsInput | string[]
@@ -474,6 +489,7 @@ export type PackageBundleUncheckedUpdateInput = {
   hasEvaluation?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  showOnLanding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   packageIds?: Prisma.PackageBundleUpdatepackageIdsInput | string[]
@@ -493,6 +509,7 @@ export type PackageBundleCreateManyInput = {
   hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
+  showOnLanding?: boolean
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   packageIds?: Prisma.PackageBundleCreatepackageIdsInput | string[]
@@ -512,6 +529,7 @@ export type PackageBundleUpdateManyMutationInput = {
   hasEvaluation?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  showOnLanding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   packageIds?: Prisma.PackageBundleUpdatepackageIdsInput | string[]
@@ -531,6 +549,7 @@ export type PackageBundleUncheckedUpdateManyInput = {
   hasEvaluation?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  showOnLanding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   packageIds?: Prisma.PackageBundleUpdatepackageIdsInput | string[]
@@ -558,6 +577,7 @@ export type PackageBundleCountOrderByAggregateInput = {
   hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
+  showOnLanding?: Prisma.SortOrder
   validFrom?: Prisma.SortOrder
   validUntil?: Prisma.SortOrder
   packageIds?: Prisma.SortOrder
@@ -585,6 +605,7 @@ export type PackageBundleMaxOrderByAggregateInput = {
   hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
+  showOnLanding?: Prisma.SortOrder
   validFrom?: Prisma.SortOrder
   validUntil?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -603,6 +624,7 @@ export type PackageBundleMinOrderByAggregateInput = {
   hasEvaluation?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
+  showOnLanding?: Prisma.SortOrder
   validFrom?: Prisma.SortOrder
   validUntil?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -660,6 +682,7 @@ export type PackageBundleSelect<ExtArgs extends runtime.Types.Extensions.Interna
   hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
+  showOnLanding?: boolean
   validFrom?: boolean
   validUntil?: boolean
   packageIds?: boolean
@@ -679,6 +702,7 @@ export type PackageBundleSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
+  showOnLanding?: boolean
   validFrom?: boolean
   validUntil?: boolean
   packageIds?: boolean
@@ -698,6 +722,7 @@ export type PackageBundleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
+  showOnLanding?: boolean
   validFrom?: boolean
   validUntil?: boolean
   packageIds?: boolean
@@ -717,6 +742,7 @@ export type PackageBundleSelectScalar = {
   hasEvaluation?: boolean
   isActive?: boolean
   isFeatured?: boolean
+  showOnLanding?: boolean
   validFrom?: boolean
   validUntil?: boolean
   packageIds?: boolean
@@ -724,7 +750,7 @@ export type PackageBundleSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PackageBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "priceStandard" | "pricePriority" | "priceInstant" | "discountPercent" | "duration" | "hasEvaluation" | "isActive" | "isFeatured" | "validFrom" | "validUntil" | "packageIds" | "createdAt" | "updatedAt", ExtArgs["result"]["packageBundle"]>
+export type PackageBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "priceStandard" | "pricePriority" | "priceInstant" | "discountPercent" | "duration" | "hasEvaluation" | "isActive" | "isFeatured" | "showOnLanding" | "validFrom" | "validUntil" | "packageIds" | "createdAt" | "updatedAt", ExtArgs["result"]["packageBundle"]>
 
 export type $PackageBundlePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PackageBundle"
@@ -741,6 +767,7 @@ export type $PackageBundlePayload<ExtArgs extends runtime.Types.Extensions.Inter
     hasEvaluation: boolean
     isActive: boolean
     isFeatured: boolean
+    showOnLanding: boolean
     validFrom: Date | null
     validUntil: Date | null
     packageIds: string[]
@@ -1180,6 +1207,7 @@ export interface PackageBundleFieldRefs {
   readonly hasEvaluation: Prisma.FieldRef<"PackageBundle", 'Boolean'>
   readonly isActive: Prisma.FieldRef<"PackageBundle", 'Boolean'>
   readonly isFeatured: Prisma.FieldRef<"PackageBundle", 'Boolean'>
+  readonly showOnLanding: Prisma.FieldRef<"PackageBundle", 'Boolean'>
   readonly validFrom: Prisma.FieldRef<"PackageBundle", 'DateTime'>
   readonly validUntil: Prisma.FieldRef<"PackageBundle", 'DateTime'>
   readonly packageIds: Prisma.FieldRef<"PackageBundle", 'String[]'>

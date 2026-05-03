@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
     AlarmAdd,
-    ClipboardList,
     UsersGroupRounded,
     UserCheck,
     CartLarge2,
@@ -103,12 +102,6 @@ export function AdminDashboard({ data }: { data: AdminDashboardData }) {
                             <Link href="/packages" className="gap-1.5">
                                 <CartLarge2 size={16} />
                                 Packages
-                            </Link>
-                        </Button>
-                        <Button asChild size="sm" variant="secondary">
-                            <Link href="/enrollments" className="gap-1.5">
-                                <ClipboardList size={16} />
-                                Enrollments
                             </Link>
                         </Button>
                         <Button asChild size="sm" variant="secondary">

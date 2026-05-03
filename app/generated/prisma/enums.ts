@@ -36,12 +36,3 @@ export const PaymentStatus = {
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
-
-
-export const EnrollmentStatus = {
-  ACTIVE: 'ACTIVE',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED'
-} as const
-
-export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus]

@@ -53,8 +53,7 @@ function StatusLabel({ status }: { status: string }) {
 }
 
 export function StudentDashboard({ data }: { data: StudentDashboardData }) {
-    const { firstName, upcomingCount, completedCount, activeEnrollments, upcoming, next } =
-        data;
+    const { firstName, upcomingCount, completedCount, upcoming, next } = data;
     const upcomingList =
         next && upcoming.length > 0
             ? upcoming.filter((b) => b.id !== next.id)
@@ -69,21 +68,16 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card lg:px-6">
+            <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-3 dark:*:data-[slot=card]:bg-card lg:px-6">
                 <Kpi
                     label="Upcoming sessions"
                     value={upcomingCount}
-                    hint="Confirmed or pending, from today onward"
+                    hint="Confirmed sessions from today onward"
                 />
                 <Kpi
                     label="Completed"
                     value={completedCount}
                     hint="All-time finished sessions"
-                />
-                <Kpi
-                    label="Active enrollments"
-                    value={activeEnrollments}
-                    hint="Packages with remaining sessions"
                 />
                 <Card className="flex flex-col justify-between border-dashed bg-muted/20 shadow-xs">
                     <CardHeader>

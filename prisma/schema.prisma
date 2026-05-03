@@ -43,14 +43,6 @@ enum PaymentStatus {
   @@map("payment_status")
 }
 
-enum EnrollmentStatus {
-  ACTIVE
-  COMPLETED
-  CANCELLED
-
-  @@map("enrollment_status")
-}
-
 // =============================================================================
 // USER & PROFILES
 // =============================================================================
@@ -88,8 +80,7 @@ model StudentProfile {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user        User                @relation(fields: [userId], references: [id])
-  enrollments StudentEnrollment[]
+  user User @relation(fields: [userId], references: [id])
 
   @@map("student_profiles")
 }
@@ -130,7 +121,6 @@ model Package {
   // Relations
   bookings     Booking[]
   classHistory ClassMetadata[]
-  enrollments  StudentEnrollment[]
 
   @@map("packages")
 }
@@ -148,6 +138,7 @@ model PackageBundle {
   hasEvaluation   Boolean   @default(false)
   isActive        Boolean   @default(true)
   isFeatured      Boolean   @default(false)
+  showOnLanding   Boolean   @default(false)
   validFrom       DateTime?
   validUntil      DateTime?
   packageIds      String[]  @default([])
@@ -155,33 +146,6 @@ model PackageBundle {
   updatedAt       DateTime  @updatedAt
 
   @@map("package_bundles")
-}
-
-// =============================================================================
-// ENROLLMENTS
-// =============================================================================
-
-// StudentEnrollment - junction table for Student <-> Package with enrollment tracking
-model StudentEnrollment {
-  id           String           @id @default(uuid())
-  studentId    String
-  packageId    String
-  enrolledAt   DateTime         @default(now())
-  status       EnrollmentStatus @default(ACTIVE)
-  classesTotal Int
-  classesUsed  Int              @default(0)
-  paymentId    String?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-
-  // Relations
-  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  package Package        @relation(fields: [packageId], references: [id], onDelete: Cascade)
-
-  @@unique([studentId, packageId])
-  @@index([studentId])
-  @@index([packageId])
-  @@map("student_enrollments")
 }
 
 // =============================================================================

@@ -234,7 +234,6 @@ export type PackageWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Package"> | Date | string
   bookings?: Prisma.BookingListRelationFilter
   classHistory?: Prisma.ClassMetadataListRelationFilter
-  enrollments?: Prisma.StudentEnrollmentListRelationFilter
 }
 
 export type PackageOrderByWithRelationInput = {
@@ -247,7 +246,6 @@ export type PackageOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   bookings?: Prisma.BookingOrderByRelationAggregateInput
   classHistory?: Prisma.ClassMetadataOrderByRelationAggregateInput
-  enrollments?: Prisma.StudentEnrollmentOrderByRelationAggregateInput
 }
 
 export type PackageWhereUniqueInput = Prisma.AtLeast<{
@@ -263,7 +261,6 @@ export type PackageWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Package"> | Date | string
   bookings?: Prisma.BookingListRelationFilter
   classHistory?: Prisma.ClassMetadataListRelationFilter
-  enrollments?: Prisma.StudentEnrollmentListRelationFilter
 }, "id">
 
 export type PackageOrderByWithAggregationInput = {
@@ -304,7 +301,6 @@ export type PackageCreateInput = {
   updatedAt?: Date | string
   bookings?: Prisma.BookingCreateNestedManyWithoutPackageInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutPackageInput
-  enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutPackageInput
 }
 
 export type PackageUncheckedCreateInput = {
@@ -317,7 +313,6 @@ export type PackageUncheckedCreateInput = {
   updatedAt?: Date | string
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPackageInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutPackageInput
-  enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutPackageInput
 }
 
 export type PackageUpdateInput = {
@@ -330,7 +325,6 @@ export type PackageUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUpdateManyWithoutPackageNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutPackageNestedInput
-  enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutPackageNestedInput
 }
 
 export type PackageUncheckedUpdateInput = {
@@ -343,7 +337,6 @@ export type PackageUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPackageNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutPackageNestedInput
-  enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutPackageNestedInput
 }
 
 export type PackageCreateManyInput = {
@@ -414,14 +407,14 @@ export type PackageSumOrderByAggregateInput = {
   price?: Prisma.SortOrder
 }
 
-export type PackageScalarRelationFilter = {
-  is?: Prisma.PackageWhereInput
-  isNot?: Prisma.PackageWhereInput
-}
-
 export type PackageNullableScalarRelationFilter = {
   is?: Prisma.PackageWhereInput | null
   isNot?: Prisma.PackageWhereInput | null
+}
+
+export type PackageScalarRelationFilter = {
+  is?: Prisma.PackageWhereInput
+  isNot?: Prisma.PackageWhereInput
 }
 
 export type DecimalFieldUpdateOperationsInput = {
@@ -430,20 +423,6 @@ export type DecimalFieldUpdateOperationsInput = {
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type PackageCreateNestedOneWithoutEnrollmentsInput = {
-  create?: Prisma.XOR<Prisma.PackageCreateWithoutEnrollmentsInput, Prisma.PackageUncheckedCreateWithoutEnrollmentsInput>
-  connectOrCreate?: Prisma.PackageCreateOrConnectWithoutEnrollmentsInput
-  connect?: Prisma.PackageWhereUniqueInput
-}
-
-export type PackageUpdateOneRequiredWithoutEnrollmentsNestedInput = {
-  create?: Prisma.XOR<Prisma.PackageCreateWithoutEnrollmentsInput, Prisma.PackageUncheckedCreateWithoutEnrollmentsInput>
-  connectOrCreate?: Prisma.PackageCreateOrConnectWithoutEnrollmentsInput
-  upsert?: Prisma.PackageUpsertWithoutEnrollmentsInput
-  connect?: Prisma.PackageWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.PackageUpdateToOneWithWhereWithoutEnrollmentsInput, Prisma.PackageUpdateWithoutEnrollmentsInput>, Prisma.PackageUncheckedUpdateWithoutEnrollmentsInput>
 }
 
 export type PackageCreateNestedOneWithoutBookingsInput = {
@@ -476,70 +455,6 @@ export type PackageUpdateOneRequiredWithoutClassHistoryNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PackageUpdateToOneWithWhereWithoutClassHistoryInput, Prisma.PackageUpdateWithoutClassHistoryInput>, Prisma.PackageUncheckedUpdateWithoutClassHistoryInput>
 }
 
-export type PackageCreateWithoutEnrollmentsInput = {
-  id?: string
-  name: string
-  description?: string | null
-  price: runtime.Decimal | runtime.DecimalJsLike | number | string
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  bookings?: Prisma.BookingCreateNestedManyWithoutPackageInput
-  classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutPackageInput
-}
-
-export type PackageUncheckedCreateWithoutEnrollmentsInput = {
-  id?: string
-  name: string
-  description?: string | null
-  price: runtime.Decimal | runtime.DecimalJsLike | number | string
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPackageInput
-  classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutPackageInput
-}
-
-export type PackageCreateOrConnectWithoutEnrollmentsInput = {
-  where: Prisma.PackageWhereUniqueInput
-  create: Prisma.XOR<Prisma.PackageCreateWithoutEnrollmentsInput, Prisma.PackageUncheckedCreateWithoutEnrollmentsInput>
-}
-
-export type PackageUpsertWithoutEnrollmentsInput = {
-  update: Prisma.XOR<Prisma.PackageUpdateWithoutEnrollmentsInput, Prisma.PackageUncheckedUpdateWithoutEnrollmentsInput>
-  create: Prisma.XOR<Prisma.PackageCreateWithoutEnrollmentsInput, Prisma.PackageUncheckedCreateWithoutEnrollmentsInput>
-  where?: Prisma.PackageWhereInput
-}
-
-export type PackageUpdateToOneWithWhereWithoutEnrollmentsInput = {
-  where?: Prisma.PackageWhereInput
-  data: Prisma.XOR<Prisma.PackageUpdateWithoutEnrollmentsInput, Prisma.PackageUncheckedUpdateWithoutEnrollmentsInput>
-}
-
-export type PackageUpdateWithoutEnrollmentsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  bookings?: Prisma.BookingUpdateManyWithoutPackageNestedInput
-  classHistory?: Prisma.ClassMetadataUpdateManyWithoutPackageNestedInput
-}
-
-export type PackageUncheckedUpdateWithoutEnrollmentsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  bookings?: Prisma.BookingUncheckedUpdateManyWithoutPackageNestedInput
-  classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutPackageNestedInput
-}
-
 export type PackageCreateWithoutBookingsInput = {
   id?: string
   name: string
@@ -549,7 +464,6 @@ export type PackageCreateWithoutBookingsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutPackageInput
-  enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutPackageInput
 }
 
 export type PackageUncheckedCreateWithoutBookingsInput = {
@@ -561,7 +475,6 @@ export type PackageUncheckedCreateWithoutBookingsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutPackageInput
-  enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutPackageInput
 }
 
 export type PackageCreateOrConnectWithoutBookingsInput = {
@@ -589,7 +502,6 @@ export type PackageUpdateWithoutBookingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutPackageNestedInput
-  enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutPackageNestedInput
 }
 
 export type PackageUncheckedUpdateWithoutBookingsInput = {
@@ -601,7 +513,6 @@ export type PackageUncheckedUpdateWithoutBookingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutPackageNestedInput
-  enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutPackageNestedInput
 }
 
 export type PackageCreateWithoutClassHistoryInput = {
@@ -613,7 +524,6 @@ export type PackageCreateWithoutClassHistoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   bookings?: Prisma.BookingCreateNestedManyWithoutPackageInput
-  enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutPackageInput
 }
 
 export type PackageUncheckedCreateWithoutClassHistoryInput = {
@@ -625,7 +535,6 @@ export type PackageUncheckedCreateWithoutClassHistoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPackageInput
-  enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutPackageInput
 }
 
 export type PackageCreateOrConnectWithoutClassHistoryInput = {
@@ -653,7 +562,6 @@ export type PackageUpdateWithoutClassHistoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUpdateManyWithoutPackageNestedInput
-  enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutPackageNestedInput
 }
 
 export type PackageUncheckedUpdateWithoutClassHistoryInput = {
@@ -665,7 +573,6 @@ export type PackageUncheckedUpdateWithoutClassHistoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPackageNestedInput
-  enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutPackageNestedInput
 }
 
 
@@ -676,13 +583,11 @@ export type PackageUncheckedUpdateWithoutClassHistoryInput = {
 export type PackageCountOutputType = {
   bookings: number
   classHistory: number
-  enrollments: number
 }
 
 export type PackageCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bookings?: boolean | PackageCountOutputTypeCountBookingsArgs
   classHistory?: boolean | PackageCountOutputTypeCountClassHistoryArgs
-  enrollments?: boolean | PackageCountOutputTypeCountEnrollmentsArgs
 }
 
 /**
@@ -709,13 +614,6 @@ export type PackageCountOutputTypeCountClassHistoryArgs<ExtArgs extends runtime.
   where?: Prisma.ClassMetadataWhereInput
 }
 
-/**
- * PackageCountOutputType without action
- */
-export type PackageCountOutputTypeCountEnrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.StudentEnrollmentWhereInput
-}
-
 
 export type PackageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -727,7 +625,6 @@ export type PackageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   updatedAt?: boolean
   bookings?: boolean | Prisma.Package$bookingsArgs<ExtArgs>
   classHistory?: boolean | Prisma.Package$classHistoryArgs<ExtArgs>
-  enrollments?: boolean | Prisma.Package$enrollmentsArgs<ExtArgs>
   _count?: boolean | Prisma.PackageCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["package"]>
 
@@ -765,7 +662,6 @@ export type PackageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type PackageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bookings?: boolean | Prisma.Package$bookingsArgs<ExtArgs>
   classHistory?: boolean | Prisma.Package$classHistoryArgs<ExtArgs>
-  enrollments?: boolean | Prisma.Package$enrollmentsArgs<ExtArgs>
   _count?: boolean | Prisma.PackageCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PackageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -776,7 +672,6 @@ export type $PackagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     bookings: Prisma.$BookingPayload<ExtArgs>[]
     classHistory: Prisma.$ClassMetadataPayload<ExtArgs>[]
-    enrollments: Prisma.$StudentEnrollmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1182,7 +1077,6 @@ export interface Prisma__PackageClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   bookings<T extends Prisma.Package$bookingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Package$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   classHistory<T extends Prisma.Package$classHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Package$classHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassMetadataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  enrollments<T extends Prisma.Package$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Package$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1652,30 +1546,6 @@ export type Package$classHistoryArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.ClassMetadataScalarFieldEnum | Prisma.ClassMetadataScalarFieldEnum[]
-}
-
-/**
- * Package.enrollments
- */
-export type Package$enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the StudentEnrollment
-   */
-  select?: Prisma.StudentEnrollmentSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the StudentEnrollment
-   */
-  omit?: Prisma.StudentEnrollmentOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.StudentEnrollmentInclude<ExtArgs> | null
-  where?: Prisma.StudentEnrollmentWhereInput
-  orderBy?: Prisma.StudentEnrollmentOrderByWithRelationInput | Prisma.StudentEnrollmentOrderByWithRelationInput[]
-  cursor?: Prisma.StudentEnrollmentWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.StudentEnrollmentScalarFieldEnum | Prisma.StudentEnrollmentScalarFieldEnum[]
 }
 
 /**

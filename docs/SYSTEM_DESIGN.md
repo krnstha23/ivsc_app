@@ -1,6 +1,6 @@
 # IVCS - System Design Document
 
-> **Last Updated**: April 30, 2026 (updated lead-time definitions)
+> **Last Updated**: May 03, 2026 (pending booking flow; enrollments removed; bundle-only booking; **past date/time validation** on `/students` bundle wizard)
 > **Status**: Phase 1–3 Complete (except payment); Phase 4 pending  
 > **Branch**: `main`
 
@@ -27,8 +27,8 @@ A centralized web application that:
 
 1. Lets **teachers** publish **availability** (evolving from discrete rows toward **multi-block** days and **server-generated** segments per **§1.5**).
 2. Lets **admins** manage **users**, **packages**, **bundles** (including **per–lead-time-tier prices** on each bundle), and **override** scheduling or act on behalf of teachers when needed.
-3. Lets **students** book **speaking** sessions through **bundles** and **packages**, with a **target** flow of **date → preference → single offered slot** and **server-side teacher assignment** (**§1.6**).
-4. Uses **`Booking` status and payment fields** (not a separate hold subsystem as the primary story) so that **only a paid, confirmed booking** blocks a segment for other students (**§1.4**); detailed payment mechanics are **deferred to §11**.
+3. Lets **students** book **speaking** sessions through **bundles** only (the **Book a Session** / `/students` flow). **Packages** remain an **admin-managed catalog**; students are directed to bundle booking instead of `/packages/[id]/book`. Flow: **date → preference → single offered slot** and **server-side teacher assignment** (**§1.6**).
+4. Uses **`Booking.status` and `paymentStatus`** (mirrored in app until a payment-confirmation API exists) so that **only a non-cancelled booking** blocks a segment for other students. Students complete **checkout steps** (phone/email, QR) then receive **`PENDING`**; **`CONFIRMED`** is set only after **admin approval** (Option A, **§9**). **`paymentStatus`** is written alongside **`Booking.status`** (e.g. PENDING/PAID/FAILED) for future webhook integration — **§11** for full payment rules.
 5. Provides a **session room** with an agreed **step order** (**§1.7**): Meet link → PDF upload → teacher evaluation → shared final evaluation (with **24h** student download window where applicable).
 
 ### 1.4 Product vision — target experience (agreed Mar 2026)
@@ -127,10 +127,10 @@ This section records the **agreed student-facing flow** for choosing a session w
 
 1. Student selects **date** (and bundle / package context as applicable).
 2. Student enters a **preferred time** (exact time, time window, or part-of-day — **precise control shape TBD** at implementation).
-3. The server considers all **valid generated segments** for that date and bundle (respecting **§1.5** gap rules, `bundleIds` / package rules, existing **confirmed/paid** bookings, and any **pending-checkout** rows represented via **`Booking` / payment state** per **§1.4**).
+3. The server considers all **valid generated segments** for that date and bundle (respecting **§1.5** gap rules, `bundleIds` / package rules, existing **non-cancelled** bookings (PENDING, CONFIRMED, COMPLETED), and any **pending-checkout** rows represented via **`Booking` / payment state** per **§1.4**).
 4. The server returns **one primary offering**: a single **concrete bookable segment** (specific start/end and internal teacher assignment) that **best matches** the preference (policy **TBD**: e.g. closest start at or after requested time, or minimum absolute delta—document in code when fixed).
 5. If **no** segment matches the preference (or all matching segments are unavailable), the server responds with the **nearest** acceptable alternative(s) (e.g. next available start on that day, and/or a small list of alternates — **count and “nearest” definition TBD**).
-6. When the student **accepts** the offered slot, the system creates or updates booking state so **payment** can complete; **blocking competing students** is expressed through **`Booking.status` / `paymentStatus`** (and timeouts/cleanup **TBD** in **§11**), not a separate hold entity as the primary design.
+6. When the student **accepts** the offered slot, the system creates a booking with **`status: PENDING`** and **`paymentStatus: PENDING`**; **blocks the slot** for other students immediately (all non-`CANCELLED` bookings are conflicts). **No enrollment / `classesUsed`** — that model was **removed** (May 2026). Success toast (client): *"Please check your email. You will receive the confirmation once the payment is complete."* (copy is **payment-oriented**; **admin still approves** before `CONFIRMED` — see **§9**). Admin confirms or rejects from the **Pending** view on `/bookings`.
 
 #### Why this works with multiple teachers
 
@@ -354,29 +354,31 @@ User (Student)
 7. New slots become bookable immediately
 ```
 
-### 4.2 User Booking Flow (Package-First)
+### 4.2 User Booking Flow (Bundle-first; May 2026)
 
-**Current implementation (Apr 2026):**
+**Current implementation:**
 
 ```
-1. User (student) logs in
-2. Option A (bundle discovery): Browse featured bundles from the "Students" page, search by date, and book an available slot
-   - Creates a Booking tied to the Availability; `packageId` is optional (no enrollment required).
-3. Option B (package booking): Browse packages, open package detail, and use the "Book a session" flow
-   - Requires an ACTIVE StudentEnrollment with remaining classes.
-4. Select an available slot → Click "Confirm & book" → Confirmation dialog (slot details)
-   5. Click "Next" → Phone/Email modal:
-   - Mobile number (required, validated)
-   - Email (pre-filled from account but editable, validated)
-   - Both `studentPhone` and `studentEmail` stored on `Booking` record
-6. Click "Next" → QR Code modal (scan to pay)
-7. Click "Confirm & book" → Booking created with status `CONFIRMED`
-8. Redirects to `/dashboard` on success
-9. If `packageId` is provided, increments `StudentEnrollment.classesUsed`
-10. **Nearest slot message**: When searched time doesn't match exactly, shows "The searched time is not available, here is the nearest slot from the searched time and date" above the slot card
+1. Student logs in
+2. Opens **Book a Session** (`/students`), selects a bundle, searches by date / preferred time
+3. Server returns a single offered slot (`findSlotForPreference`); optional nearest-slot messaging when not exact match
+4. Confirm slot → Phone/Email modal → QR modal → **Confirm & book**
+5. Creates `Booking` with `status: PENDING`, `paymentStatus: PENDING`, `packageId: null`; blocks slot for others (non-CANCELLED conflicts)
+6. Toast: "Please check your email. You will receive the confirmation once the payment is complete." → redirect `/dashboard`
+7. Admin confirms on `/bookings` (`tab=pending`) → `CONFIRMED` + `paymentStatus: PAID` (until §11 payment API refines this)
+8. **Student `/bookings`**: lists **CONFIRMED** upcoming/past only; **PENDING** hidden. **Cancel/reschedule** apply to **CONFIRMED** bookings only (student cannot cancel **PENDING**)
+9. **`/packages/[id]/book`** redirects to **`/students`**; package detail for students explains bundle booking only
+10. **Writing-only bundles** (`duration === 0`): `createWritingOnlyBooking` also creates **PENDING** + admin approval
 ```
 
-**Target (per §1.4, §1.5, §1.6, §11):** introduce **payment-gated** confirmation so the slot is only **fully booked** after **successful payment**; represent checkout and timeouts via **`Booking.status`** and **`paymentStatus`**. Student flow becomes **date → preferred time → single offered slot → phone/email → QR payment → confirmed**. Bundle **tier price** at checkout comes from **Standard (2+ days) / Priority (tomorrow) / Instant (today)** fields on **`PackageBundle`**.
+**Past date / time validation (bundle wizard — `/students`, `components/bundle-cards.tsx` + server actions):**
+
+| Layer | Behavior |
+| ----- | -------- |
+| **Client** | `<input type="date">` sets **`min`** to **today’s calendar date in the browser’s local timezone** (`localCalendarDateString()`), so the native picker **disables past days** (replacing UTC-only `toISOString().slice(0, 10)`, which misaligned “today” near timezone boundaries). **`onChange`** rejects values **before `min`** (e.g. paste) with a toast and clears the field. **`Find slot`** rechecks before calling the server. |
+| **Server** | **`findSlotForPreference`**: rejects when **`dateStr`** is **before** today’s UTC calendar date string (`now.toISOString().slice(0, 10)`), matching how **`scheduledAt`** is built (`…T${startTime}:00.000Z`). If the closest slot’s **`sessionStart` ≤ `now`**, returns **not found** plus **alternatives** and an explanatory message. **`createBookingForSlot`**: rejects when **`scheduledAt.getTime() ≤ Date.now()`** so direct action calls cannot book in the past. |
+
+**Target (§11):** External payment confirmation webhooks and stricter **`paymentStatus`** rules — **`CONFIRMED`** remains **admin-gated** (Option A) unless product direction changes.
 
 ### 4.3 Admin Timetable Management
 
@@ -473,22 +475,25 @@ ivcs-app/
 
 Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar filters items with `filterByRole()`. Sub-routes (e.g. `/dashboard/bookings`) are protected so direct URL access respects the same permissions. No separate `/admin`, `/teacher`, or `/student` pages; all dashboard access is via `/dashboard`.
 
-**Sidebar pages by role (current — implemented, Apr 10 2026):**
+**Sidebar pages by role (current — implemented, May 01 2026):**
 
 | Page              | Route              | ADMIN | TEACHER | USER (Student) |
 |-------------------|--------------------|-------|---------|----------------|
 | Dashboard         | /dashboard         | ✓     | ✓       | ✓               |
 | Calendar          | /calendar          | ✓     | ✓       | ✓               |
-| My Bookings       | /bookings          | —     | —       | ✓               |
-| My Sessions       | /bookings/teaching | —     | ✓       | —               |
+| Bookings          | /bookings          | ✓ (all + Pending tab) | ✓ (teaching sessions) | ✓ (own bookings) |
 | Users             | /users             | ✓     | —       | —               |
 | Manage Teachers   | /teachers/manage   | ✓     | —       | —               |
-| Enrollments       | /enrollments       | ✓     | —       | —               |
 | Teachers          | /teachers          | ✓     | ✓       | ✓               |
 | Students          | /students          | ✓     | ✓       | ✓               |
 | Packages          | /packages          | ✓     | ✓       | ✓               |
 | Timetable         | /timetable         | ✓     | —       | —               |
 | Reports           | /reports           | ✓     | —       | —               |
+
+**Note:** The legacy `/bookings/teaching` route permanently redirects to `/bookings`. The merged `/bookings` page uses role-based rendering:
+- **Students**: See only their own bookings (Upcoming/Past tabs, `PENDING` bookings filtered out, no Pending tab)
+- **Teachers**: See only their assigned teaching sessions (Upcoming/Past tabs, no Pending tab)
+- **Admins**: See all bookings across all users (Upcoming/Past/Pending tabs; Pending tab is admin-only with confirm/reject actions)
 
 **Dashboard home:** Section cards visible to all roles.
 
@@ -503,14 +508,13 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 | Model | Table Name | Purpose |
 |-------|------------|---------|
 | `User` | `users` | Base user with **username** (login), email, role (ADMIN, TEACHER, USER), auth fields |
-| `StudentProfile` | `student_profiles` | Extended student info, linked to enrollments |
+| `StudentProfile` | `student_profiles` | Extended student info |
 | `TeacherProfile` | `teacher_profiles` | Extended teacher info: bio, availability, `isApproved` (self-reg approval gate) |
 | `Availability` | `availabilities` | Date-specific time slots teachers mark as available |
 | `Package` | `packages` | Purchasable class packages with pricing |
 | `Booking` | `bookings` | Scheduled sessions, links User → Teacher → Availability; includes `meetLink`, `bundleId`, `submissionStart`/`End` |
 | `ClassMetadata` | `class_metadata` | Completed class records for history/reporting |
 | `PackageBundle` | `package_bundles` | Marketing bundles: `priceStandard`/`Priority`/`Instant`, `duration` (0=writing-only), `hasEvaluation` |
-| `StudentEnrollment` | `student_enrollments` | Junction: Student ↔ Package with enrollment tracking |
 | `Evaluation` | `evaluations` | Teacher evaluation per booking: integer `score` + free-text `feedback` |
 | `WritingSubmission` | `writing_submissions` | Student PDF uploads linked to bookings |
 | `WritingQuestion` | `writing_questions` | IELTS writing question PDFs uploaded by teachers/admins; auto-assigned to eligible bookings |
@@ -522,16 +526,13 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 | `Role` | `role` | ADMIN, TEACHER, USER |
 | `BookingStatus` | `booking_status` | PENDING, CONFIRMED, CANCELLED, COMPLETED |
 | `PaymentStatus` | `payment_status` | PENDING, PAID, REFUNDED, FAILED |
-| `EnrollmentStatus` | `enrollment_status` | ACTIVE, COMPLETED, CANCELLED |
-
 #### Key Design Decisions
 
 1. **snake_case table names**: All tables use `@@map()` for PostgreSQL convention (e.g. `users`, `teacher_profiles`).
 2. **camelCase column names**: All table columns use **camelCase** in the database (e.g. `userName`, `passwordHash`, `firstName`, `createdAt`). In Prisma, use the same camelCase field name so the generated client uses the correct column name in queries. New migrations must create columns in camelCase for consistency.
-3. **Explicit junction tables**: Most many-to-many relationships use explicit junctions for metadata support (e.g. StudentEnrollment). Bundles store package membership via `packageIds[]`.
-4. **Package-centric model**: Teachers and Students link to Packages (not free-text subjects)
-5. **Enrollment tracking**: StudentEnrollment tracks classes total/used, expiry, status
-6. **Payment integration status**: Payment-related fields (`paymentStatus`, `transactionId`, `paymentId`) exist, but payment checkout/webhook processing is not implemented yet; package-based booking currently increments `StudentEnrollment.classesUsed` when the booking is created
+3. **Bundles ↔ packages**: `PackageBundle.packageIds[]` lists catalog packages in a bundle; no separate enrollment junction table (**StudentEnrollment removed**, migration `20260503120000_drop_student_enrollments`).
+4. **Package-centric catalog**: Admins manage packages and bundles; students **book via bundles** on `/students`, not via `/packages/[id]/book`.
+5. **Payment integration status**: `paymentStatus` and `transactionId` exist on `Booking` and are **updated in sync with booking lifecycle** (e.g. confirm → `PAID`, reject → `FAILED`); external payment-confirmation API **TBD** (**§11**).
 
 #### New Tables (Feb 4, 2026)
 
@@ -542,14 +543,6 @@ priceStandard, pricePriority, priceInstant,
 discountPercent,
 isActive, isFeatured, validFrom, validUntil,
 packageIds[], createdAt, updatedAt
-```
-
-**StudentEnrollment** - Student ↔ Package junction
-```
-id, studentId, packageId, enrolledAt,
-status (EnrollmentStatus), classesTotal, classesUsed,
-paymentId, createdAt, updatedAt
-@@unique([studentId, packageId])
 ```
 
 #### Removed Fields (Feb 4, 2026)
@@ -615,6 +608,13 @@ See `prisma/schema.prisma` for full implementation.
 | Multi-step booking modals | Flow: Confirm slot → Phone/Email modal → QR code modal → Confirm & book → Dashboard; validation on each step with toast notifications | 2026-04-30 |
 | Nearest slot message | When searched time isn't available, shows "The searched time is not available, here is the nearest slot from the searched time and date" above the slot card; uses `isExactMatch` field in `FindSlotResult` | 2026-04-30 |
 | Calendar-day lead-time categories | Updated **§1.5** lead-time definitions: **Standard** = days after tomorrow, **Priority** = tomorrow, **Instant** = current day (all in UTC+5:45). Replaced time-based cutoffs (48h/24h) with calendar-date rules matching `computeLeadTimeCategory()` in `lib/slot-generator.ts` | 2026-04-30 |
+| Pending booking flow (bundle + writing-only) | `PENDING` + `paymentStatus: PENDING` on create; admin confirm → `CONFIRMED` + `PAID`; reject → `CANCELLED` + `FAILED` + `notes` | 2026-05-03 |
+| Removed `StudentEnrollment` + enrollments admin UI | Migration `20260503120000_drop_student_enrollments`; deleted `/enrollments` routes; students book bundles only | 2026-05-03 |
+| Merged `/bookings` + admin Pending tab | Role-based page; `?tab=pending`; `admin-pending-bookings` client UI | 2026-05-03 |
+| Non-admin cannot cancel PENDING | Only `ADMIN` can cancel/reject pending; students reschedule/cancel `CONFIRMED` only | 2026-05-03 |
+| Session room blocks `PENDING` | Redirect to dashboard if booking not confirmed | 2026-05-03 |
+| Teacher load counts non-CANCELLED | `assignTeacher` / writing-only week counts include `PENDING` for fair assignment | 2026-05-03 |
+| Bundle booking: no past dates/times | **Client:** local-calendar **`min`** on date input + validation on change / before search. **Server:** `findSlotForPreference` rejects past calendar date and past `sessionStart`; `createBookingForSlot` rejects `scheduledAt` ≤ now (**§4.2** table) | 2026-05-03 |
 
 ### 6.2 Pending Decisions
 
@@ -1078,24 +1078,24 @@ app/
 - [x] Bundle CRUD (create/edit/deactivate) with tier pricing + duration + evaluation toggle
 - [x] Teacher approval (self-registration → pending → admin approves from `/users` or `/teachers/manage`)
 - [x] Teacher management page (`/teachers/manage`): approve, toggle active, stats, admin-create-availability
-- [x] Student enrollment management (admin `/enrollments`, `/enrollments/assign`): assign, edit, track
+- [x] ~~Student enrollment management~~ **removed** (May 2026) — bundle-only student booking; packages are catalog-only for students
 - [x] Timetable (`/timetable`) + Reports (`/reports`)
 
 **Teacher:**
 - [x] Profile setup (bio editing via `/profile`)
 - [x] Availability management (calendar UI + create slots)
 - [x] Availability edit/delete (unbooked slots)
-- [x] View assigned bookings (`/bookings/teaching` + `/calendar`)
+- [x] View assigned bookings (`/bookings` + `/calendar`)
 - [x] Complete bookings (mark as COMPLETED)
 - [x] Session room: set Meet link, view PDF uploads, submit evaluation
 
 **Student:**
 - [x] Browse bundle offers and book slots via `/students` (anonymous, single-offered-slot UX)
-- [x] Browse packages and book sessions via `/packages/[id]/book` (enrollment-aware)
+- [x] Package detail is **catalog**; booking via `/students` (bundle flow); `/packages/[id]/book` redirects to `/students`
 - [x] View confirmed bookings via `/calendar`
 - [x] Cancel/reschedule bookings (from calendar day view)
 - [x] Dedicated "My bookings" page (`/bookings`) with Upcoming/Past/Cancelled tabs
-- [x] Enrollment progress on package pages and booking flow (no separate student enrollments list)
+- [x] ~~Enrollment progress~~ removed with enrollments model
 - [x] Session room: view Meet link, upload writing PDF, view evaluation + 24h download
 - [x] Writing-only bundle flow: choose submission window, upload PDF
 
@@ -1117,7 +1117,7 @@ app/
 | 9 | Zod validation + loading/error states + role guards on actions | ✅ Done | All above |
 | 10 | Booking system (package-first + slot generation + assignment) | ✅ Done | Availability + Packages |
 | 11 | Profile management (teacher/student) | ✅ Done | Auth |
-| 12 | Package CRUD + enrollment + assignment | ✅ Done | Packages |
+| 12 | Package CRUD + bundles | ✅ Done | Packages |
 | 13 | Session room (Meet, PDF upload, evaluation, download) | ✅ Done | Booking |
 | 14 | Student bookings + teacher sessions pages | ✅ Done | Booking |
 | 15 | Admin teacher management + timetable + reporting | ✅ Done | Dashboards |
@@ -1126,6 +1126,75 @@ app/
 ### Next on the plan
 
 **Phase 2–3 complete** (Apr 10, 2026). Remaining work is **Phase 4** (notifications, payment integration, polish, performance, DevOps) — see above. Payment and refund specifics are deferred to **§11**.
+
+---
+
+## 9. Pending Booking Flow (May 2026)
+
+**Status:** **Implemented** (code + DB, May 2026). New bookings from bundle (and writing-only) flows are **`PENDING`** until an **admin** confirms. **`StudentEnrollment` removed** — no `classesUsed` increment/decrement.
+
+### 9.1 Overview
+
+Students complete the booking wizard → **`PENDING`** + **`paymentStatus: PENDING`**. **Admin** approves → **`CONFIRMED`** + **`paymentStatus: PAID`** (interim mapping until payment API in **§11**). **Reject** → **`CANCELLED`**, **`paymentStatus: FAILED`**, reason appended to **`notes`**. Merged **`/bookings`** for all roles; **`/bookings/teaching`** redirects to **`/bookings`**. **Pending** bookings do not appear in **student** or **teacher** lists; **session room** redirects if **`PENDING`**.
+
+### 9.2 Requirements
+
+| # | Requirement | Details |
+|---|-------------|---------|
+| 1 | **Booking status on submission** | Student booking creates `Booking` with `status: PENDING` (changed from `CONFIRMED`) |
+| 2 | **Slot blocking** | PENDING bookings block slots for other students (treated as conflicts in slot generation and booking checks) |
+| 3 | **No enrollment** | `StudentEnrollment` model **dropped**; no class-quota tracking on booking |
+| 4 | **Admin-only Pending tab** | New "Pending" tab visible only to `ADMIN` users on the merged `/bookings` page |
+| 5 | **Admin confirmation** | Admin can confirm pending bookings (changes status `PENDING` → `CONFIRMED`) |
+| 6 | **Admin rejection** | Admin can reject pending bookings with a **mandatory** rejection reason |
+| 7 | **Rejection cleanup** | On rejection: set `status: CANCELLED`, `paymentStatus: FAILED`, append reason to `notes` (`[REJECTED] <reason>`); slot freed via non-CANCELLED conflict rules |
+| 8 | **Student visibility** | Students cannot see their own PENDING bookings (filtered out from student bookings view) |
+| 9 | **Merged bookings page** | Merge `/bookings` (student) and `/bookings/teaching` (teacher) into a single `/bookings` page with role-based rendering |
+| 10 | **Teacher access** | Teachers see only their assigned sessions (Upcoming/Past tabs, no Pending tab) |
+| 11 | **Admin access** | Admins see all bookings (Upcoming/Past/Pending tabs) |
+| 12 | **Route redirect** | Legacy `/bookings/teaching` permanently redirects to `/bookings` |
+| 13 | **Reject reason storage** | Rejection reason stored in existing `Booking.notes` field (append format: `\n[REJECTED] <reason>`) |
+| 14 | **Cancel rules** | Students may **cancel/reschedule** only **`CONFIRMED`** bookings. **PENDING** handled by **admin** (confirm/reject). Non-admin roles cannot cancel **PENDING** |
+| 15 | **Bundle-only student booking** | Package book route redirects to `/students`; no package-enrollment booking path |
+
+### 9.3 Implementation reference (shipped)
+
+| Area | Location |
+|------|-----------|
+| Create **`PENDING`** booking | `createBookingForSlot`, `createWritingOnlyBooking` in `app/(app)/packages/actions.ts` |
+| Slot conflicts / teacher load | `lib/slot-generator.ts` (`generateSlots`, `assignTeacher`) |
+| Merged bookings UI | `app/(app)/bookings/page.tsx`; `components/bookings-sessions-section.tsx`; `components/admin-pending-bookings.tsx` |
+| Confirm / reject actions | `app/(app)/bookings/actions.ts` |
+| Teaching redirect | `app/(app)/bookings/teaching/page.tsx` → `/bookings` |
+| Session room guard | `app/(app)/sessions/[bookingId]/room/page.tsx` |
+| Student toast | `components/bundle-cards.tsx` |
+| Past date/time enforcement | Same as **§4.2**: `bundle-cards.tsx` + `findSlotForPreference` / `createBookingForSlot` in `packages/actions.ts` |
+
+### 9.4 Data model impact
+
+- **Dropped:** `StudentEnrollment`, `EnrollmentStatus` (migration `20260503120000_drop_student_enrollments`).
+- **Booking:** `status`, `paymentStatus`, `notes`; **`packageId`** usually **null** for bundle bookings.
+
+### 9.5 Updated user flows
+
+**Student booking flow:** bundle wizard → **`PENDING`** → toast (payment copy) → **`/dashboard`** → listing hides **`PENDING`** until **`CONFIRMED`**.
+
+**Admin:** **`/bookings?tab=pending`** → Confirm (**`CONFIRMED`** / **`PAID`**) or Reject (**`CANCELLED`** / **`FAILED`** + **`notes`**).
+
+---
+
+## 10. Design Decisions for Pending Flow
+
+| Decision | Rationale | Date |
+| -------- | ---------- | ---- |
+| **CONFIRMED** only after admin (Option A) | Payment/checkout UI can complete before admin approval; **product** confirmation is admin-gated until §11 changes this | 2026-05-03 |
+| **`paymentStatus` mirrored from lifecycle** | Same row stores **`paymentStatus`** for future APIs; confirm sets **`PAID`**, reject sets **`FAILED`** (interim) | 2026-05-03 |
+| PENDING bookings block slots | Non-**`CANCELLED`** bookings are scheduling conflicts | 2026-05-03 |
+| Removed **StudentEnrollment** | Bundle-only booking; no class quota | 2026-05-03 |
+| Rejection reason in **`notes`** | No extra columns; append **`[REJECTED]`** | 2026-05-03 |
+| Students/teachers never see **PENDING** in lists | Pending queue is **admin-only**; session room blocked for **PENDING** | 2026-05-03 |
+| Merged **`/bookings`** | One route; teacher legacy path redirects | 2026-05-03 |
+| Local **`min`** date + server **`scheduledAt`** check | Students cannot pick or submit bundle slots in the past (**§4.2**) | 2026-05-03 |
 
 ---
 
@@ -1140,7 +1209,7 @@ Planned topics to document later:
 - **Refunds** and **chargebacks**; **student-initiated cancellation** (must **free the teacher’s schedule**; refund amounts and timing TBD).
 - **Reconciliation**, taxes, invoices, and admin reporting (if in scope).
 
-Until this section is filled in, engineers should treat **§1.4**–**§1.6** as the **product intent** and keep the **current** codebase behavior (**immediate `CONFIRMED` booking** without payment) as a **known gap** documented in **§4.2**.
+Until this section is filled in, engineers should treat **§1.4**–**§1.6** and **§9** as the **product intent**. Bookings start **`PENDING`**; **`CONFIRMED`** follows **admin approval**; **`paymentStatus`** is updated in parallel for future gateway integration (**§4.2**).
 
 ---
 
@@ -1189,6 +1258,7 @@ Until this section is filled in, engineers should treat **§1.4**–**§1.6** as
 | 2026-04-25 | **Writing Question Bank:** New `WritingQuestion` model (`writing_questions` table). `lib/writing-question-assigner.ts` — unseen-first, least-used fallback assignment logic. Questions auto-assigned in `createBookingForSlot` + `createWritingOnlyBooking` for bundles with `hasEvaluation`. `/question-bank` page (admin + teacher) for uploading/managing questions. `/api/questions/[questionId]/view` for secure PDF serving. Session room gains `WritingPromptStep` — locked to students until `scheduledAt ≤ now`. `Booking` gains `writingQuestionId` FK. | -      |
 | 2026-04-20 | **Public landing (`app/page.tsx`):** Rebuilt to match `Frame.png` rhythm (hero, three cards, experience band, three-tier pricing, FAQ accordions, multi-column footer). **`ListeningMock`** is the only large UI mock, right column of `#experience`; hero stays **`/hero.png`**. **Pricing:** static NPR tier amounts per `public/price.png` (**1400 / 1680 / 1820**), cards use same system as feature band (light section, white `rounded-2xl` cards, accent **Select**). Inline writing/report mocks removed; messaging folded into cards. **`components/landing-header.tsx`:** center nav (md+) to `#features`, `#experience`, `#pricing`, `/packages`. | -      |
 | 2026-04-27 | **Security hardening pass (5 issues):** IDOR fix for `findSlotsForReschedule` with object-level auth parity; XSS hardening for inline JSON-LD/style sinks via `lib/security.ts`; JWT claim refresh + deactivation handling in auth callbacks; restrictive CORS posture verified (no permissive headers); secrets-in-source reduction in Docker/Compose + deployment docs updates. | -      |
+| 2026-05-03 | **Past date/time validation (bundle booking):** `bundle-cards.tsx` — date **`min`** uses **local** calendar today; toast + clear on invalid input; guard before **Find slot**. **`findSlotForPreference`** / **`createBookingForSlot`** (`packages/actions.ts`) — reject past calendar date, past offered slot start, and **`scheduledAt ≤ now`**. Documented **§4.2**, **§6.1**, **§9.3**, **§10**. | -      |
 
 ---
 

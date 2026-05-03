@@ -56,6 +56,7 @@ export function CreateBundleForm({
         discountPercent: number | null;
         isActive: boolean;
         isFeatured?: boolean;
+        showOnLanding?: boolean;
         packageIds: string[];
     };
 }) {
@@ -64,6 +65,9 @@ export function CreateBundleForm({
     );
     const [isFeatured, setIsFeatured] = React.useState(
         initial?.isFeatured ?? false,
+    );
+    const [showOnLanding, setShowOnLanding] = React.useState(
+        initial?.showOnLanding ?? false,
     );
     const [hasEvaluation, setHasEvaluation] = React.useState(
         initial?.hasEvaluation ?? false,
@@ -99,6 +103,11 @@ export function CreateBundleForm({
                 type="hidden"
                 name="isFeatured"
                 value={isFeatured ? "true" : "false"}
+            />
+            <input
+                type="hidden"
+                name="showOnLanding"
+                value={showOnLanding ? "true" : "false"}
             />
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -264,6 +273,17 @@ export function CreateBundleForm({
                     />
                     <Label htmlFor="isFeatured" className="cursor-pointer">
                         Featured bundle
+                    </Label>
+                </div>
+
+                <div className="flex items-center gap-3 sm:col-span-2">
+                    <Switch
+                        id="showOnLanding"
+                        checked={showOnLanding}
+                        onCheckedChange={setShowOnLanding}
+                    />
+                    <Label htmlFor="showOnLanding" className="cursor-pointer">
+                        Show on home page pricing
                     </Label>
                 </div>
 

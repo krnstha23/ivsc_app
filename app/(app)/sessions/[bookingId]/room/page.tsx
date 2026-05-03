@@ -24,6 +24,7 @@ export default async function SessionRoomPage({
         select: {
             id: true,
             userId: true,
+            status: true,
             bundleId: true,
             scheduledAt: true,
             duration: true,
@@ -56,6 +57,10 @@ export default async function SessionRoomPage({
     });
 
     if (!booking) notFound();
+
+    if (booking.status === "PENDING") {
+        redirect("/dashboard");
+    }
 
     // Fetch writing question separately so a missing migration never crashes the page.
     let writingQuestion: { id: string; title: string; description: string | null; fileName: string } | null = null;

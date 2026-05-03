@@ -173,6 +173,7 @@ export async function deletePackageBundle(formData: FormData) {
     });
 
     revalidatePath("/packages");
+    revalidatePath("/");
     redirect("/packages");
 }
 
@@ -243,6 +244,7 @@ export async function createPackageBundle(formData: FormData) {
         discountPercent: ((formData.get("discountPercent") as string) ?? "").trim() || null,
         isActive: (formData.get("isActive") as string) !== "false",
         isFeatured: (formData.get("isFeatured") as string) === "true",
+        showOnLanding: (formData.get("showOnLanding") as string) === "true",
         packageIds,
     };
 
@@ -265,11 +267,13 @@ export async function createPackageBundle(formData: FormData) {
             discountPercent: parsed.data.discountPercent ?? null,
             isActive: parsed.data.isActive,
             isFeatured: parsed.data.isFeatured,
+            showOnLanding: parsed.data.showOnLanding,
             packageIds: Array.from(new Set(parsed.data.packageIds)),
         },
     });
 
     revalidatePath("/packages");
+    revalidatePath("/");
     redirect("/packages");
 }
 
@@ -305,6 +309,7 @@ export async function updatePackageBundleDetails(formData: FormData) {
             ((formData.get("discountPercent") as string) ?? "").trim() || null,
         isActive: (formData.get("isActive") as string) !== "false",
         isFeatured: (formData.get("isFeatured") as string) === "true",
+        showOnLanding: (formData.get("showOnLanding") as string) === "true",
         packageIds,
     };
 
@@ -328,110 +333,19 @@ export async function updatePackageBundleDetails(formData: FormData) {
             discountPercent: parsed.data.discountPercent ?? null,
             isActive: parsed.data.isActive,
             isFeatured: parsed.data.isFeatured,
+            showOnLanding: parsed.data.showOnLanding,
             packageIds: Array.from(new Set(parsed.data.packageIds)),
         },
     });
 
     revalidatePath("/packages");
+    revalidatePath("/");
     redirect("/packages");
 }
 
 // ---------------------------------------------------------------------------
 // Booking helpers
 // ---------------------------------------------------------------------------
-
-export type EnrolledPackageForBundle = {
-    packageId: string;
-    packageName: string;
-    classesRemaining: number;
-};
-
-/** Returns current user's enrolled packages that are in the given bundle and have remaining classes. */
-export async function getEnrolledPackagesForBundle(
-    bundleId: string
-): Promise<EnrolledPackageForBundle[]> {
-    const session = await auth();
-    const userId = (session?.user as { id?: string })?.id;
-    if (!userId) return [];
-
-    const bundle = await prisma.packageBundle.findUnique({
-        where: { id: bundleId },
-        select: { packageIds: true },
-    });
-    if (!bundle || bundle.packageIds.length === 0) return [];
-
-    const student = await prisma.studentProfile.findUnique({
-        where: { userId },
-        select: { id: true },
-    });
-    if (!student) return [];
-
-    const enrollments = await prisma.studentEnrollment.findMany({
-        where: {
-            studentId: student.id,
-            packageId: { in: bundle.packageIds },
-            status: "ACTIVE",
-        },
-        include: {
-            package: { select: { id: true, name: true } },
-        },
-    });
-
-    return enrollments
-        .filter((e) => e.classesUsed < e.classesTotal)
-        .map((e) => ({
-            packageId: e.package.id,
-            packageName: e.package.name,
-            classesRemaining: e.classesTotal - e.classesUsed,
-        }));
-}
-
-export type EnrollmentForPackageResult = {
-    enrollmentId: string;
-    classesTotal: number;
-    classesUsed: number;
-    classesRemaining: number;
-} | null;
-
-/** Returns current user's active enrollment for a package (if any). */
-export async function getEnrollmentForPackage(
-    packageId: string
-): Promise<EnrollmentForPackageResult> {
-    const session = await auth();
-    const userId = (session?.user as { id?: string })?.id;
-    if (!userId) return null;
-
-    const student = await prisma.studentProfile.findUnique({
-        where: { userId },
-        select: { id: true },
-    });
-    if (!student) return null;
-
-    const enrollment = await prisma.studentEnrollment.findUnique({
-        where: {
-            studentId_packageId: { studentId: student.id, packageId },
-        },
-        select: {
-            id: true,
-            classesTotal: true,
-            classesUsed: true,
-            status: true,
-        },
-    });
-    if (
-        !enrollment ||
-        enrollment.status !== "ACTIVE" ||
-        enrollment.classesUsed >= enrollment.classesTotal
-    )
-        return null;
-
-    return {
-        enrollmentId: enrollment.id,
-        classesTotal: enrollment.classesTotal,
-        classesUsed: enrollment.classesUsed,
-        classesRemaining: enrollment.classesTotal - enrollment.classesUsed,
-    };
-}
 
 export type CreateBookingResult =
     | { success: true }
@@ -457,7 +371,7 @@ function canManageBooking(
     return false;
 }
 
-/** Cancel a booking and free the slot. Refunds one class to the package enrollment when applicable. */
+/** Cancel a booking and free the slot. Students may cancel only confirmed bookings. */
 export async function cancelBooking(
     bookingId: string
 ): Promise<CreateBookingResult> {
@@ -489,6 +403,23 @@ export async function cancelBooking(
         return { success: false, error: "This booking is already cancelled." };
     }
 
+    if (
+        booking.status === "PENDING" &&
+        role !== AuthRole.ADMIN
+    ) {
+        return {
+            success: false,
+            error: "Pending bookings can only be cancelled by an administrator.",
+        };
+    }
+
+    if (role === AuthRole.USER && booking.status !== "CONFIRMED") {
+        return {
+            success: false,
+            error: "Only confirmed bookings can be cancelled or rescheduled.",
+        };
+    }
+
     const teacherProfile =
         role === AuthRole.TEACHER || role === AuthRole.ADMIN
             ? await prisma.teacherProfile.findUnique({
@@ -501,35 +432,11 @@ export async function cancelBooking(
         return { success: false, error: "You cannot cancel this booking." };
     }
 
-    await prisma.$transaction(async (tx) => {
-        if (booking.packageId) {
-            const student = await tx.studentProfile.findUnique({
-                where: { userId: booking.userId },
-                select: { id: true },
-            });
-            if (student) {
-                const enr = await tx.studentEnrollment.findUnique({
-                    where: {
-                        studentId_packageId: {
-                            studentId: student.id,
-                            packageId: booking.packageId,
-                        },
-                    },
-                    select: { id: true, classesUsed: true },
-                });
-                if (enr && enr.classesUsed > 0) {
-                    await tx.studentEnrollment.update({
-                        where: { id: enr.id },
-                        data: { classesUsed: { decrement: 1 } },
-                    });
-                }
-            }
-        }
-        await tx.booking.delete({ where: { id: booking.id } });
-    });
+    await prisma.booking.delete({ where: { id: booking.id } });
 
     revalidatePath("/calendar");
     revalidatePath("/packages");
+    revalidatePath("/bookings");
     if (booking.packageId) {
         revalidatePath(`/packages/${booking.packageId}`);
     }
@@ -565,9 +472,18 @@ export async function findSlotsForReschedule(
             teacherId: true,
             bundleId: true,
             duration: true,
+            status: true,
         },
     });
     if (!booking) return { slots: [] };
+
+    if (booking.status === "PENDING") {
+        return { slots: [] };
+    }
+
+    if (role === AuthRole.USER && booking.status !== "CONFIRMED") {
+        return { slots: [] };
+    }
 
     const teacherProfile =
         role === AuthRole.TEACHER || role === AuthRole.ADMIN
@@ -676,6 +592,18 @@ export async function rescheduleToSlot(payload: {
     if (booking.status === "CANCELLED") {
         return { success: false, error: "Cannot reschedule a cancelled booking." };
     }
+    if (booking.status === "PENDING") {
+        return {
+            success: false,
+            error: "Pending bookings must be approved or rejected from the Bookings page.",
+        };
+    }
+    if (role === AuthRole.USER && booking.status !== "CONFIRMED") {
+        return {
+            success: false,
+            error: "Only confirmed bookings can be rescheduled.",
+        };
+    }
 
     const teacherProfile =
         role === AuthRole.TEACHER || role === AuthRole.ADMIN
@@ -767,6 +695,7 @@ export async function rescheduleToSlot(payload: {
                     scheduledAt,
                     duration,
                     status: "CONFIRMED",
+                    paymentStatus: "PAID",
                 },
             });
         });
@@ -879,7 +808,7 @@ export async function createWritingOnlyBooking(payload: {
         by: ["teacherId"],
         where: {
             teacherId: { in: teacherIds },
-            status: "CONFIRMED",
+            status: { not: "CANCELLED" },
             scheduledAt: { gte: weekStartUtc, lt: weekEndUtc },
         },
         _count: { id: true },
@@ -917,7 +846,8 @@ export async function createWritingOnlyBooking(payload: {
                 bundleId,
                 scheduledAt: submissionStart,
                 duration: 0,
-                status: "CONFIRMED",
+                status: "PENDING",
+                paymentStatus: "PENDING",
                 submissionStart,
                 submissionEnd,
                 writingQuestionId,
@@ -927,6 +857,7 @@ export async function createWritingOnlyBooking(payload: {
 
     revalidatePath("/packages");
     revalidatePath("/calendar");
+    revalidatePath("/bookings");
     return { success: true, bookingId: booking.id };
 }
 
@@ -1023,6 +954,14 @@ export async function findSlotForPreference(
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
 
+    if (dateStr < todayStr) {
+        return {
+            found: false,
+            alternatives: [],
+            message: "You cannot book a date in the past.",
+        };
+    }
+
     const allSlots = await generateSlots(date, bundleId);
 
     // Filter out past slots when searching today
@@ -1059,6 +998,20 @@ export async function findSlotForPreference(
     const best = sorted[0];
 
     const sessionStart = new Date(`${dateStr}T${best.startTime}:00.000Z`);
+    if (sessionStart.getTime() <= now.getTime()) {
+        const alternatives = await findAlternativeDates(
+            date,
+            bundleId,
+            bundle,
+            preferredTime,
+            now,
+        );
+        return {
+            found: false,
+            alternatives,
+            message: "That time has already passed. Try another time or date.",
+        };
+    }
     const category = computeLeadTimeCategory(now, sessionStart);
     const price = getCategoryPrice(category, bundle);
 
@@ -1139,7 +1092,6 @@ export async function createBookingForSlot(payload: {
     bundleId: string;
     date: string;
     startTime: string;
-    packageId?: string;
     studentPhone?: string;
     studentEmail?: string;
 }): Promise<CreateBookingResult> {
@@ -1152,7 +1104,7 @@ export async function createBookingForSlot(payload: {
         return { success: false, error: "Only students can book sessions." };
     }
 
-    const { bundleId, date: dateStr, startTime, packageId } = payload;
+    const { bundleId, date: dateStr, startTime } = payload;
 
     if (!bundleId || !dateStr || !startTime) {
         return { success: false, error: "Missing required fields." };
@@ -1190,36 +1142,13 @@ export async function createBookingForSlot(payload: {
     const eligibleTeacherIds = matchingSlots.map((s) => s.teacherId);
     const assignedTeacherId = await assignTeacher(eligibleTeacherIds, date);
 
-    // Package enrollment check
-    let enrollmentId: string | null = null;
-    if (packageId) {
-        const enrollment = await prisma.studentEnrollment.findUnique({
-            where: {
-                studentId_packageId: { studentId: student.id, packageId },
-            },
-            select: {
-                id: true,
-                classesTotal: true,
-                classesUsed: true,
-                status: true,
-            },
-        });
-        if (!enrollment || enrollment.status !== "ACTIVE") {
-            return {
-                success: false,
-                error: "You are not enrolled in this package.",
-            };
-        }
-        if (enrollment.classesUsed >= enrollment.classesTotal) {
-            return {
-                success: false,
-                error: "No classes remaining in this package.",
-            };
-        }
-        enrollmentId = enrollment.id;
-    }
-
     const scheduledAt = new Date(`${dateStr}T${startTime}:00.000Z`);
+    if (scheduledAt.getTime() <= Date.now()) {
+        return {
+            success: false,
+            error: "Cannot book a session in the past. Please choose a future time.",
+        };
+    }
     const endTime = minutesToTime(
         timeToMinutes(startTime) + bundle.duration,
     );
@@ -1270,23 +1199,17 @@ export async function createBookingForSlot(payload: {
                     userId,
                     teacherId: assignedTeacherId,
                     availabilityId: newAvailability.id,
-                    packageId: packageId ?? null,
+                    packageId: null,
                     bundleId,
                     scheduledAt,
                     duration: bundle.duration,
-                    status: "CONFIRMED",
+                    status: "PENDING",
+                    paymentStatus: "PENDING",
                     studentPhone: payload.studentPhone ?? null,
                     studentEmail: payload.studentEmail ?? null,
                     writingQuestionId,
                 },
             });
-
-            if (enrollmentId) {
-                await tx.studentEnrollment.update({
-                    where: { id: enrollmentId },
-                    data: { classesUsed: { increment: 1 } },
-                });
-            }
         });
     } catch (e) {
         if (e instanceof Error && e.message === "SLOT_TAKEN") {
@@ -1301,6 +1224,7 @@ export async function createBookingForSlot(payload: {
     revalidatePath("/packages");
     revalidatePath("/calendar");
     revalidatePath("/students");
+    revalidatePath("/bookings");
     return { success: true };
 }
 

@@ -200,7 +200,7 @@ export async function assignTeacher(
     const rows = await prisma.booking.findMany({
         where: {
             teacherId: { in: eligibleTeacherIds },
-            status: "CONFIRMED",
+            status: { not: "CANCELLED" },
             scheduledAt: { gte: start, lt: end },
         },
         select: { teacherId: true },

@@ -20,27 +20,19 @@ export const authConfig = {
       return token
     },
     session({ session, token }) {
-      if (session.user) {
-        (session.user as { id?: string }).id = token.id as string
-        ;(session.user as { role?: string }).role = token.role as string
-        ;(session.user as { username?: string }).username = token.username as string
+      const userId = token.id as string | undefined
+      if (!session.user || !userId) {
+        return { ...session, user: undefined }
       }
+      (session.user as { id?: string }).id = userId
+      ;(session.user as { role?: string }).role = token.role as string
+      ;(session.user as { username?: string }).username = token.username as string
       return session
     },
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl
 
       if (pathname.startsWith('/calendar')) {
-        if (!auth?.user) {
-          return NextResponse.redirect(new URL('/login', request.url))
-        }
-        if ((auth.user as { role?: string }).role !== 'ADMIN') {
-          return NextResponse.redirect(new URL('/dashboard', request.url))
-        }
-        return true
-      }
-
-      if (pathname.startsWith('/enrollments')) {
         if (!auth?.user) {
           return NextResponse.redirect(new URL('/login', request.url))
         }

@@ -10,7 +10,6 @@ import {
     LayersMinimalistic,
     UserRounded,
     CalendarMark,
-    Notebook,
     UserCheck,
     CalendarDate,
     Chart,
@@ -43,16 +42,10 @@ const NAV_MAIN = [
         allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
     {
-        title: "My Bookings",
+        title: "Bookings",
         url: "/bookings",
         icon: CalendarMark,
-        allowedRoles: ["USER"] as Role[],
-    },
-    {
-        title: "My Sessions",
-        url: "/bookings/teaching",
-        icon: Notebook,
-        allowedRoles: ["ADMIN", "TEACHER"] as Role[],
+        allowedRoles: ["ADMIN", "TEACHER", "USER"] as Role[],
     },
     {
         title: "Calendar",

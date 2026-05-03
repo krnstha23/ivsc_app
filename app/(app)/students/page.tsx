@@ -25,8 +25,7 @@ export default async function StudentsPage() {
             isFeatured: true,
             packageIds: true,
         },
-        orderBy: [{ name: "asc" }],
-        take: 3,
+        orderBy: [{ isFeatured: "desc" }, { name: "asc" }],
     });
 
     const bundlesForClient = bundles.map((b) => ({

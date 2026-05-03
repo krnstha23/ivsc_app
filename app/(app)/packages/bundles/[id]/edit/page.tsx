@@ -38,6 +38,7 @@ export default async function EditBundlePage({
                 discountPercent: true,
                 isActive: true,
                 isFeatured: true,
+                showOnLanding: true,
                 packageIds: true,
             },
         }),
@@ -83,6 +84,7 @@ export default async function EditBundlePage({
                                 : Number(bundle.discountPercent),
                         isActive: bundle.isActive,
                         isFeatured: bundle.isFeatured,
+                        showOnLanding: bundle.showOnLanding,
                         packageIds: bundle.packageIds,
                     }}
                 />

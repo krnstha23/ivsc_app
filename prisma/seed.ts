@@ -11,7 +11,6 @@ import {
     Role,
     BookingStatus,
     PaymentStatus,
-    EnrollmentStatus,
 } from "../app/generated/prisma/client";
 import { hashPassword } from "../lib/passwords";
 
@@ -195,33 +194,6 @@ async function main() {
                 isFeatured: true,
                 packageIds: [pkgSpeaking.id, pkgWriting.id, pkgReading.id],
             },
-        });
-
-        // --- Enrollments ---
-        await tx.studentEnrollment.createMany({
-            data: [
-                {
-                    studentId: studentProfile1.id,
-                    packageId: pkgSpeaking.id,
-                    classesTotal: 10,
-                    classesUsed: 2,
-                    status: EnrollmentStatus.ACTIVE,
-                },
-                {
-                    studentId: studentProfile2.id,
-                    packageId: pkgWriting.id,
-                    classesTotal: 10,
-                    classesUsed: 0,
-                    status: EnrollmentStatus.ACTIVE,
-                },
-                {
-                    studentId: studentProfile1.id,
-                    packageId: pkgReading.id,
-                    classesTotal: 8,
-                    classesUsed: 1,
-                    status: EnrollmentStatus.ACTIVE,
-                },
-            ],
         });
 
         // --- Availability (continuous blocks, next 7 days) ---
@@ -640,7 +612,7 @@ async function main() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ids = (globalThis as any).__roomIds as Record<string, string>;
     console.log(
-        "\nSeed completed: users, profiles, packages, bundles, enrollments, availability, bookings, class metadata, static pages, session room scenarios.",
+        "\nSeed completed: users, profiles, packages, bundles, availability, bookings, class metadata, static pages, session room scenarios.",
     );
     console.log("\nSession Room test URLs (login as the matching student or teacher):");
     console.log(`  Speaking — Step 1  no Meet link       → /sessions/${ids.roomStep1}/room  [student1 / teacher1]`);

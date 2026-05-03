@@ -3,12 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing-header";
 import { formatRs } from "@/lib/format-rs";
+import { prisma } from "@/lib/prisma";
 import { serializeJsonForHtmlScript } from "@/lib/security";
 
 export const metadata: Metadata = {
-    title: "ScoreMirror – Computer-Based IELTS Evaluations",
-    description:
-        "IELTS Speaking and Writing Evaluation Service by Test Expert",
+    title: "ScoreMirror - A Premium Human-led IELTS Speaking and Writing Evaluation Service",
+    description: "IELTS Speaking and Writing Evaluation Service by Test Expert",
     keywords: [
         "IELTS evaluation",
         "computer-based IELTS",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     ],
     alternates: { canonical: "/" },
     openGraph: {
-        title: "ScoreMirror – Computer-Based IELTS Evaluations",
+        title: "ScoreMirror - A Premium Human-led IELTS Speaking and Writing Evaluation Service",
         description:
             "A Premium Human-led IELTS Speaking and Writing Evaluation Service.",
         url: "/",
@@ -32,6 +32,35 @@ const accent = "#7C5CFF";
 const dark = "#0B0B0F";
 const light = "#F7F7F7";
 const coolBand = "#eef0f4";
+
+type LandingBundlePrices = {
+    priceStandard: unknown;
+    pricePriority: unknown;
+    priceInstant: unknown;
+};
+
+/** Landing pricing: one card per bundle tier; omit tiers with no price. */
+const LANDING_BUNDLE_TIERS: readonly {
+    key: "standard" | "priority" | "instant";
+    label: string;
+    getAmount: (b: LandingBundlePrices) => number;
+}[] = [
+    {
+        key: "standard",
+        label: "Standard (48h+)",
+        getAmount: (b) => Number(b.priceStandard),
+    },
+    {
+        key: "priority",
+        label: "Priority (24–48h)",
+        getAmount: (b) => Number(b.pricePriority),
+    },
+    {
+        key: "instant",
+        label: "Instant (same day)",
+        getAmount: (b) => Number(b.priceInstant),
+    },
+];
 
 function Display({
     children,
@@ -87,29 +116,29 @@ function CardBullet({ children }: { children: React.ReactNode }) {
     );
 }
 
-/** Static landing prices (NPR) — aligned to `public/price.png`; replace with catalog data when wired. */
-const LANDING_PRICING_TIERS = [
-    {
-        key: "standard",
-        title: "Standard (48h+)",
-        amount: 1400,
-        tagline: "Plan ahead",
-    },
-    {
-        key: "priority",
-        title: "Priority (24-48h)",
-        amount: 1680,
-        tagline: "Need it soon",
-    },
-    {
-        key: "instant",
-        title: "Instant (Same day)",
-        amount: 1820,
-        tagline: "Book for today",
-    },
-] as const;
-
 export default async function HomePage() {
+    const landingBundles = await prisma.packageBundle.findMany({
+        where: { isActive: true, showOnLanding: true },
+        orderBy: { name: "asc" },
+        select: {
+            id: true,
+            name: true,
+            description: true,
+            priceStandard: true,
+            pricePriority: true,
+            priceInstant: true,
+        },
+    });
+
+    const landingPricingCards = landingBundles.flatMap((bundle) =>
+        LANDING_BUNDLE_TIERS.map((t) => ({
+            bundle,
+            tierKey: t.key,
+            tierLabel: t.label,
+            amount: t.getAmount(bundle),
+        })).filter((row) => row.amount > 0),
+    );
+
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -209,45 +238,46 @@ export default async function HomePage() {
                 <div className="mx-auto max-w-6xl">
                     <h2 className="mx-auto max-w-3xl text-center text-xl leading-snug text-[#1a1a22] sm:text-2xl md:text-3xl md:leading-snug">
                         <Display>
-                            A human-led IELTS evaluation service. A caliber check.
+                            A human-led IELTS evaluation service. A caliber
+                            check.
                         </Display>
                     </h2>
                     <div className="mt-12 grid gap-6 md:grid-cols-3 md:gap-8">
                         {(
-                             [
-                                 {
-                                     title: "Video Call Speaking (VCS) Live",
-                                     bullets: [
-                                         "12–14 min live examiner format",
-                                         "Real-time scoring with human judgment",
-                                         "Recorded session + diagnostic notes",
-                                         "Brief verbal debrief after completion",
-                                     ],
-                                     href: "/speaking-evaluation",
-                                     cta: "Learn More",
-                                 },
-                                 {
-                                     title: "Writing Evaluation (Async)",
-                                     bullets: [
-                                         "Submit Task 1 + Task 2 essays",
-                                         "Band-linked written correction",
-                                         "Feedback mapped to rubric criteria",
-                                         "No auto-generated scoring",
-                                     ],
-                                     href: "/writing-evaluation",
-                                     cta: "Learn More",
-                                 },
-                                 {
-                                     title: "What makes us different",
-                                     bullets: [
-                                         "We don't coach. We diagnose performance.",
-                                         "No crowded batches or noisy classes.",
-                                         "Only your real level, clearly reflected.",
-                                     ],
-                                     href: "/why-us",
-                                     cta: "Learn More",
-                                 },
-                             ] as const
+                            [
+                                {
+                                    title: "Video Call Speaking (VCS) Live",
+                                    bullets: [
+                                        "12–14 min live examiner format",
+                                        "Real-time scoring with human judgment",
+                                        "Recorded session + diagnostic notes",
+                                        "Brief verbal debrief after completion",
+                                    ],
+                                    href: "/speaking-evaluation",
+                                    cta: "Learn More",
+                                },
+                                {
+                                    title: "Writing Evaluation (Async)",
+                                    bullets: [
+                                        "Submit Task 1 + Task 2 essays",
+                                        "Band-linked written correction",
+                                        "Feedback mapped to rubric criteria",
+                                        "No auto-generated scoring",
+                                    ],
+                                    href: "/writing-evaluation",
+                                    cta: "Learn More",
+                                },
+                                {
+                                    title: "What makes us different",
+                                    bullets: [
+                                        "We don't coach. We diagnose performance.",
+                                        "No crowded batches or noisy classes.",
+                                        "Only your real level, clearly reflected.",
+                                    ],
+                                    href: "/why-us",
+                                    cta: "Learn More",
+                                },
+                            ] as const
                         ).map((card) => (
                             <div
                                 key={card.title}
@@ -287,19 +317,26 @@ export default async function HomePage() {
                                 The medium does not change what gets evaluated.
                             </Display>
                         </h2>
-                         <ul className="mt-10 space-y-6 text-left text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
-                              <CheckLi>
-                                  You already use video calls every day. Taking your IELTS speaking test on one changes nothing about how you are assessed.
-                              </CheckLi>
-                              <CheckLi>
-                                  In many parts of the world, test takers do not ask this question. They sit, speak, and get evaluated. The medium is invisible.
-                              </CheckLi>
-                              <CheckLi>
-                                  The examiner evaluates your fluency, vocabulary, grammar, and pronunciation — not whether you are on a screen or physically in a room.
-                              </CheckLi>
-                          </ul>
+                        <ul className="mt-10 space-y-6 text-left text-[0.9375rem] leading-relaxed text-[#3d3d4a]">
+                            <CheckLi>
+                                You already use video calls every day. Taking
+                                your IELTS speaking test on one changes nothing
+                                about how you are assessed.
+                            </CheckLi>
+                            <CheckLi>
+                                In many parts of the world, test takers do not
+                                ask this question. They sit, speak, and get
+                                evaluated. The medium is invisible.
+                            </CheckLi>
+                            <CheckLi>
+                                The examiner evaluates your fluency, vocabulary,
+                                grammar, and pronunciation — not whether you are
+                                on a screen or physically in a room.
+                            </CheckLi>
+                        </ul>
                         <p className="mt-8 text-[0.9375rem] font-semibold text-[#0B0B0F]">
-                            So practice the same way. On a video call. With a real human evaluator.
+                            So practice the same way. On a video call. With a
+                            real human evaluator.
                         </p>
                         <div className="mt-8 flex justify-center md:justify-start">
                             <Link
@@ -339,98 +376,58 @@ export default async function HomePage() {
                         <Display>Pricing based on when you need it.</Display>
                     </h2>
 
-                    {/* All Products */}
-                    <div className="mt-10 grid gap-6 md:grid-cols-3 md:gap-8">
-                        {/* Speaking Premium */}
-                        {LANDING_PRICING_TIERS.map((tier) => (
-                            <div
-                                key={tier.key}
-                                className="flex h-full flex-col rounded-lg border border-[#E2E2E2] bg-white p-5 text-center sm:p-6"
-                            >
-                                <h4 className="text-sm font-semibold text-[#0B0B0F]">
-                                    {tier.title}
-                                </h4>
-                                <p className="mt-2 text-sm text-[#5c5c6a]">
-                                    {tier.tagline}
-                                </p>
-                                <p className="mt-4">
-                                    <Display className="text-2xl font-semibold">
-                                        {formatRs(tier.amount, {
-                                            minimumFractionDigits: 0,
-                                            maximumFractionDigits: 0,
-                                        })}
-                                    </Display>
-                                </p>
-                                <p className="mt-2 text-xs text-[#5c5c6a]">
-                                    Score + Recording + Analysis Report + Verbal Q&A
-                                </p>
-                                <div className="mt-6 flex-1" aria-hidden />
-                                <Link
-                                    href="/login"
-                                    className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
-                                    style={{ backgroundColor: accent }}
-                                >
-                                    Select
-                                </Link>
-                            </div>
-                        ))}
-
-                        {/* Writing + Combo centered */}
-                        <div className="col-span-full mt-4 flex flex-wrap justify-center gap-6 md:gap-8">
-                            <div
-                                className="w-full md:flex-1 md:max-w-xs flex flex-col rounded-lg border border-[#E2E2E2] bg-white p-5 text-center sm:p-6"
-                            >
-                                <h4 className="text-sm font-semibold text-[#0B0B0F]">
-                                    Writing Evaluation (Premium)
-                                </h4>
-                                <p className="mt-4">
-                                    <Display className="text-2xl font-semibold">
-                                        {formatRs(800, {
-                                            minimumFractionDigits: 0,
-                                            maximumFractionDigits: 0,
-                                        })}
-                                    </Display>
-                                </p>
-                                <p className="mt-2 text-xs text-[#5c5c6a]">
-                                    Score + word-level feedback + detailed rubric analysis
-                                </p>
-                                <div className="mt-6 flex-1" aria-hidden />
-                                <Link
-                                    href="/login"
-                                    className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
-                                    style={{ backgroundColor: accent }}
-                                >
-                                    Select
-                                </Link>
-                            </div>
-
-                            <div
-                                className="w-full md:flex-1 md:max-w-xs flex flex-col rounded-lg border border-[#E2E2E2] bg-white p-5 text-center sm:p-6"
-                            >
-                                <h4 className="text-sm font-semibold text-[#0B0B0F]">
-                                    Combo Premium
-                                </h4>
-                                <p className="mt-4">
-                                    <Display className="text-2xl font-semibold">
-                                        {formatRs(2000, {
-                                            minimumFractionDigits: 0,
-                                            maximumFractionDigits: 0,
-                                        })}
-                                    </Display>
-                                </p>
-                                <p className="mt-2 text-xs text-[#5c5c6a]">
-                                    Speaking Premium + Writing Premium
-                                </p>
-                                <div className="mt-6 flex-1" aria-hidden />
-                                <Link
-                                    href="/login"
-                                    className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
-                                    style={{ backgroundColor: accent }}
-                                >
-                                    Select
-                                </Link>
-                            </div>
-                        </div>
+                    <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3 md:gap-8">
+                        {landingBundles.length === 0 ? (
+                            <p className="col-span-full text-center text-sm text-[#5c5c6a]">
+                                Pricing bundles will appear here when published from the
+                                admin catalog.
+                            </p>
+                        ) : landingPricingCards.length === 0 ? (
+                            <p className="col-span-full text-center text-sm text-[#5c5c6a]">
+                                No priced tiers to show yet. Set bundle prices in the
+                                admin catalog.
+                            </p>
+                        ) : (
+                            landingPricingCards.map(
+                                ({ bundle, tierKey, tierLabel, amount }) => (
+                                    <div
+                                        key={`${bundle.id}-${tierKey}`}
+                                        className="flex h-full flex-col rounded-2xl border border-black/[0.06] bg-white p-6 text-center shadow-[0_20px_50px_-20px_rgba(15,15,25,0.18)] sm:p-8"
+                                    >
+                                        <h4 className="text-sm font-semibold text-black">
+                                            {bundle.name}
+                                        </h4>
+                                        <p className="mt-2 text-sm text-[#5c5c6a]">
+                                            {tierLabel}
+                                        </p>
+                                        <p className="mt-4">
+                                            <Display className="text-4xl font-semibold tabular-nums text-black">
+                                                {formatRs(amount, {
+                                                    minimumFractionDigits: 0,
+                                                    maximumFractionDigits: 0,
+                                                })}
+                                            </Display>
+                                        </p>
+                                        {bundle.description ? (
+                                            <p className="mt-3 text-sm text-[#5c5c6a]">
+                                                {bundle.description}
+                                            </p>
+                                        ) : null}
+                                        <div className="mt-6 flex-1" aria-hidden />
+                                        <Link
+                                            href={`/login?bundle=${encodeURIComponent(bundle.id)}&tier=${tierKey}`}
+                                            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-95"
+                                            style={{
+                                                backgroundColor: accent,
+                                                boxShadow: `0 12px 40px -8px ${accent}88`,
+                                            }}
+                                        >
+                                            Select
+                                        </Link>
+                                    </div>
+                                ),
+                            )
+                        )}
                     </div>
 
                     {/* Note */}
@@ -484,13 +481,22 @@ export default async function HomePage() {
                             <Link href="/about-us" className="hover:opacity-80">
                                 About Us
                             </Link>
-                            <Link href="/how-we-evaluate" className="hover:opacity-80">
+                            <Link
+                                href="/how-we-evaluate"
+                                className="hover:opacity-80"
+                            >
                                 How We Evaluate
                             </Link>
-                            <Link href="/speaking-evaluation" className="hover:opacity-80">
+                            <Link
+                                href="/speaking-evaluation"
+                                className="hover:opacity-80"
+                            >
                                 Speaking Evaluation
                             </Link>
-                            <Link href="/writing-evaluation" className="hover:opacity-80">
+                            <Link
+                                href="/writing-evaluation"
+                                className="hover:opacity-80"
+                            >
                                 Writing Evaluation
                             </Link>
                         </nav>
@@ -503,10 +509,16 @@ export default async function HomePage() {
                             className="mt-4 flex flex-col gap-2 text-sm text-[#3d3d4a]"
                             aria-label="Legal"
                         >
-                            <Link href="/terms-conditions" className="hover:opacity-80">
+                            <Link
+                                href="/terms-and-conditions"
+                                className="hover:opacity-80"
+                            >
                                 Terms &amp; Conditions
                             </Link>
-                            <Link href="/privacy-policy" className="hover:opacity-80">
+                            <Link
+                                href="/privacy-policy"
+                                className="hover:opacity-80"
+                            >
                                 Privacy Policy
                             </Link>
                         </nav>
@@ -525,8 +537,14 @@ export default async function HomePage() {
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 hover:opacity-80"
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    aria-hidden
+                                >
+                                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
                                 </svg>
                                 Facebook
                             </Link>
@@ -536,8 +554,14 @@ export default async function HomePage() {
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 hover:opacity-80"
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 3.838a8.162 8.162 0 100 16.324 8.162 8.162 0 000-16.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    aria-hidden
+                                >
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 3.838a8.162 8.162 0 100 16.324 8.162 8.162 0 000-16.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
                                 </svg>
                                 Instagram
                             </Link>
@@ -547,8 +571,14 @@ export default async function HomePage() {
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 hover:opacity-80"
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12.046 21.794c-1.808 0-3.584-.481-5.14-1.396l-.369-.22-3.797 1.153 1.148-3.627-.241-.38A9.84 9.84 0 012.1 12.046C2.1 6.574 6.574 2.1 12.046 2.1c2.734 0 5.305 1.072 7.23 3.017a9.82 9.82 0 012.716 7.23c0 5.472-4.474 9.917-9.984 9.917zm8.476-18.332C18.267.236 15.217-.2 12.2.088 6.078.697.697 6.078.088 12.2-.537 18.688 5.412 24.3 11.997 24.3c2.66 0 5.292-.88 7.434-2.582l3.442 1.044a.86.86 0 00.273-.017.86.86 0 00.52-.58l1.156-3.654a9.78 9.78 0 011.44-7.618c-1.93-4.38-5.868-7.676-10.736-8.596z"/>
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    aria-hidden
+                                >
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12.046 21.794c-1.808 0-3.584-.481-5.14-1.396l-.369-.22-3.797 1.153 1.148-3.627-.241-.38A9.84 9.84 0 012.1 12.046C2.1 6.574 6.574 2.1 12.046 2.1c2.734 0 5.305 1.072 7.23 3.017a9.82 9.82 0 012.716 7.23c0 5.472-4.474 9.917-9.984 9.917zm8.476-18.332C18.267.236 15.217-.2 12.2.088 6.078.697.697 6.078.088 12.2-.537 18.688 5.412 24.3 11.997 24.3c2.66 0 5.292-.88 7.434-2.582l3.442 1.044a.86.86 0 00.273-.017.86.86 0 00.52-.58l1.156-3.654a9.78 9.78 0 011.44-7.618c-1.93-4.38-5.868-7.676-10.736-8.596z" />
                                 </svg>
                                 WhatsApp
                             </Link>
@@ -556,9 +586,25 @@ export default async function HomePage() {
                                 href="mailto:info@scoremirror.com.np"
                                 className="flex items-center gap-2 hover:opacity-80"
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden
+                                >
+                                    <rect
+                                        x="2"
+                                        y="4"
+                                        width="20"
+                                        height="16"
+                                        rx="2"
+                                    />
+                                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                                 </svg>
                                 Email
                             </Link>
