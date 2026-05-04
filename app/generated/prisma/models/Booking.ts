@@ -343,6 +343,7 @@ export type BookingWhereInput = {
   writingQuestion?: Prisma.XOR<Prisma.WritingQuestionNullableScalarRelationFilter, Prisma.WritingQuestionWhereInput> | null
   evaluation?: Prisma.XOR<Prisma.EvaluationNullableScalarRelationFilter, Prisma.EvaluationWhereInput> | null
   writingSubmission?: Prisma.XOR<Prisma.WritingSubmissionNullableScalarRelationFilter, Prisma.WritingSubmissionWhereInput> | null
+  emailSendLogs?: Prisma.EmailSendLogListRelationFilter
 }
 
 export type BookingOrderByWithRelationInput = {
@@ -373,6 +374,7 @@ export type BookingOrderByWithRelationInput = {
   writingQuestion?: Prisma.WritingQuestionOrderByWithRelationInput
   evaluation?: Prisma.EvaluationOrderByWithRelationInput
   writingSubmission?: Prisma.WritingSubmissionOrderByWithRelationInput
+  emailSendLogs?: Prisma.EmailSendLogOrderByRelationAggregateInput
 }
 
 export type BookingWhereUniqueInput = Prisma.AtLeast<{
@@ -406,6 +408,7 @@ export type BookingWhereUniqueInput = Prisma.AtLeast<{
   writingQuestion?: Prisma.XOR<Prisma.WritingQuestionNullableScalarRelationFilter, Prisma.WritingQuestionWhereInput> | null
   evaluation?: Prisma.XOR<Prisma.EvaluationNullableScalarRelationFilter, Prisma.EvaluationWhereInput> | null
   writingSubmission?: Prisma.XOR<Prisma.WritingSubmissionNullableScalarRelationFilter, Prisma.WritingSubmissionWhereInput> | null
+  emailSendLogs?: Prisma.EmailSendLogListRelationFilter
 }, "id" | "availabilityId">
 
 export type BookingOrderByWithAggregationInput = {
@@ -485,6 +488,7 @@ export type BookingCreateInput = {
   writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUncheckedCreateInput = {
@@ -510,6 +514,7 @@ export type BookingUncheckedCreateInput = {
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUpdateInput = {
@@ -535,6 +540,7 @@ export type BookingUpdateInput = {
   writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateInput = {
@@ -560,6 +566,7 @@ export type BookingUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingCreateManyInput = {
@@ -889,6 +896,20 @@ export type EnumPaymentStatusFieldUpdateOperationsInput = {
   set?: $Enums.PaymentStatus
 }
 
+export type BookingCreateNestedOneWithoutEmailSendLogsInput = {
+  create?: Prisma.XOR<Prisma.BookingCreateWithoutEmailSendLogsInput, Prisma.BookingUncheckedCreateWithoutEmailSendLogsInput>
+  connectOrCreate?: Prisma.BookingCreateOrConnectWithoutEmailSendLogsInput
+  connect?: Prisma.BookingWhereUniqueInput
+}
+
+export type BookingUpdateOneRequiredWithoutEmailSendLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.BookingCreateWithoutEmailSendLogsInput, Prisma.BookingUncheckedCreateWithoutEmailSendLogsInput>
+  connectOrCreate?: Prisma.BookingCreateOrConnectWithoutEmailSendLogsInput
+  upsert?: Prisma.BookingUpsertWithoutEmailSendLogsInput
+  connect?: Prisma.BookingWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BookingUpdateToOneWithWhereWithoutEmailSendLogsInput, Prisma.BookingUpdateWithoutEmailSendLogsInput>, Prisma.BookingUncheckedUpdateWithoutEmailSendLogsInput>
+}
+
 export type BookingCreateNestedManyWithoutWritingQuestionInput = {
   create?: Prisma.XOR<Prisma.BookingCreateWithoutWritingQuestionInput, Prisma.BookingUncheckedCreateWithoutWritingQuestionInput> | Prisma.BookingCreateWithoutWritingQuestionInput[] | Prisma.BookingUncheckedCreateWithoutWritingQuestionInput[]
   connectOrCreate?: Prisma.BookingCreateOrConnectWithoutWritingQuestionInput | Prisma.BookingCreateOrConnectWithoutWritingQuestionInput[]
@@ -981,6 +1002,7 @@ export type BookingCreateWithoutUserInput = {
   writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUncheckedCreateWithoutUserInput = {
@@ -1005,6 +1027,7 @@ export type BookingUncheckedCreateWithoutUserInput = {
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutBookingInput
 }
 
 export type BookingCreateOrConnectWithoutUserInput = {
@@ -1081,6 +1104,7 @@ export type BookingCreateWithoutTeacherInput = {
   writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUncheckedCreateWithoutTeacherInput = {
@@ -1105,6 +1129,7 @@ export type BookingUncheckedCreateWithoutTeacherInput = {
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutBookingInput
 }
 
 export type BookingCreateOrConnectWithoutTeacherInput = {
@@ -1155,6 +1180,7 @@ export type BookingCreateWithoutPackageInput = {
   writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUncheckedCreateWithoutPackageInput = {
@@ -1179,6 +1205,7 @@ export type BookingUncheckedCreateWithoutPackageInput = {
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutBookingInput
 }
 
 export type BookingCreateOrConnectWithoutPackageInput = {
@@ -1229,6 +1256,7 @@ export type BookingCreateWithoutAvailabilityInput = {
   writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUncheckedCreateWithoutAvailabilityInput = {
@@ -1253,6 +1281,7 @@ export type BookingUncheckedCreateWithoutAvailabilityInput = {
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutBookingInput
 }
 
 export type BookingCreateOrConnectWithoutAvailabilityInput = {
@@ -1293,12 +1322,130 @@ export type BookingUpdateWithoutAvailabilityInput = {
   writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateWithoutAvailabilityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  writingQuestionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
+  writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedUpdateManyWithoutBookingNestedInput
+}
+
+export type BookingCreateWithoutEmailSendLogsInput = {
+  id?: string
+  bundleId?: string | null
+  scheduledAt: Date | string
+  duration: number
+  status?: $Enums.BookingStatus
+  notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
+  meetLink?: string | null
+  paymentStatus?: $Enums.PaymentStatus
+  transactionId?: string | null
+  submissionStart?: Date | string | null
+  submissionEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutBookingsInput
+  teacher: Prisma.TeacherProfileCreateNestedOneWithoutBookingsInput
+  availability: Prisma.AvailabilityCreateNestedOneWithoutBookingInput
+  package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
+  writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
+  evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
+  writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+}
+
+export type BookingUncheckedCreateWithoutEmailSendLogsInput = {
+  id?: string
+  userId: string
+  teacherId: string
+  availabilityId: string
+  packageId?: string | null
+  bundleId?: string | null
+  scheduledAt: Date | string
+  duration: number
+  status?: $Enums.BookingStatus
+  notes?: string | null
+  studentPhone?: string | null
+  studentEmail?: string | null
+  meetLink?: string | null
+  paymentStatus?: $Enums.PaymentStatus
+  transactionId?: string | null
+  submissionStart?: Date | string | null
+  submissionEnd?: Date | string | null
+  writingQuestionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
+  writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+}
+
+export type BookingCreateOrConnectWithoutEmailSendLogsInput = {
+  where: Prisma.BookingWhereUniqueInput
+  create: Prisma.XOR<Prisma.BookingCreateWithoutEmailSendLogsInput, Prisma.BookingUncheckedCreateWithoutEmailSendLogsInput>
+}
+
+export type BookingUpsertWithoutEmailSendLogsInput = {
+  update: Prisma.XOR<Prisma.BookingUpdateWithoutEmailSendLogsInput, Prisma.BookingUncheckedUpdateWithoutEmailSendLogsInput>
+  create: Prisma.XOR<Prisma.BookingCreateWithoutEmailSendLogsInput, Prisma.BookingUncheckedCreateWithoutEmailSendLogsInput>
+  where?: Prisma.BookingWhereInput
+}
+
+export type BookingUpdateToOneWithWhereWithoutEmailSendLogsInput = {
+  where?: Prisma.BookingWhereInput
+  data: Prisma.XOR<Prisma.BookingUpdateWithoutEmailSendLogsInput, Prisma.BookingUncheckedUpdateWithoutEmailSendLogsInput>
+}
+
+export type BookingUpdateWithoutEmailSendLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meetLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutBookingsNestedInput
+  teacher?: Prisma.TeacherProfileUpdateOneRequiredWithoutBookingsNestedInput
+  availability?: Prisma.AvailabilityUpdateOneRequiredWithoutBookingNestedInput
+  package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
+  writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
+  evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
+  writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+}
+
+export type BookingUncheckedUpdateWithoutEmailSendLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  teacherId?: Prisma.StringFieldUpdateOperationsInput | string
+  availabilityId?: Prisma.StringFieldUpdateOperationsInput | string
   packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1341,6 +1488,7 @@ export type BookingCreateWithoutWritingQuestionInput = {
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUncheckedCreateWithoutWritingQuestionInput = {
@@ -1365,6 +1513,7 @@ export type BookingUncheckedCreateWithoutWritingQuestionInput = {
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutBookingInput
 }
 
 export type BookingCreateOrConnectWithoutWritingQuestionInput = {
@@ -1415,6 +1564,7 @@ export type BookingCreateWithoutEvaluationInput = {
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
   writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   writingSubmission?: Prisma.WritingSubmissionCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUncheckedCreateWithoutEvaluationInput = {
@@ -1439,6 +1589,7 @@ export type BookingUncheckedCreateWithoutEvaluationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   writingSubmission?: Prisma.WritingSubmissionUncheckedCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutBookingInput
 }
 
 export type BookingCreateOrConnectWithoutEvaluationInput = {
@@ -1479,6 +1630,7 @@ export type BookingUpdateWithoutEvaluationInput = {
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
   writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateWithoutEvaluationInput = {
@@ -1503,6 +1655,7 @@ export type BookingUncheckedUpdateWithoutEvaluationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingCreateWithoutWritingSubmissionInput = {
@@ -1527,6 +1680,7 @@ export type BookingCreateWithoutWritingSubmissionInput = {
   package?: Prisma.PackageCreateNestedOneWithoutBookingsInput
   writingQuestion?: Prisma.WritingQuestionCreateNestedOneWithoutBookingsInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogCreateNestedManyWithoutBookingInput
 }
 
 export type BookingUncheckedCreateWithoutWritingSubmissionInput = {
@@ -1551,6 +1705,7 @@ export type BookingUncheckedCreateWithoutWritingSubmissionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutBookingInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutBookingInput
 }
 
 export type BookingCreateOrConnectWithoutWritingSubmissionInput = {
@@ -1591,6 +1746,7 @@ export type BookingUpdateWithoutWritingSubmissionInput = {
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
   writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateWithoutWritingSubmissionInput = {
@@ -1615,6 +1771,7 @@ export type BookingUncheckedUpdateWithoutWritingSubmissionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingCreateManyUserInput = {
@@ -1661,6 +1818,7 @@ export type BookingUpdateWithoutUserInput = {
   writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateWithoutUserInput = {
@@ -1685,6 +1843,7 @@ export type BookingUncheckedUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateManyWithoutUserInput = {
@@ -1753,6 +1912,7 @@ export type BookingUpdateWithoutTeacherInput = {
   writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateWithoutTeacherInput = {
@@ -1777,6 +1937,7 @@ export type BookingUncheckedUpdateWithoutTeacherInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateManyWithoutTeacherInput = {
@@ -1845,6 +2006,7 @@ export type BookingUpdateWithoutPackageInput = {
   writingQuestion?: Prisma.WritingQuestionUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateWithoutPackageInput = {
@@ -1869,6 +2031,7 @@ export type BookingUncheckedUpdateWithoutPackageInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateManyWithoutPackageInput = {
@@ -1937,6 +2100,7 @@ export type BookingUpdateWithoutWritingQuestionInput = {
   package?: Prisma.PackageUpdateOneWithoutBookingsNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateWithoutWritingQuestionInput = {
@@ -1961,6 +2125,7 @@ export type BookingUncheckedUpdateWithoutWritingQuestionInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutBookingNestedInput
   writingSubmission?: Prisma.WritingSubmissionUncheckedUpdateOneWithoutBookingNestedInput
+  emailSendLogs?: Prisma.EmailSendLogUncheckedUpdateManyWithoutBookingNestedInput
 }
 
 export type BookingUncheckedUpdateManyWithoutWritingQuestionInput = {
@@ -1985,6 +2150,35 @@ export type BookingUncheckedUpdateManyWithoutWritingQuestionInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type BookingCountOutputType
+ */
+
+export type BookingCountOutputType = {
+  emailSendLogs: number
+}
+
+export type BookingCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  emailSendLogs?: boolean | BookingCountOutputTypeCountEmailSendLogsArgs
+}
+
+/**
+ * BookingCountOutputType without action
+ */
+export type BookingCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BookingCountOutputType
+   */
+  select?: Prisma.BookingCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * BookingCountOutputType without action
+ */
+export type BookingCountOutputTypeCountEmailSendLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmailSendLogWhereInput
+}
 
 
 export type BookingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2015,6 +2209,8 @@ export type BookingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   writingQuestion?: boolean | Prisma.Booking$writingQuestionArgs<ExtArgs>
   evaluation?: boolean | Prisma.Booking$evaluationArgs<ExtArgs>
   writingSubmission?: boolean | Prisma.Booking$writingSubmissionArgs<ExtArgs>
+  emailSendLogs?: boolean | Prisma.Booking$emailSendLogsArgs<ExtArgs>
+  _count?: boolean | Prisma.BookingCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["booking"]>
 
 export type BookingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2105,6 +2301,8 @@ export type BookingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   writingQuestion?: boolean | Prisma.Booking$writingQuestionArgs<ExtArgs>
   evaluation?: boolean | Prisma.Booking$evaluationArgs<ExtArgs>
   writingSubmission?: boolean | Prisma.Booking$writingSubmissionArgs<ExtArgs>
+  emailSendLogs?: boolean | Prisma.Booking$emailSendLogsArgs<ExtArgs>
+  _count?: boolean | Prisma.BookingCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BookingIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -2131,6 +2329,7 @@ export type $BookingPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     writingQuestion: Prisma.$WritingQuestionPayload<ExtArgs> | null
     evaluation: Prisma.$EvaluationPayload<ExtArgs> | null
     writingSubmission: Prisma.$WritingSubmissionPayload<ExtArgs> | null
+    emailSendLogs: Prisma.$EmailSendLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2554,6 +2753,7 @@ export interface Prisma__BookingClient<T, Null = never, ExtArgs extends runtime.
   writingQuestion<T extends Prisma.Booking$writingQuestionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Booking$writingQuestionArgs<ExtArgs>>): Prisma.Prisma__WritingQuestionClient<runtime.Types.Result.GetResult<Prisma.$WritingQuestionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   evaluation<T extends Prisma.Booking$evaluationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Booking$evaluationArgs<ExtArgs>>): Prisma.Prisma__EvaluationClient<runtime.Types.Result.GetResult<Prisma.$EvaluationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   writingSubmission<T extends Prisma.Booking$writingSubmissionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Booking$writingSubmissionArgs<ExtArgs>>): Prisma.Prisma__WritingSubmissionClient<runtime.Types.Result.GetResult<Prisma.$WritingSubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  emailSendLogs<T extends Prisma.Booking$emailSendLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Booking$emailSendLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailSendLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3072,6 +3272,30 @@ export type Booking$writingSubmissionArgs<ExtArgs extends runtime.Types.Extensio
    */
   include?: Prisma.WritingSubmissionInclude<ExtArgs> | null
   where?: Prisma.WritingSubmissionWhereInput
+}
+
+/**
+ * Booking.emailSendLogs
+ */
+export type Booking$emailSendLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmailSendLog
+   */
+  select?: Prisma.EmailSendLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmailSendLog
+   */
+  omit?: Prisma.EmailSendLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailSendLogInclude<ExtArgs> | null
+  where?: Prisma.EmailSendLogWhereInput
+  orderBy?: Prisma.EmailSendLogOrderByWithRelationInput | Prisma.EmailSendLogOrderByWithRelationInput[]
+  cursor?: Prisma.EmailSendLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmailSendLogScalarFieldEnum | Prisma.EmailSendLogScalarFieldEnum[]
 }
 
 /**

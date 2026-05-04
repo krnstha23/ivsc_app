@@ -15,6 +15,7 @@ import {
     Chart,
     Document,
     DocumentText,
+    Letter,
 } from "@solar-icons/react";
 
 import { NavMain } from "@/components/nav-main";
@@ -105,6 +106,12 @@ const NAV_MAIN = [
         title: "Reports",
         url: "/reports",
         icon: Chart,
+        allowedRoles: ["ADMIN"] as Role[],
+    },
+    {
+        title: "Email log",
+        url: "/email-logs",
+        icon: Letter,
         allowedRoles: ["ADMIN"] as Role[],
     },
 ];

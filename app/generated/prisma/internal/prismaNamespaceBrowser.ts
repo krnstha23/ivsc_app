@@ -58,6 +58,7 @@ export const ModelName = {
   PackageBundle: 'PackageBundle',
   Availability: 'Availability',
   Booking: 'Booking',
+  EmailSendLog: 'EmailSendLog',
   WritingQuestion: 'WritingQuestion',
   Evaluation: 'Evaluation',
   WritingSubmission: 'WritingSubmission',
@@ -196,6 +197,22 @@ export const BookingScalarFieldEnum = {
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const EmailSendLogScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  userId: 'userId',
+  type: 'type',
+  toEmail: 'toEmail',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  trigger: 'trigger',
+  triggeredByUserId: 'triggeredByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailSendLogScalarFieldEnum = (typeof EmailSendLogScalarFieldEnum)[keyof typeof EmailSendLogScalarFieldEnum]
 
 
 export const WritingQuestionScalarFieldEnum = {

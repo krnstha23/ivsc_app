@@ -53,6 +53,11 @@ export type Availability = Prisma.AvailabilityModel
  */
 export type Booking = Prisma.BookingModel
 /**
+ * Model EmailSendLog
+ * 
+ */
+export type EmailSendLog = Prisma.EmailSendLogModel
+/**
  * Model WritingQuestion
  * 
  */

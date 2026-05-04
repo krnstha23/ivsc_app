@@ -280,6 +280,57 @@ export type EnumPaymentStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>
 }
 
+export type EnumEmailSendTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendType | Prisma.EnumEmailSendTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendType[] | Prisma.ListEnumEmailSendTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendType[] | Prisma.ListEnumEmailSendTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendTypeFilter<$PrismaModel> | $Enums.EmailSendType
+}
+
+export type EnumEmailSendStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendStatus | Prisma.EnumEmailSendStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendStatus[] | Prisma.ListEnumEmailSendStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendStatus[] | Prisma.ListEnumEmailSendStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendStatusFilter<$PrismaModel> | $Enums.EmailSendStatus
+}
+
+export type EnumEmailSendTriggerFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendTrigger | Prisma.EnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendTrigger[] | Prisma.ListEnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendTrigger[] | Prisma.ListEnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendTriggerFilter<$PrismaModel> | $Enums.EmailSendTrigger
+}
+
+export type EnumEmailSendTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendType | Prisma.EnumEmailSendTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendType[] | Prisma.ListEnumEmailSendTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendType[] | Prisma.ListEnumEmailSendTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendTypeWithAggregatesFilter<$PrismaModel> | $Enums.EmailSendType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEmailSendTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEmailSendTypeFilter<$PrismaModel>
+}
+
+export type EnumEmailSendStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendStatus | Prisma.EnumEmailSendStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendStatus[] | Prisma.ListEnumEmailSendStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendStatus[] | Prisma.ListEnumEmailSendStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendStatusWithAggregatesFilter<$PrismaModel> | $Enums.EmailSendStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEmailSendStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEmailSendStatusFilter<$PrismaModel>
+}
+
+export type EnumEmailSendTriggerWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendTrigger | Prisma.EnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendTrigger[] | Prisma.ListEnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendTrigger[] | Prisma.ListEnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendTriggerWithAggregatesFilter<$PrismaModel> | $Enums.EmailSendTrigger
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEmailSendTriggerFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEmailSendTriggerFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -557,6 +608,57 @@ export type NestedEnumPaymentStatusWithAggregatesFilter<$PrismaModel = never> = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumEmailSendTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendType | Prisma.EnumEmailSendTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendType[] | Prisma.ListEnumEmailSendTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendType[] | Prisma.ListEnumEmailSendTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendTypeFilter<$PrismaModel> | $Enums.EmailSendType
+}
+
+export type NestedEnumEmailSendStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendStatus | Prisma.EnumEmailSendStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendStatus[] | Prisma.ListEnumEmailSendStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendStatus[] | Prisma.ListEnumEmailSendStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendStatusFilter<$PrismaModel> | $Enums.EmailSendStatus
+}
+
+export type NestedEnumEmailSendTriggerFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendTrigger | Prisma.EnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendTrigger[] | Prisma.ListEnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendTrigger[] | Prisma.ListEnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendTriggerFilter<$PrismaModel> | $Enums.EmailSendTrigger
+}
+
+export type NestedEnumEmailSendTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendType | Prisma.EnumEmailSendTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendType[] | Prisma.ListEnumEmailSendTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendType[] | Prisma.ListEnumEmailSendTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendTypeWithAggregatesFilter<$PrismaModel> | $Enums.EmailSendType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEmailSendTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEmailSendTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumEmailSendStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendStatus | Prisma.EnumEmailSendStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendStatus[] | Prisma.ListEnumEmailSendStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendStatus[] | Prisma.ListEnumEmailSendStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendStatusWithAggregatesFilter<$PrismaModel> | $Enums.EmailSendStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEmailSendStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEmailSendStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumEmailSendTriggerWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmailSendTrigger | Prisma.EnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  in?: $Enums.EmailSendTrigger[] | Prisma.ListEnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmailSendTrigger[] | Prisma.ListEnumEmailSendTriggerFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmailSendTriggerWithAggregatesFilter<$PrismaModel> | $Enums.EmailSendTrigger
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEmailSendTriggerFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEmailSendTriggerFilter<$PrismaModel>
 }
 
 

@@ -382,5 +382,5 @@ Internet
 
 sudo mkdir -p /etc/scoremirror/secrets
 sudo cp google-meet-key.json /etc/scoremirror/secrets/google-meet-key.json
-sudo chmod 600 /etc/scoremirror/secrets/google-meet-key.json
+sudo chmod 644 /etc/scoremirror/secrets/google-meet-key.json
 echo 'GOOGLE_MEET_HOST_EMAIL="info@scoremirror.com.np"' >> .env

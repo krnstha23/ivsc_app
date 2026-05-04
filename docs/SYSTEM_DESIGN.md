@@ -1,6 +1,6 @@
 # IVCS - System Design Document
 
-> **Last Updated**: May 03, 2026 (pending booking flow; enrollments removed; bundle-only booking; **past date/time validation** on `/students` bundle wizard)
+> **Last Updated**: May 04, 2026 (**outbound booking confirmation email** via Nodemailer; **`EmailSendLog`** audit table; **admin `/email-logs`** page with resend; `.env.example` SMTP vars; **landing footer** Legal link **`/cancellation-and-refund-policy`**). Prior: May 03, 2026 pending booking flow; enrollments removed; bundle-only booking; past date/time validation on `/students` bundle wizard.
 > **Status**: Phase 1–3 Complete (except payment); Phase 4 pending  
 > **Branch**: `main`
 
@@ -58,6 +58,11 @@ This section records the **intended end-state** for IVCS as an IELTS-oriented mo
 #### Teacher evaluation and notifications
 
 - Teachers **submit evaluation in the application** after the session; the student receives the outcome via **email** (templates, queue, retries TBD). The **in-app session room** flow is specified in **§1.7**.
+
+#### Booking confirmation email (admin approval path)
+
+- **Implemented (May 2026):** When an **admin** confirms a **`PENDING`** booking (`confirmPendingBooking` in `app/(app)/bookings/actions.ts`), the system sets **`CONFIRMED`** / **`paymentStatus: PAID`**, then sends a **booking confirmation** email to the student via **Nodemailer** (`lib/booking-mail.ts`). **Recipient resolution:** `Booking.studentEmail` if set, otherwise the student **`User.email`**. Session details use **Asia/Kathmandu** wall time in the message body.
+- **SMTP** is configured with environment variables (**§9.6**). If SMTP is missing or misconfigured, the booking **still confirms**; each send attempt is recorded in **`EmailSendLog`** with **`FAILED`** and an error summary—admins review this on **`/email-logs`**.
 
 #### Payment
 
@@ -214,7 +219,7 @@ A dedicated **session room** page is the hub for a **confirmed** speaking bookin
 
 | Role               | Description               | Key Permissions                                                             |
 | ------------------ | ------------------------- | --------------------------------------------------------------------------- |
-| **Admin**          | System administrator      | **Full control:** manage users, packages, and bundles; view and change bookings; **override scheduling**; **assign or reassign teachers**; perform **teacher-only** operations where the product allows (e.g. create or edit **availability** on behalf of a teacher). Exact UI surfaces evolve with implementation. |
+| **Admin**          | System administrator      | **Full control:** manage users, packages, and bundles; view and change bookings; **override scheduling**; **assign or reassign teachers**; review **email delivery logs** and **resend** booking confirmation mail; perform **teacher-only** operations where the product allows (e.g. create or edit **availability** on behalf of a teacher). Exact UI surfaces evolve with implementation. |
 | **Teacher**        | Instructor/tutor          | Manage own availability; view bookings where they are the teacher           |
 | **User (Student)** | End user seeking sessions | Browse bundles/packages and create bookings; view confirmed bookings on calendar |
 
@@ -450,6 +455,7 @@ ivcs-app/
 │   ├── header-user-menu.tsx, theme-toggle.tsx
 │   ├── logout-confirm-context.tsx, back-button-logout-handler.tsx
 │   ├── packages-header-with-filter.tsx, users-header-with-filter.tsx
+│   ├── email-send-log-table.tsx     # ADMIN: mail audit table + resend dialog
 │   └── providers.tsx                # SessionProvider
 ├── lib/
 │   ├── prisma.ts                    # Singleton + pg adapter
@@ -460,6 +466,8 @@ ivcs-app/
 │   ├── permissions.ts               # Role, canAccess, filterByRole
 │   ├── validations.ts               # Zod schemas for all server actions
 │   ├── google-meet.ts               # Google Meet REST API v2: createMeetSpace (recording enabled)
+│   ├── booking-mail.ts              # Nodemailer transport; booking confirmation templates; recipient resolution
+│   ├── dispatch-booking-confirmation-email.ts  # Send + persist EmailSendLog (SENT/FAILED)
 │   └── utils.ts                     # cn()
 ├── prisma/schema.prisma, migrations/
 ├── proxy.ts                         # Route protection (Next.js 16)
@@ -489,6 +497,7 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 | Packages          | /packages          | ✓     | ✓       | ✓               |
 | Timetable         | /timetable         | ✓     | —       | —               |
 | Reports           | /reports           | ✓     | —       | —               |
+| Email log         | /email-logs        | ✓     | —       | —               |
 
 **Note:** The legacy `/bookings/teaching` route permanently redirects to `/bookings`. The merged `/bookings` page uses role-based rendering:
 - **Students**: See only their own bookings (Upcoming/Past tabs, `PENDING` bookings filtered out, no Pending tab)
@@ -518,6 +527,7 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 | `Evaluation` | `evaluations` | Teacher evaluation per booking: integer `score` + free-text `feedback` |
 | `WritingSubmission` | `writing_submissions` | Student PDF uploads linked to bookings |
 | `WritingQuestion` | `writing_questions` | IELTS writing question PDFs uploaded by teachers/admins; auto-assigned to eligible bookings |
+| `EmailSendLog` | `email_send_logs` | One row per outbound SMTP attempt (booking confirmation); links **Booking**, student **User**, optional **triggeredBy** admin |
 
 #### Enums
 
@@ -526,6 +536,9 @@ Visibility is controlled by `allowedRoles` in `lib/permissions.ts`; the sidebar 
 | `Role` | `role` | ADMIN, TEACHER, USER |
 | `BookingStatus` | `booking_status` | PENDING, CONFIRMED, CANCELLED, COMPLETED |
 | `PaymentStatus` | `payment_status` | PENDING, PAID, REFUNDED, FAILED |
+| `EmailSendType` | `email_send_type` | BOOKING_CONFIRMED |
+| `EmailSendStatus` | `email_send_status` | SENT, FAILED |
+| `EmailSendTrigger` | `email_send_trigger` | BOOKING_CONFIRM, ADMIN_RESEND |
 #### Key Design Decisions
 
 1. **snake_case table names**: All tables use `@@map()` for PostgreSQL convention (e.g. `users`, `teacher_profiles`).
@@ -615,6 +628,7 @@ See `prisma/schema.prisma` for full implementation.
 | Session room blocks `PENDING` | Redirect to dashboard if booking not confirmed | 2026-05-03 |
 | Teacher load counts non-CANCELLED | `assignTeacher` / writing-only week counts include `PENDING` for fair assignment | 2026-05-03 |
 | Bundle booking: no past dates/times | **Client:** local-calendar **`min`** on date input + validation on change / before search. **Server:** `findSlotForPreference` rejects past calendar date and past `sessionStart`; `createBookingForSlot` rejects `scheduledAt` ≤ now (**§4.2** table) | 2026-05-03 |
+| **Outbound SMTP + mail audit log** | **Nodemailer** booking confirmation when admin confirms **`PENDING`** booking; **`EmailSendLog`** per attempt; admin **`/email-logs`** with **Resend** (recipient verification); env **`SMTP_*`**, **`MAIL_FROM`** (documented in **`.env.example`**) | 2026-05-04 |
 
 ### 6.2 Pending Decisions
 
@@ -794,9 +808,9 @@ See `prisma/schema.prisma` for full implementation.
   - [ ] Notification model (database)
   - [ ] Real-time updates (consider Pusher/Ably or polling)
   - [ ] Notification bell in navbar
-- [ ] Email notifications
-  - [ ] Email service integration (Resend, SendGrid, etc.)
-  - [ ] Templates: Booking confirmation, reminder, cancellation
+- [x] Email notifications (**partial — May 2026**)
+  - [x] **Booking confirmation** on admin approve (**Nodemailer** + **`EmailSendLog`**; **`/email-logs`** admin audit + resend)
+  - [ ] Additional templates: reminder, cancellation, evaluation-ready (**TBD**)
   - [ ] Scheduled reminders (24h before class)
 
 **4.2 Payment Integration**
@@ -1050,7 +1064,8 @@ app/
 │   ├── packages/[id]/page.tsx # Package detail
 │   ├── packages/[id]/book/page.tsx # Package booking flow (enrollment-aware)
 │   ├── users/page.tsx         # ADMIN: user list
-│   └── users/new/page.tsx    # ADMIN: create user
+│   ├── users/new/page.tsx    # ADMIN: create user
+│   └── email-logs/page.tsx   # ADMIN: outbound email audit log
 ├── login/page.tsx
 └── register/page.tsx
 ```
@@ -1164,7 +1179,9 @@ Students complete the booking wizard → **`PENDING`** + **`paymentStatus: PENDI
 | Create **`PENDING`** booking | `createBookingForSlot`, `createWritingOnlyBooking` in `app/(app)/packages/actions.ts` |
 | Slot conflicts / teacher load | `lib/slot-generator.ts` (`generateSlots`, `assignTeacher`) |
 | Merged bookings UI | `app/(app)/bookings/page.tsx`; `components/bookings-sessions-section.tsx`; `components/admin-pending-bookings.tsx` |
-| Confirm / reject actions | `app/(app)/bookings/actions.ts` |
+| Confirm / reject actions | `app/(app)/bookings/actions.ts` (confirm calls **`dispatchBookingConfirmationEmail`** after status update) |
+| Outbound confirmation mail + **`EmailSendLog`** | `lib/booking-mail.ts`, `lib/dispatch-booking-confirmation-email.ts` |
+| Admin mail audit UI | `app/(app)/email-logs/page.tsx`; `components/email-send-log-table.tsx`; **`resendBookingConfirmationAsAdmin`** in `app/(app)/email-logs/actions.ts` |
 | Teaching redirect | `app/(app)/bookings/teaching/page.tsx` → `/bookings` |
 | Session room guard | `app/(app)/sessions/[bookingId]/room/page.tsx` |
 | Student toast | `components/bundle-cards.tsx` |
@@ -1181,6 +1198,33 @@ Students complete the booking wizard → **`PENDING`** + **`paymentStatus: PENDI
 
 **Admin:** **`/bookings?tab=pending`** → Confirm (**`CONFIRMED`** / **`PAID`**) or Reject (**`CANCELLED`** / **`FAILED`** + **`notes`**).
 
+### 9.6 Outbound email (booking confirmation) & admin delivery log
+
+**Status:** **Implemented** (May 2026).
+
+**Purpose:** Notify the student when an admin confirms a pending booking; persist an **audit trail** of every SMTP attempt (success or failure) for operations.
+
+**Libraries:** **`nodemailer`** (v7.x, aligned with optional NextAuth peer). **`lib/booking-mail.ts`** builds plain-text + HTML bodies, creates the transport from env, and exposes **`sendBookingConfirmedEmail`**. **`lib/dispatch-booking-confirmation-email.ts`** resolves package/bundle labels, calls send, then **`prisma.emailSendLog.create`**—always **one log row per attempt**.
+
+**Trigger:** **`BOOKING_CONFIRM`** — runs immediately after `confirmPendingBooking` updates the booking to **`CONFIRMED`** (admin user id stored on the log when available). **`ADMIN_RESEND`** — admin-only server action after verifying the typed recipient matches **`resolveBookingRecipientEmail`** for that booking.
+
+**Data model (`EmailSendLog`, migration `20260504060013_add_email_send_logs`):**
+
+| Field | Notes |
+|-------|--------|
+| `bookingId`, `userId` (student) | FKs; cascade on booking delete |
+| `type` | `BOOKING_CONFIRMED` (extensible for future mail types) |
+| `toEmail` | Snapshot address used; **`(none)`** if no recipient (logged as **FAILED**) |
+| `status` | **`SENT`** or **`FAILED`** |
+| `errorMessage` | Short SMTP/config error text when **FAILED** |
+| `trigger` | **`BOOKING_CONFIRM`** or **`ADMIN_RESEND`** |
+| `triggeredByUserId` | Admin user for confirm/resend; nullable |
+| `createdAt` | Attempt timestamp |
+
+**Admin UI:** **`/email-logs`** (sidebar **Email log**, admin-only). Tabular history (newest first, cap 1000 rows); columns include status, error summary, trigger, admin username. **Resend** opens a dialog: admin must **type the recipient email** matching the booking’s resolved address before **`ADMIN_RESEND`** is executed. **Students do not** have a mail-log page.
+
+**Configuration (see `.env.example`):** Minimum **`SMTP_HOST`** and **`MAIL_FROM`**. Optional **`SMTP_PORT`** (default **587**), **`SMTP_SECURE`** (`true` for typical **465** SSL), **`SMTP_USER`** / **`SMTP_PASSWORD`** when the relay requires auth. Missing host/from → send fails with a clear error string stored on the log; **booking confirmation in the DB is unchanged**.
+
 ---
 
 ## 10. Design Decisions for Pending Flow
@@ -1195,6 +1239,7 @@ Students complete the booking wizard → **`PENDING`** + **`paymentStatus: PENDI
 | Students/teachers never see **PENDING** in lists | Pending queue is **admin-only**; session room blocked for **PENDING** | 2026-05-03 |
 | Merged **`/bookings`** | One route; teacher legacy path redirects | 2026-05-03 |
 | Local **`min`** date + server **`scheduledAt`** check | Students cannot pick or submit bundle slots in the past (**§4.2**) | 2026-05-03 |
+| Outbound **SMTP** + **`EmailSendLog`** | Nodemailer confirmation on admin approve; audit row per attempt; resend with recipient verification; **no student-facing log** | 2026-05-04 |
 
 ---
 
@@ -1259,6 +1304,8 @@ Until this section is filled in, engineers should treat **§1.4**–**§1.6** an
 | 2026-04-20 | **Public landing (`app/page.tsx`):** Rebuilt to match `Frame.png` rhythm (hero, three cards, experience band, three-tier pricing, FAQ accordions, multi-column footer). **`ListeningMock`** is the only large UI mock, right column of `#experience`; hero stays **`/hero.png`**. **Pricing:** static NPR tier amounts per `public/price.png` (**1400 / 1680 / 1820**), cards use same system as feature band (light section, white `rounded-2xl` cards, accent **Select**). Inline writing/report mocks removed; messaging folded into cards. **`components/landing-header.tsx`:** center nav (md+) to `#features`, `#experience`, `#pricing`, `/packages`. | -      |
 | 2026-04-27 | **Security hardening pass (5 issues):** IDOR fix for `findSlotsForReschedule` with object-level auth parity; XSS hardening for inline JSON-LD/style sinks via `lib/security.ts`; JWT claim refresh + deactivation handling in auth callbacks; restrictive CORS posture verified (no permissive headers); secrets-in-source reduction in Docker/Compose + deployment docs updates. | -      |
 | 2026-05-03 | **Past date/time validation (bundle booking):** `bundle-cards.tsx` — date **`min`** uses **local** calendar today; toast + clear on invalid input; guard before **Find slot**. **`findSlotForPreference`** / **`createBookingForSlot`** (`packages/actions.ts`) — reject past calendar date, past offered slot start, and **`scheduledAt ≤ now`**. Documented **§4.2**, **§6.1**, **§9.3**, **§10**. | -      |
+| 2026-05-04 | **Outbound booking confirmation email:** **Nodemailer** (`lib/booking-mail.ts`) + **`dispatchBookingConfirmationEmail`** after **`confirmPendingBooking`**. New **`EmailSendLog`** model + migration **`20260504060013_add_email_send_logs`**; enums **`EmailSendType`**, **`EmailSendStatus`**, **`EmailSendTrigger`**. Admin-only **`/email-logs`** (`components/email-send-log-table.tsx`, **`email-logs/actions.ts`** resend with recipient match). **`.env.example`** SMTP variables. Doc updates: **§1.4**, **§2**, **§5.2–5.3**, **§6.1**, **§9.3**, **§9.6**, Phase **4.1**, changelog. | -      |
+| 2026-05-04 | **Public landing footer (Legal):** **`app/page.tsx`** — added **`/cancellation-and-refund-policy`** next to Terms & Privacy (`Cancellation & Refund Policy`). Renders via **`app/[slug]/page.tsx`** + **`StaticPage`** (`slug` must exist and be active in admin **Static Pages**). **§13** updated. | -      |
 
 ---
 
@@ -1268,3 +1315,4 @@ Until this section is filled in, engineers should treat **§1.4**–**§1.6** an
 - **Exam preview:** `ListeningMock` only (no duplicate “experience” section); placed in `#experience` beside computer-delivered copy.
 - **Pricing (home):** Static NPR amounts (**1400 / 1680 / 1820**) and tier labels from `public/price.png`; same card chrome as the feature grid (`#F7F7F7` band, white bordered cards, `#7C5CFF` primary **Select**). Replace with live catalog pricing when marketing is ready to wire DB.
 - **Copy stance:** Marketing emphasizes **computer-based full mocks**, **human writing review**, and **reports** so the page stays truthful alongside §1.4 speaking/writing session flows.
+- **Footer — Legal (`app/page.tsx`):** Column lists **`/terms-and-conditions`**, **`/privacy-policy`**, and **`/cancellation-and-refund-policy`** (“Cancellation & Refund Policy”). Each path is served by the **public static page** route **`app/[slug]/page.tsx`**, backed by **`StaticPage.slug`** in the database (admin **Static Pages**). Ensure an active page row exists with **`slug = cancellation-and-refund-policy`** or the link returns **404**.

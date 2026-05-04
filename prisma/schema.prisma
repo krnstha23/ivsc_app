@@ -43,6 +43,26 @@ enum PaymentStatus {
   @@map("payment_status")
 }
 
+enum EmailSendType {
+  BOOKING_CONFIRMED
+
+  @@map("email_send_type")
+}
+
+enum EmailSendStatus {
+  SENT
+  FAILED
+
+  @@map("email_send_status")
+}
+
+enum EmailSendTrigger {
+  BOOKING_CONFIRM
+  ADMIN_RESEND
+
+  @@map("email_send_trigger")
+}
+
 // =============================================================================
 // USER & PROFILES
 // =============================================================================
@@ -68,6 +88,8 @@ model User {
   bookings          Booking[]
   classHistory      ClassMetadata[]
   writingQuestions  WritingQuestion[]
+  emailSendLogsForStudent EmailSendLog[] @relation("EmailSendLogsForStudent")
+  emailSendLogsTriggered  EmailSendLog[] @relation("EmailSendLogsTriggeredBy")
 
   @@map("users")
 }
@@ -203,11 +225,35 @@ model Booking {
   writingQuestion    WritingQuestion?    @relation(fields: [writingQuestionId], references: [id])
   evaluation         Evaluation?
   writingSubmission  WritingSubmission?
+  emailSendLogs      EmailSendLog[]
 
   @@index([userId])
   @@index([teacherId])
   @@index([scheduledAt])
   @@map("bookings")
+}
+
+// Outbound email delivery attempts (e.g. booking confirmation)
+model EmailSendLog {
+  id                String            @id @default(uuid())
+  bookingId         String
+  userId            String
+  type              EmailSendType
+  toEmail           String
+  status            EmailSendStatus
+  errorMessage      String?
+  trigger           EmailSendTrigger
+  triggeredByUserId String?
+  createdAt         DateTime          @default(now())
+
+  booking     Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user        User    @relation("EmailSendLogsForStudent", fields: [userId], references: [id], onDelete: Cascade)
+  triggeredBy User?   @relation("EmailSendLogsTriggeredBy", fields: [triggeredByUserId], references: [id], onDelete: SetNull)
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("email_send_logs")
 }
 
 // =============================================================================

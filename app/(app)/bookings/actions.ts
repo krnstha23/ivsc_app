@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@/app/generated/prisma/enums";
 import { firstError } from "@/lib/validations";
+import { dispatchBookingConfirmationEmail } from "@/lib/dispatch-booking-confirmation-email";
 
 export type CompleteBookingResult =
     | { success: true }
@@ -114,9 +115,16 @@ export async function confirmPendingBooking(
         },
     });
 
+    const adminId = (session.user as { id?: string }).id ?? null;
+    await dispatchBookingConfirmationEmail(booking.id, {
+        trigger: "BOOKING_CONFIRM",
+        triggeredByUserId: adminId,
+    });
+
     revalidatePath("/bookings");
     revalidatePath("/calendar");
     revalidatePath("/dashboard");
+    revalidatePath("/email-logs");
     return { success: true };
 }
 

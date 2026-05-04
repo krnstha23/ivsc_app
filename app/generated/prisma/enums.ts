@@ -36,3 +36,26 @@ export const PaymentStatus = {
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
+export const EmailSendType = {
+  BOOKING_CONFIRMED: 'BOOKING_CONFIRMED'
+} as const
+
+export type EmailSendType = (typeof EmailSendType)[keyof typeof EmailSendType]
+
+
+export const EmailSendStatus = {
+  SENT: 'SENT',
+  FAILED: 'FAILED'
+} as const
+
+export type EmailSendStatus = (typeof EmailSendStatus)[keyof typeof EmailSendStatus]
+
+
+export const EmailSendTrigger = {
+  BOOKING_CONFIRM: 'BOOKING_CONFIRM',
+  ADMIN_RESEND: 'ADMIN_RESEND'
+} as const
+
+export type EmailSendTrigger = (typeof EmailSendTrigger)[keyof typeof EmailSendTrigger]

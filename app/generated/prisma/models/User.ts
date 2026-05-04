@@ -243,6 +243,8 @@ export type UserWhereInput = {
   bookings?: Prisma.BookingListRelationFilter
   classHistory?: Prisma.ClassMetadataListRelationFilter
   writingQuestions?: Prisma.WritingQuestionListRelationFilter
+  emailSendLogsForStudent?: Prisma.EmailSendLogListRelationFilter
+  emailSendLogsTriggered?: Prisma.EmailSendLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -263,6 +265,8 @@ export type UserOrderByWithRelationInput = {
   bookings?: Prisma.BookingOrderByRelationAggregateInput
   classHistory?: Prisma.ClassMetadataOrderByRelationAggregateInput
   writingQuestions?: Prisma.WritingQuestionOrderByRelationAggregateInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogOrderByRelationAggregateInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -286,6 +290,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   bookings?: Prisma.BookingListRelationFilter
   classHistory?: Prisma.ClassMetadataListRelationFilter
   writingQuestions?: Prisma.WritingQuestionListRelationFilter
+  emailSendLogsForStudent?: Prisma.EmailSendLogListRelationFilter
+  emailSendLogsTriggered?: Prisma.EmailSendLogListRelationFilter
 }, "id" | "userName" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -342,6 +348,8 @@ export type UserCreateInput = {
   bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutStudentInput
   writingQuestions?: Prisma.WritingQuestionCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -362,6 +370,8 @@ export type UserUncheckedCreateInput = {
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutStudentInput
   writingQuestions?: Prisma.WritingQuestionUncheckedCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserUpdateInput = {
@@ -382,6 +392,8 @@ export type UserUpdateInput = {
   bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutStudentNestedInput
   writingQuestions?: Prisma.WritingQuestionUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -402,6 +414,8 @@ export type UserUncheckedUpdateInput = {
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutStudentNestedInput
   writingQuestions?: Prisma.WritingQuestionUncheckedUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -499,6 +513,11 @@ export type UserScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput
 }
 
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -561,6 +580,36 @@ export type UserUpdateOneRequiredWithoutBookingsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBookingsInput, Prisma.UserUpdateWithoutBookingsInput>, Prisma.UserUncheckedUpdateWithoutBookingsInput>
 }
 
+export type UserCreateNestedOneWithoutEmailSendLogsForStudentInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmailSendLogsForStudentInput, Prisma.UserUncheckedCreateWithoutEmailSendLogsForStudentInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailSendLogsForStudentInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutEmailSendLogsTriggeredInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmailSendLogsTriggeredInput, Prisma.UserUncheckedCreateWithoutEmailSendLogsTriggeredInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailSendLogsTriggeredInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutEmailSendLogsForStudentNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmailSendLogsForStudentInput, Prisma.UserUncheckedCreateWithoutEmailSendLogsForStudentInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailSendLogsForStudentInput
+  upsert?: Prisma.UserUpsertWithoutEmailSendLogsForStudentInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmailSendLogsForStudentInput, Prisma.UserUpdateWithoutEmailSendLogsForStudentInput>, Prisma.UserUncheckedUpdateWithoutEmailSendLogsForStudentInput>
+}
+
+export type UserUpdateOneWithoutEmailSendLogsTriggeredNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmailSendLogsTriggeredInput, Prisma.UserUncheckedCreateWithoutEmailSendLogsTriggeredInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailSendLogsTriggeredInput
+  upsert?: Prisma.UserUpsertWithoutEmailSendLogsTriggeredInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmailSendLogsTriggeredInput, Prisma.UserUpdateWithoutEmailSendLogsTriggeredInput>, Prisma.UserUncheckedUpdateWithoutEmailSendLogsTriggeredInput>
+}
+
 export type UserCreateNestedOneWithoutWritingQuestionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutWritingQuestionsInput, Prisma.UserUncheckedCreateWithoutWritingQuestionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutWritingQuestionsInput
@@ -606,6 +655,8 @@ export type UserCreateWithoutStudentProfileInput = {
   bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutStudentInput
   writingQuestions?: Prisma.WritingQuestionCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserUncheckedCreateWithoutStudentProfileInput = {
@@ -625,6 +676,8 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutStudentInput
   writingQuestions?: Prisma.WritingQuestionUncheckedCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserCreateOrConnectWithoutStudentProfileInput = {
@@ -660,6 +713,8 @@ export type UserUpdateWithoutStudentProfileInput = {
   bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutStudentNestedInput
   writingQuestions?: Prisma.WritingQuestionUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentProfileInput = {
@@ -679,6 +734,8 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutStudentNestedInput
   writingQuestions?: Prisma.WritingQuestionUncheckedUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserCreateWithoutTeacherProfileInput = {
@@ -698,6 +755,8 @@ export type UserCreateWithoutTeacherProfileInput = {
   bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutStudentInput
   writingQuestions?: Prisma.WritingQuestionCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserUncheckedCreateWithoutTeacherProfileInput = {
@@ -717,6 +776,8 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutStudentInput
   writingQuestions?: Prisma.WritingQuestionUncheckedCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserCreateOrConnectWithoutTeacherProfileInput = {
@@ -752,6 +813,8 @@ export type UserUpdateWithoutTeacherProfileInput = {
   bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutStudentNestedInput
   writingQuestions?: Prisma.WritingQuestionUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeacherProfileInput = {
@@ -771,6 +834,8 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutStudentNestedInput
   writingQuestions?: Prisma.WritingQuestionUncheckedUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserCreateWithoutBookingsInput = {
@@ -790,6 +855,8 @@ export type UserCreateWithoutBookingsInput = {
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutStudentInput
   writingQuestions?: Prisma.WritingQuestionCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserUncheckedCreateWithoutBookingsInput = {
@@ -809,6 +876,8 @@ export type UserUncheckedCreateWithoutBookingsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutStudentInput
   writingQuestions?: Prisma.WritingQuestionUncheckedCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserCreateOrConnectWithoutBookingsInput = {
@@ -844,6 +913,8 @@ export type UserUpdateWithoutBookingsInput = {
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutStudentNestedInput
   writingQuestions?: Prisma.WritingQuestionUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBookingsInput = {
@@ -863,6 +934,208 @@ export type UserUncheckedUpdateWithoutBookingsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutStudentNestedInput
   writingQuestions?: Prisma.WritingQuestionUncheckedUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedUpdateManyWithoutTriggeredByNestedInput
+}
+
+export type UserCreateWithoutEmailSendLogsForStudentInput = {
+  id?: string
+  userName: string
+  email: string
+  phone?: string | null
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  passwordHash: string
+  role?: $Enums.Role
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutStudentInput
+  writingQuestions?: Prisma.WritingQuestionCreateNestedManyWithoutUploaderInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogCreateNestedManyWithoutTriggeredByInput
+}
+
+export type UserUncheckedCreateWithoutEmailSendLogsForStudentInput = {
+  id?: string
+  userName: string
+  email: string
+  phone?: string | null
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  passwordHash: string
+  role?: $Enums.Role
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutStudentInput
+  writingQuestions?: Prisma.WritingQuestionUncheckedCreateNestedManyWithoutUploaderInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutTriggeredByInput
+}
+
+export type UserCreateOrConnectWithoutEmailSendLogsForStudentInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmailSendLogsForStudentInput, Prisma.UserUncheckedCreateWithoutEmailSendLogsForStudentInput>
+}
+
+export type UserCreateWithoutEmailSendLogsTriggeredInput = {
+  id?: string
+  userName: string
+  email: string
+  phone?: string | null
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  passwordHash: string
+  role?: $Enums.Role
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutStudentInput
+  writingQuestions?: Prisma.WritingQuestionCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutEmailSendLogsTriggeredInput = {
+  id?: string
+  userName: string
+  email: string
+  phone?: string | null
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  passwordHash: string
+  role?: $Enums.Role
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutStudentInput
+  writingQuestions?: Prisma.WritingQuestionUncheckedCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutEmailSendLogsTriggeredInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmailSendLogsTriggeredInput, Prisma.UserUncheckedCreateWithoutEmailSendLogsTriggeredInput>
+}
+
+export type UserUpsertWithoutEmailSendLogsForStudentInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutEmailSendLogsForStudentInput, Prisma.UserUncheckedUpdateWithoutEmailSendLogsForStudentInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmailSendLogsForStudentInput, Prisma.UserUncheckedCreateWithoutEmailSendLogsForStudentInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutEmailSendLogsForStudentInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutEmailSendLogsForStudentInput, Prisma.UserUncheckedUpdateWithoutEmailSendLogsForStudentInput>
+}
+
+export type UserUpdateWithoutEmailSendLogsForStudentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  classHistory?: Prisma.ClassMetadataUpdateManyWithoutStudentNestedInput
+  writingQuestions?: Prisma.WritingQuestionUpdateManyWithoutUploaderNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUpdateManyWithoutTriggeredByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutEmailSendLogsForStudentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutStudentNestedInput
+  writingQuestions?: Prisma.WritingQuestionUncheckedUpdateManyWithoutUploaderNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedUpdateManyWithoutTriggeredByNestedInput
+}
+
+export type UserUpsertWithoutEmailSendLogsTriggeredInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutEmailSendLogsTriggeredInput, Prisma.UserUncheckedUpdateWithoutEmailSendLogsTriggeredInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmailSendLogsTriggeredInput, Prisma.UserUncheckedCreateWithoutEmailSendLogsTriggeredInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutEmailSendLogsTriggeredInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutEmailSendLogsTriggeredInput, Prisma.UserUncheckedUpdateWithoutEmailSendLogsTriggeredInput>
+}
+
+export type UserUpdateWithoutEmailSendLogsTriggeredInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  classHistory?: Prisma.ClassMetadataUpdateManyWithoutStudentNestedInput
+  writingQuestions?: Prisma.WritingQuestionUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutEmailSendLogsTriggeredInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutStudentNestedInput
+  writingQuestions?: Prisma.WritingQuestionUncheckedUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWritingQuestionsInput = {
@@ -882,6 +1155,8 @@ export type UserCreateWithoutWritingQuestionsInput = {
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
   classHistory?: Prisma.ClassMetadataCreateNestedManyWithoutStudentInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserUncheckedCreateWithoutWritingQuestionsInput = {
@@ -901,6 +1176,8 @@ export type UserUncheckedCreateWithoutWritingQuestionsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
   classHistory?: Prisma.ClassMetadataUncheckedCreateNestedManyWithoutStudentInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserCreateOrConnectWithoutWritingQuestionsInput = {
@@ -936,6 +1213,8 @@ export type UserUpdateWithoutWritingQuestionsInput = {
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUpdateManyWithoutStudentNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWritingQuestionsInput = {
@@ -955,6 +1234,8 @@ export type UserUncheckedUpdateWithoutWritingQuestionsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
   classHistory?: Prisma.ClassMetadataUncheckedUpdateManyWithoutStudentNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserCreateWithoutClassHistoryInput = {
@@ -974,6 +1255,8 @@ export type UserCreateWithoutClassHistoryInput = {
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
   writingQuestions?: Prisma.WritingQuestionCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserUncheckedCreateWithoutClassHistoryInput = {
@@ -993,6 +1276,8 @@ export type UserUncheckedCreateWithoutClassHistoryInput = {
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
   writingQuestions?: Prisma.WritingQuestionUncheckedCreateNestedManyWithoutUploaderInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutUserInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedCreateNestedManyWithoutTriggeredByInput
 }
 
 export type UserCreateOrConnectWithoutClassHistoryInput = {
@@ -1028,6 +1313,8 @@ export type UserUpdateWithoutClassHistoryInput = {
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
   writingQuestions?: Prisma.WritingQuestionUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUpdateManyWithoutTriggeredByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutClassHistoryInput = {
@@ -1047,6 +1334,8 @@ export type UserUncheckedUpdateWithoutClassHistoryInput = {
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
   writingQuestions?: Prisma.WritingQuestionUncheckedUpdateManyWithoutUploaderNestedInput
+  emailSendLogsForStudent?: Prisma.EmailSendLogUncheckedUpdateManyWithoutUserNestedInput
+  emailSendLogsTriggered?: Prisma.EmailSendLogUncheckedUpdateManyWithoutTriggeredByNestedInput
 }
 
 
@@ -1058,12 +1347,16 @@ export type UserCountOutputType = {
   bookings: number
   classHistory: number
   writingQuestions: number
+  emailSendLogsForStudent: number
+  emailSendLogsTriggered: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bookings?: boolean | UserCountOutputTypeCountBookingsArgs
   classHistory?: boolean | UserCountOutputTypeCountClassHistoryArgs
   writingQuestions?: boolean | UserCountOutputTypeCountWritingQuestionsArgs
+  emailSendLogsForStudent?: boolean | UserCountOutputTypeCountEmailSendLogsForStudentArgs
+  emailSendLogsTriggered?: boolean | UserCountOutputTypeCountEmailSendLogsTriggeredArgs
 }
 
 /**
@@ -1097,6 +1390,20 @@ export type UserCountOutputTypeCountWritingQuestionsArgs<ExtArgs extends runtime
   where?: Prisma.WritingQuestionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountEmailSendLogsForStudentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmailSendLogWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountEmailSendLogsTriggeredArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmailSendLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1116,6 +1423,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   bookings?: boolean | Prisma.User$bookingsArgs<ExtArgs>
   classHistory?: boolean | Prisma.User$classHistoryArgs<ExtArgs>
   writingQuestions?: boolean | Prisma.User$writingQuestionsArgs<ExtArgs>
+  emailSendLogsForStudent?: boolean | Prisma.User$emailSendLogsForStudentArgs<ExtArgs>
+  emailSendLogsTriggered?: boolean | Prisma.User$emailSendLogsTriggeredArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1171,6 +1480,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   bookings?: boolean | Prisma.User$bookingsArgs<ExtArgs>
   classHistory?: boolean | Prisma.User$classHistoryArgs<ExtArgs>
   writingQuestions?: boolean | Prisma.User$writingQuestionsArgs<ExtArgs>
+  emailSendLogsForStudent?: boolean | Prisma.User$emailSendLogsForStudentArgs<ExtArgs>
+  emailSendLogsTriggered?: boolean | Prisma.User$emailSendLogsTriggeredArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1184,6 +1495,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     bookings: Prisma.$BookingPayload<ExtArgs>[]
     classHistory: Prisma.$ClassMetadataPayload<ExtArgs>[]
     writingQuestions: Prisma.$WritingQuestionPayload<ExtArgs>[]
+    emailSendLogsForStudent: Prisma.$EmailSendLogPayload<ExtArgs>[]
+    emailSendLogsTriggered: Prisma.$EmailSendLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1597,6 +1910,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   bookings<T extends Prisma.User$bookingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   classHistory<T extends Prisma.User$classHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$classHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassMetadataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   writingQuestions<T extends Prisma.User$writingQuestionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$writingQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WritingQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  emailSendLogsForStudent<T extends Prisma.User$emailSendLogsForStudentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emailSendLogsForStudentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailSendLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  emailSendLogsTriggered<T extends Prisma.User$emailSendLogsTriggeredArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emailSendLogsTriggeredArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailSendLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2133,6 +2448,54 @@ export type User$writingQuestionsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.WritingQuestionScalarFieldEnum | Prisma.WritingQuestionScalarFieldEnum[]
+}
+
+/**
+ * User.emailSendLogsForStudent
+ */
+export type User$emailSendLogsForStudentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmailSendLog
+   */
+  select?: Prisma.EmailSendLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmailSendLog
+   */
+  omit?: Prisma.EmailSendLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailSendLogInclude<ExtArgs> | null
+  where?: Prisma.EmailSendLogWhereInput
+  orderBy?: Prisma.EmailSendLogOrderByWithRelationInput | Prisma.EmailSendLogOrderByWithRelationInput[]
+  cursor?: Prisma.EmailSendLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmailSendLogScalarFieldEnum | Prisma.EmailSendLogScalarFieldEnum[]
+}
+
+/**
+ * User.emailSendLogsTriggered
+ */
+export type User$emailSendLogsTriggeredArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmailSendLog
+   */
+  select?: Prisma.EmailSendLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmailSendLog
+   */
+  omit?: Prisma.EmailSendLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailSendLogInclude<ExtArgs> | null
+  where?: Prisma.EmailSendLogWhereInput
+  orderBy?: Prisma.EmailSendLogOrderByWithRelationInput | Prisma.EmailSendLogOrderByWithRelationInput[]
+  cursor?: Prisma.EmailSendLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmailSendLogScalarFieldEnum | Prisma.EmailSendLogScalarFieldEnum[]
 }
 
 /**

@@ -391,6 +391,7 @@ export const ModelName = {
   PackageBundle: 'PackageBundle',
   Availability: 'Availability',
   Booking: 'Booking',
+  EmailSendLog: 'EmailSendLog',
   WritingQuestion: 'WritingQuestion',
   Evaluation: 'Evaluation',
   WritingSubmission: 'WritingSubmission',
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "studentProfile" | "teacherProfile" | "package" | "packageBundle" | "availability" | "booking" | "writingQuestion" | "evaluation" | "writingSubmission" | "classMetadata" | "staticPage"
+    modelProps: "user" | "studentProfile" | "teacherProfile" | "package" | "packageBundle" | "availability" | "booking" | "emailSendLog" | "writingQuestion" | "evaluation" | "writingSubmission" | "classMetadata" | "staticPage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -930,6 +931,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.BookingCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.BookingCountAggregateOutputType> | number
+        }
+      }
+    }
+    EmailSendLog: {
+      payload: Prisma.$EmailSendLogPayload<ExtArgs>
+      fields: Prisma.EmailSendLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmailSendLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmailSendLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>
+        }
+        findFirst: {
+          args: Prisma.EmailSendLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmailSendLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>
+        }
+        findMany: {
+          args: Prisma.EmailSendLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>[]
+        }
+        create: {
+          args: Prisma.EmailSendLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>
+        }
+        createMany: {
+          args: Prisma.EmailSendLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmailSendLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>[]
+        }
+        delete: {
+          args: Prisma.EmailSendLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>
+        }
+        update: {
+          args: Prisma.EmailSendLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmailSendLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmailSendLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmailSendLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmailSendLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailSendLogPayload>
+        }
+        aggregate: {
+          args: Prisma.EmailSendLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmailSendLog>
+        }
+        groupBy: {
+          args: Prisma.EmailSendLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailSendLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmailSendLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailSendLogCountAggregateOutputType> | number
         }
       }
     }
@@ -1459,6 +1534,22 @@ export const BookingScalarFieldEnum = {
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
 
 
+export const EmailSendLogScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  userId: 'userId',
+  type: 'type',
+  toEmail: 'toEmail',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  trigger: 'trigger',
+  triggeredByUserId: 'triggeredByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailSendLogScalarFieldEnum = (typeof EmailSendLogScalarFieldEnum)[keyof typeof EmailSendLogScalarFieldEnum]
+
+
 export const WritingQuestionScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -1667,6 +1758,48 @@ export type ListEnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'EmailSendType'
+ */
+export type EnumEmailSendTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailSendType'>
+    
+
+
+/**
+ * Reference to a field of type 'EmailSendType[]'
+ */
+export type ListEnumEmailSendTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailSendType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EmailSendStatus'
+ */
+export type EnumEmailSendStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailSendStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'EmailSendStatus[]'
+ */
+export type ListEnumEmailSendStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailSendStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EmailSendTrigger'
+ */
+export type EnumEmailSendTriggerFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailSendTrigger'>
+    
+
+
+/**
+ * Reference to a field of type 'EmailSendTrigger[]'
+ */
+export type ListEnumEmailSendTriggerFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailSendTrigger[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -1781,6 +1914,7 @@ export type GlobalOmitConfig = {
   packageBundle?: Prisma.PackageBundleOmit
   availability?: Prisma.AvailabilityOmit
   booking?: Prisma.BookingOmit
+  emailSendLog?: Prisma.EmailSendLogOmit
   writingQuestion?: Prisma.WritingQuestionOmit
   evaluation?: Prisma.EvaluationOmit
   writingSubmission?: Prisma.WritingSubmissionOmit

@@ -521,6 +521,12 @@ export default async function HomePage() {
                             >
                                 Privacy Policy
                             </Link>
+                            <Link
+                                href="/cancellation-and-refund-policy"
+                                className="hover:opacity-80"
+                            >
+                                Cancellation &amp; Refund Policy
+                            </Link>
                         </nav>
                     </div>
                     <div>
